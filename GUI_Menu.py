@@ -24,7 +24,6 @@ class MenuGUI():
         self.close.grid(row=3)
         self.titleFrame.pack()
 
-
     #Function for Quitting
     def _quit(self):
         self.window.quit()
