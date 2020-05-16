@@ -1,11 +1,13 @@
-import GUI_Manager
+import GUI as gui
 
+#TODO: Combine Board GUI and Menu objects into one object
 
 def main():
     # Creating new GUI
-    game_window = GUI_Manager.createGame()
+    game_GUI = gui.create_game()
 
-    GUI_Manager.loop(game_window)
+    print(game_GUI)
+    gui.loop(game_GUI)
 
 
 if __name__ == '__main__':
