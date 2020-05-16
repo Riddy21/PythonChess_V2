@@ -1,13 +1,12 @@
-import tkinter as tk
-from GUI_Menu import MenuGUI
+import GUI_Manager
+
 
 def main():
-    #Creating new GUI root
-    window = tk.Tk()
-    MenuGUI(window)
+    # Creating new GUI
+    game_window = GUI_Manager.createGame()
 
-    # Loop window
-    window.mainloop()
+    GUI_Manager.loop(game_window)
+
 
 if __name__ == '__main__':
     main()

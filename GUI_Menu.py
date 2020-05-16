@@ -1,18 +1,20 @@
+import GUI_Manager
 import tkinter as tk
 
-#Main Page class
+
+# Main Page class
 class MenuGUI():
-    #Constructor  with reference to root
+    # Constructor  with reference to root
     def __init__(self, window):
-        #Init variables
+        # Init variables
         self.window = window
 
-        #Setup window
+        # Setup window
         self.window.title("Chess")
         self.window.geometry("500x500")
-        self.window.resizable(0,0)
+        self.window.resizable(0, 0)
 
-        #Create a frame and pack with interface
+        # Create a frame and pack with interface
         self.titleFrame = tk.Frame(self.window)
         self.title = tk.Label(self.titleFrame, pady=85, text="Ridvan's Chess")
         self.oneP = tk.Button(self.titleFrame, text="One Player", padx=220, pady=50, command=self._create_1p)
@@ -24,14 +26,14 @@ class MenuGUI():
         self.close.grid(row=3)
         self.titleFrame.pack()
 
-    #Function for Quitting
+    # Function for Quitting
     def _quit(self):
         self.window.quit()
 
-    #Function for Starting in 1 Player
+    # Function for Starting in 1 Player
     def _create_1p(self):
-        pass
+        GUI_Manager.go_to_1P(self.window)
 
-    #Function for Starting in 2 Player
+    # Function for Starting in 2 Player
     def _create_2p(self):
-        pass
+        GUI_Manager.go_to_2P(self.window)
