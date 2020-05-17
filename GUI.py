@@ -55,7 +55,7 @@ class GUI():
     def sync_board(self):
         for x in range(8):
             for y in range(8):
-                #elf.board[x][y].config(image=Main.piece[x][y].getImage())
+                #self.board[x][y].config(image=Main.piece[x][y].getImage())
                 self.board[x][y].grid(row=y + 1, column=x)
 
     def _create_board(self,mode):
@@ -82,6 +82,7 @@ class GUI():
         self.close.grid(columnspan=2, row=9, column=6)
         self.undo.grid(columnspan=2, row=9, column=3)
         self.board = [[0 for col in range(8)] for row in range(8)]
+
         i = 0
 
         # Create Board as series of buttons and save to 2D array
