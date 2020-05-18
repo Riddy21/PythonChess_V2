@@ -37,7 +37,7 @@ class GUI():
         # Setup menu
         self._create_menu()
 
-    #Creates menu GUI
+    # Creates menu GUI
     def _create_menu(self):
         # Create a frame and pack with interface
         self.frame = tk.Frame(self.window)
@@ -95,16 +95,23 @@ class GUI():
         self.sync_board()
 
     # Resync the board with the GUIs
-    def sync_board(self):
+    def sync_board(self, Game):
 
         # Placeholder image
         image = tk.PhotoImage(file="Assets/Chess_tile_bd.png")
+
+        # Sync board with the board array on game
 
         for x in range(8):
             for y in range(8):
                 self.boardGUI[x][y].configure(image=image)
                 self.boardGUI[x][y].photo = image
                 self.boardGUI[x][y].grid(row=y + 1, column=x)
+
+    # Highlight squares that can be moved to
+    def highlight_board(self, Game):
+        pass
+        # highlight the board squares that are indicated by the game in cyan
 
     # Function for Starting in 1 Player
     def goto_1p(self):
