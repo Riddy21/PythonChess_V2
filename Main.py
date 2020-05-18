@@ -4,9 +4,9 @@ import GUI as gui
 
 def main():
     # Creating new GUI
-    game_GUI = gui.create_game()
+    game_Window = gui.create_window()
 
-    gui.loop(game_GUI)
+    gui.loop(game_Window)
 
 
 if __name__ == '__main__':

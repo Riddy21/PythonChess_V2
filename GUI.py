@@ -5,13 +5,14 @@ from tkmacosx import Button
 # Static Functions
 # Create another window with menu
 # Passes back game window
-def create_game():
+def create_window():
     # Creates window and passes back to user
     window = tk.Tk()
     game_GUI = GUI(window)
     return game_GUI
 
 
+# Loops GUIs to activate
 def loop(*GUIs):
     # loop through all windows and loop them
     for gui in GUIs:
@@ -30,6 +31,14 @@ class GUI():
         self.window.geometry("500x500")
         self.window.resizable(0, 0)
 
+        # GUI state
+        self.GUI_state = "Menu"
+
+        # Setup menu
+        self._create_menu()
+
+    #Creates menu GUI
+    def _create_menu(self):
         # Create a frame and pack with interface
         self.frame = tk.Frame(self.window)
         self.title = tk.Label(self.frame, pady=85, text="Ridvan's Chess")
@@ -94,7 +103,7 @@ class GUI():
         for x in range(8):
             for y in range(8):
                 self.boardGUI[x][y].configure(image=image)
-                self.boardGUI[x][y].photo=image
+                self.boardGUI[x][y].photo = image
                 self.boardGUI[x][y].grid(row=y + 1, column=x)
 
     # Function for Starting in 1 Player
