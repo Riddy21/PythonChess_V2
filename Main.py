@@ -6,7 +6,6 @@ def main():
     # Creating new GUI
     game_GUI = gui.create_game()
 
-    print(game_GUI)
     gui.loop(game_GUI)
 
 
