@@ -1,4 +1,4 @@
-
+import Game as g
 # Helper functions for GUI Button interaction
 
 # Function for Starting in 1 Player
@@ -6,9 +6,10 @@ def goto_1p(GUI):
     # Destroy previous frame
     GUI.frame.destroy()
 
-    # Create Game object and pass in the GUI
+    # Create Game object and pass in the GUI and set to self.game
+    GUI.game = g.Game(GUI)
 
-    # Initiate AI
+    # TODO: Initiate AI
 
     # Set GUI state to 1P
     GUI.state = '1P'
@@ -22,8 +23,8 @@ def goto_2p(GUI):
     # Destroy previous frame
     GUI.frame.destroy()
 
-    # Create a game object and pass in the GUI
-
+    # Create a game object and pass in the GUI as set self.game
+    GUI.game = g.Game(GUI)
 
     # Set GUI state to 2P
     GUI.state = '2P'

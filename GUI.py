@@ -20,7 +20,7 @@ def loop(*GUIs):
 
 
 # Main Page class
-class GUI():
+class GUI:
     # Constructor  with reference to root
     def __init__(self, window):
         # Create window
@@ -33,6 +33,9 @@ class GUI():
 
         # GUI state
         self.state = "Menu"
+
+        # Game object tied to GUI
+        self.game = 'No game initiated'
 
         # Setup menu
         self._create_menu()
@@ -77,26 +80,26 @@ class GUI():
         self.undo.grid(columnspan=2, row=9, column=3)
 
         # Board Grid
-        self.boardGUI = [[0 for col in range(8)] for row in range(8)]
+        self.boardGUI = [[0] * 8] * 8
 
         i = 0
 
         # Create Board as series of buttons and save to 2D array
         for y in range(8):
             for x in range(8):
-                if (i % 2 == 0 and y % 2 == 0):
+                if i % 2 == 0 and y % 2 == 0:
                     self.boardGUI[x][y] = tk.Button(self.frame, highlightbackground='white', highlightthickness=4)
-                elif (not i % 2 == 0 and not y % 2 == 0):
+                elif not i % 2 == 0 and not y % 2 == 0:
                     self.boardGUI[x][y] = tk.Button(self.frame, highlightbackground='white', highlightthickness=4)
                 else:
                     self.boardGUI[x][y] = tk.Button(self.frame, highlightbackground='black', highlightthickness=4)
                 i = i + 1
                 self.boardGUI[x][y].grid(row=y + 1, column=x)
 
-
     # Resync the board with the GUIs
-    def sync_board(self, Game):
+    def sync_board(self):
 
+        # TODO: Read the game board and sync the pieces to the board
         # Placeholder image
         image = tk.PhotoImage(file="Assets/Chess_tile_bd.png")
 
@@ -112,4 +115,6 @@ class GUI():
         pass
         # highlight the board squares that are indicated by the game in cyan
 
-
+    # Get game object from GUi
+    def get_game(self):
+        return self.game
