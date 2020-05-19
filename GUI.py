@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkmacosx import Button
+from GUI_button_handler import *
 
 
 # Static Functions
@@ -32,7 +32,7 @@ class GUI():
         self.window.resizable(0, 0)
 
         # GUI state
-        self.GUI_state = "Menu"
+        self.state = "Menu"
 
         # Setup menu
         self._create_menu()
@@ -42,9 +42,9 @@ class GUI():
         # Create a frame and pack with interface
         self.frame = tk.Frame(self.window)
         self.title = tk.Label(self.frame, pady=85, text="Ridvan's Chess")
-        self.oneP = tk.Button(self.frame, text="One Player", padx=220, pady=50, command=self.goto_1p)
-        self.twoP = tk.Button(self.frame, text='Two Player', padx=220, pady=50, command=self.goto_2p)
-        self.close = tk.Button(self.frame, text='Close', padx=230, pady=20, command=self.quit)
+        self.oneP = tk.Button(self.frame, text="One Player", padx=220, pady=50, command=lambda: goto_1p(self))
+        self.twoP = tk.Button(self.frame, text='Two Player', padx=220, pady=50, command=lambda: goto_2p(self))
+        self.close = tk.Button(self.frame, text='Close', padx=230, pady=20, command=lambda: quit(self))
         self.title.grid(row=0)
         self.oneP.grid(row=1)
         self.twoP.grid(row=2)
@@ -66,8 +66,8 @@ class GUI():
             self.player2 = tk.Label(self.frame, text='Player 2')
 
         # bottom buttons
-        self.home = tk.Button(self.frame, text='Home', command=self.back_to_menu)
-        self.close = tk.Button(self.frame, text='Close', command=self.quit)
+        self.home = tk.Button(self.frame, text='Home', command=lambda: back_to_menu(self))
+        self.close = tk.Button(self.frame, text='Close', command=lambda: quit(self))
         self.undo = tk.Button(self.frame, text='Undo')
 
         self.player1.grid(columnspan=2, row=0, column=0)
@@ -91,8 +91,8 @@ class GUI():
                 else:
                     self.boardGUI[x][y] = tk.Button(self.frame, highlightbackground='black', highlightthickness=4)
                 i = i + 1
+                self.boardGUI[x][y].grid(row=y + 1, column=x)
 
-        self.sync_board()
 
     # Resync the board with the GUIs
     def sync_board(self, Game):
@@ -106,26 +106,10 @@ class GUI():
             for y in range(8):
                 self.boardGUI[x][y].configure(image=image)
                 self.boardGUI[x][y].photo = image
-                self.boardGUI[x][y].grid(row=y + 1, column=x)
 
     # Highlight squares that can be moved to
     def highlight_board(self, Game):
         pass
         # highlight the board squares that are indicated by the game in cyan
 
-    # Function for Starting in 1 Player
-    def goto_1p(self):
-        self.frame.destroy()
-        self._create_board(1)
 
-    # Function for Starting in 2 Player
-    def goto_2p(self):
-        self.frame.destroy()
-        self._create_board(2)
-
-    def back_to_menu(self):
-        self.frame.destroy()
-        self.__init__(self.window)
-
-    def quit(self):
-        self.window.quit()
