@@ -1,3 +1,6 @@
+from Pieces import Blank, Bishop, King, Knight, Rook, Pawn, Queen
+
+
 # Game class initiated when the game board is displayed
 class Game:
     def __init__(self,GUI):
@@ -5,7 +8,7 @@ class Game:
         self.GUI = GUI
 
         # 2D array of pieces to represent board
-        self.board = [[''] * 8] * 8
+        self.board = [[Blank()] * 8] * 8
 
         # stack of all old moves and current move
         self.moves = []
@@ -18,10 +21,45 @@ class Game:
 
     # TODO: set board as a specific config
     def set_board(self,config):
-        # TODO: set board by updating self.board
+        # set board by updating self.board
+        self.board[0][0] = Rook('black')
+        self.board[7][0] = Rook('black')
+        self.board[1][0] = Knight('black')
+        self.board[6][0] = Knight('black')
+        self.board[2][0] = Bishop('black')
+        self.board[5][0] = Bishop('black')
+        self.board[3][0] = Queen('black')
+        self.board[4][0] = King('black')
+        self.board[0][1] = Pawn('black')
+        self.board[1][1] = Pawn('black')
+        self.board[2][1] = Pawn('black')
+        self.board[3][1] = Pawn('black')
+        self.board[4][1] = Pawn('black')
+        self.board[5][1] = Pawn('black')
+        self.board[6][1] = Pawn('black')
+        self.board[7][1] = Pawn('black')
+        self.board[0][7] = Rook('white')
+        self.board[7][7] = Rook('white')
+        self.board[1][7] = Knight('white')
+        self.board[6][7] = Knight('white')
+        self.board[2][7] = Bishop('white')
+        self.board[5][7] = Bishop('white')
+        self.board[3][7] = Queen('white')
+        self.board[4][7] = King('white')
+        self.board[0][6] = Pawn('white')
+        self.board[1][6] = Pawn('white')
+        self.board[2][6] = Pawn('white')
+        self.board[3][6] = Pawn('white')
+        self.board[4][6] = Pawn('white')
+        self.board[5][6] = Pawn('white')
+        self.board[6][6] = Pawn('white')
+
+
+        # TODO: set according to config
 
         #TODO: sync board
-        pass
+        self.GUI.sync_board()
+
 
     # TODO: print board in string format using string representation
     def __str__(self):

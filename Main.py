@@ -11,7 +11,7 @@ def main():
 
     game = game_Window.get_game()
 
-    game.test_print()
+    game.set_board('string')
 
     gui.loop(game_Window)
 

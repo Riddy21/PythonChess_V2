@@ -105,8 +105,9 @@ class GUI:
 
         # Sync board with the board array on game
 
-        for x in range(8):
-            for y in range(8):
+        for y in range(8):
+            for x in range(8):
+                image = tk.PhotoImage(file=self.game.board[x][y].image)
                 self.boardGUI[x][y].configure(image=image)
                 self.boardGUI[x][y].photo = image
 
