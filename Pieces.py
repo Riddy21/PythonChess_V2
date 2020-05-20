@@ -68,7 +68,7 @@ class Queen(_Piece):
             str = 'q'
 
         # Makes a piece with set values and images
-        super().__init__(1, colour, 'placeholder', image, str)
+        super().__init__(9, colour, 'placeholder', image, str)
 
 class King(_Piece):
     def __init__(self, colour):
@@ -80,7 +80,7 @@ class King(_Piece):
             str = 'k'
 
         # Makes a piece with set values and images
-        super().__init__(1, colour, 'placeholder', image, str)
+        super().__init__(1000, colour, 'placeholder', image, str) # TODO: make value max int value
 
 class Blank(_Piece):
     def __init__(self):

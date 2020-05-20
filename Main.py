@@ -7,12 +7,6 @@ def main():
     # Create new Game
     game_Window = gui.create_window()
 
-    hdlr.goto_1p(game_Window)
-
-    game = game_Window.get_game()
-
-    game.set_board('string')
-
     gui.loop(game_Window)
 
 

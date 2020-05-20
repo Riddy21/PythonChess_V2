@@ -80,7 +80,7 @@ class GUI:
         self.undo.grid(columnspan=2, row=9, column=3)
 
         # Board Grid
-        self.boardGUI = [[0] * 8] * 8
+        self.boardGUI = [[0] * 8 for i in range(8)]
 
         i = 0
 
@@ -100,8 +100,6 @@ class GUI:
     def sync_board(self):
 
         # TODO: Read the game board and sync the pieces to the board
-        # Placeholder image
-        image = tk.PhotoImage(file="Assets/Chess_tile_bd.png")
 
         # Sync board with the board array on game
 

@@ -8,7 +8,7 @@ class Game:
         self.GUI = GUI
 
         # 2D array of pieces to represent board
-        self.board = [[Blank()] * 8] * 8
+        self.board = [[Blank()] * 8 for i in range(8)]
 
         # stack of all old moves and current move
         self.moves = []
@@ -53,7 +53,7 @@ class Game:
         self.board[4][6] = Pawn('white')
         self.board[5][6] = Pawn('white')
         self.board[6][6] = Pawn('white')
-
+        self.board[7][6] = Pawn('white')
 
         # TODO: set according to config
 
