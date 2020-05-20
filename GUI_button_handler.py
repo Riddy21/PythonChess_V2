@@ -1,4 +1,6 @@
 import Game as g
+
+
 # Helper functions for GUI Button interaction
 
 # Function for Starting in 1 Player
@@ -15,7 +17,7 @@ def goto_1p(GUI):
     GUI.state = '1P'
 
     # Generate 1p game board
-    GUI._create_board(1)
+    GUI.create_board(1)
 
     # Must set board before being able to play
     GUI.game.set_board("Hello")
@@ -33,10 +35,11 @@ def goto_2p(GUI):
     GUI.state = '2P'
 
     # Generate 2p game board
-    GUI._create_board(2)
+    GUI.create_board(2)
 
     # Must set board before being able to play
     GUI.game.set_board("Hello")
+
 
 # Returns to main menu
 def back_to_menu(GUI):
@@ -52,10 +55,8 @@ def back_to_menu(GUI):
     GUI.__init__(GUI.window)
 
 
-def quit(GUI):
+def quit_win(GUI):
     # Save game state
 
     # Quit
     GUI.window.quit()
-
-

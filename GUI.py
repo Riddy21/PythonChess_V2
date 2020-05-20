@@ -47,7 +47,7 @@ class GUI:
         self.title = tk.Label(self.frame, pady=85, text="Ridvan's Chess")
         self.oneP = tk.Button(self.frame, text="One Player", padx=220, pady=50, command=lambda: goto_1p(self))
         self.twoP = tk.Button(self.frame, text='Two Player', padx=220, pady=50, command=lambda: goto_2p(self))
-        self.close = tk.Button(self.frame, text='Close', padx=230, pady=20, command=lambda: quit(self))
+        self.close = tk.Button(self.frame, text='Close', padx=230, pady=20, command=lambda: quit_win(self))
         self.title.grid(row=0)
         self.oneP.grid(row=1)
         self.twoP.grid(row=2)
@@ -55,12 +55,12 @@ class GUI:
         self.frame.pack()
 
     # Function for Quitting
-    def _create_board(self, mode):
+    def create_board(self, mode):
         self.frame = tk.Frame(self.window)
         self.frame.pack()
 
         # 1P or 2P screen setup
-        if (mode == 1):
+        if mode == 1:
             self.player1 = tk.Label(self.frame, text='You')
             self.player2 = tk.Label(self.frame, text='CPU')
 
