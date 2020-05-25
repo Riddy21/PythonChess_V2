@@ -66,7 +66,13 @@ class Game:
 
     # TODO: Function to end move,
 
+    # TODO: Function to undo move
+
     # TODO: Convert chess coords to int coords
+
+    # TODO: Static: Converts Object board to string board
+
+    # TODO: Static: Converts String board to Object board
 
     # TODO: print board in string format using string representation
     def __str__(self):

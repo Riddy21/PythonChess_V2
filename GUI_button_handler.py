@@ -5,6 +5,9 @@ from Game import Game
 
 # Function for Starting in 1 Player
 def goto_1p(GUI):
+    # console message
+    print("switching to 1 player....")
+
     # Destroy previous frame
     GUI.frame.destroy()
 
@@ -26,6 +29,9 @@ def goto_1p(GUI):
 
 # Function for Starting in 2 Player
 def goto_2p(GUI):
+    # console message
+    print("switching to 2 player....")
+
     # Destroy previous frame
     GUI.frame.destroy()
 
@@ -45,16 +51,22 @@ def goto_2p(GUI):
 
 # Registers a touch on the board and records it to the game
 def pressed(GUI, x, y):
+
+    # console message
     print(x, y)
+
     # Gets move status of last element of move queue
 
-    # If move is in progress, register the end location
+    # If move is in progress, register the end location and make move
 
-    # If move finished, start new move
+    # If move finished, start new move and enter coordinates
 
 
 # Returns to main menu
 def back_to_menu(GUI):
+    # console message
+    print("Going back to menu...")
+
     # Destroy frame game frame
     GUI.frame.destroy()
 
@@ -68,6 +80,9 @@ def back_to_menu(GUI):
 
 
 def quit_win(GUI):
+    # console message
+    print("Quitting game")
+
     # Save game state
 
     # Quit

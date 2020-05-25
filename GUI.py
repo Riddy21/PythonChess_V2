@@ -43,6 +43,9 @@ class GUI:
 
     # Creates menu GUI
     def _create_menu(self):
+        # console message
+        print("Starting Menu....")
+
         # Create a frame and pack with interface
         self.frame = tk.Frame(self.window)
         self.title = tk.Label(self.frame, pady=85, text="Ridvan's Chess")
@@ -57,6 +60,9 @@ class GUI:
 
     # Function for Quitting
     def create_board(self, mode):
+        # console message
+        print("Creating Board....")
+
         self.frame = tk.Frame(self.window)
         self.frame.pack()
 
