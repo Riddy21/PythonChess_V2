@@ -1,5 +1,6 @@
 import tkinter as tk
-from GUI_button_handler import *
+import GUI_button_handler as gbh
+from functools import partial
 
 
 # Static Functions
@@ -45,9 +46,9 @@ class GUI:
         # Create a frame and pack with interface
         self.frame = tk.Frame(self.window)
         self.title = tk.Label(self.frame, pady=85, text="Ridvan's Chess")
-        self.oneP = tk.Button(self.frame, text="One Player", padx=220, pady=50, command=lambda: goto_1p(self))
-        self.twoP = tk.Button(self.frame, text='Two Player', padx=220, pady=50, command=lambda: goto_2p(self))
-        self.close = tk.Button(self.frame, text='Close', padx=230, pady=20, command=lambda: quit_win(self))
+        self.oneP = tk.Button(self.frame, text="One Player", padx=220, pady=50, command=lambda: gbh.goto_1p(self))
+        self.twoP = tk.Button(self.frame, text='Two Player', padx=220, pady=50, command=lambda: gbh.goto_2p(self))
+        self.close = tk.Button(self.frame, text='Close', padx=230, pady=20, command=lambda: gbh.quit_win(self))
         self.title.grid(row=0)
         self.oneP.grid(row=1)
         self.twoP.grid(row=2)
@@ -69,8 +70,8 @@ class GUI:
             self.player2 = tk.Label(self.frame, text='Player 2')
 
         # bottom buttons
-        self.home = tk.Button(self.frame, text='Home', command=lambda: back_to_menu(self))
-        self.close = tk.Button(self.frame, text='Close', command=lambda: quit(self))
+        self.home = tk.Button(self.frame, text='Home', command=lambda: gbh.back_to_menu(self))
+        self.close = tk.Button(self.frame, text='Close', command=lambda: gbh.quit_win(self))
         self.undo = tk.Button(self.frame, text='Undo')
 
         self.player1.grid(columnspan=2, row=0, column=0)
@@ -88,11 +89,14 @@ class GUI:
         for y in range(8):
             for x in range(8):
                 if i % 2 == 0 and y % 2 == 0:
-                    self.boardGUI[x][y] = tk.Button(self.frame, highlightbackground='white', highlightthickness=4)
+                    self.boardGUI[x][y] = tk.Button(self.frame, highlightbackground='white', highlightthickness=4,
+                                                    command = partial(gbh.pressed, self, x, y))
                 elif not i % 2 == 0 and not y % 2 == 0:
-                    self.boardGUI[x][y] = tk.Button(self.frame, highlightbackground='white', highlightthickness=4)
+                    self.boardGUI[x][y] = tk.Button(self.frame, highlightbackground='white', highlightthickness=4,
+                                                    command = partial(gbh.pressed, self, x, y))
                 else:
-                    self.boardGUI[x][y] = tk.Button(self.frame, highlightbackground='black', highlightthickness=4)
+                    self.boardGUI[x][y] = tk.Button(self.frame, highlightbackground='black', highlightthickness=4,
+                                                    command = partial(gbh.pressed, self, x, y))
                 i = i + 1
                 self.boardGUI[x][y].grid(row=y + 1, column=x)
 
@@ -110,7 +114,7 @@ class GUI:
                 self.boardGUI[x][y].photo = image
 
     # Highlight squares that can be moved to
-    def highlight_board(self, Game):
+    def highlight_board(self, game):
         pass
         # highlight the board squares that are indicated by the game in cyan
 

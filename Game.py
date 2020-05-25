@@ -1,9 +1,10 @@
 from Pieces import Blank, Bishop, King, Knight, Rook, Pawn, Queen
+from Move import Move
 
 
 # Game class initiated when the game board is displayed
 class Game:
-    def __init__(self,GUI):
+    def __init__(self, GUI):
         # GUI pointer for changing GUI from game class
         self.GUI = GUI
 
@@ -16,11 +17,8 @@ class Game:
         # string representing the turn colour of the game
         self.turn = 'white'
 
-        # State defining whether you are selecting a piece or where to move it
-        self.move_state = 'select'
-
     # TODO: set board as a specific config
-    def set_board(self,config):
+    def set_board(self):
         # set board by updating self.board
         self.board[0][0] = Rook('black')
         self.board[7][0] = Rook('black')
@@ -57,13 +55,27 @@ class Game:
 
         # TODO: set according to config
 
-        #TODO: sync board
+        # TODO: sync board
         self.GUI.sync_board()
 
+    # TODO: Move interfacing functions
+
+    # TODO: Function to make complete move from to-coordinates and from-coordinates
+
+    # TODO: Function to start move,
+
+    # TODO: Function to end move,
+
+    # TODO: Convert chess coords to int coords
 
     # TODO: print board in string format using string representation
     def __str__(self):
-        print("Not done yet")
+        str = ''
 
+        # Add board string reps
+        for y in range(8):
+            for x in range(8):
+                str += self.board[x][y].str_rep + ' '
+            str += '\n'
 
-
+        return str

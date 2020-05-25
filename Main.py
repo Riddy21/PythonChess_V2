@@ -1,5 +1,8 @@
 import GUI as gui
-import GUI_button_handler as hdlr
+import GUI_button_handler as gbh
+import time
+
+# Make functions to control interface
 
 #TODO: Combine Board GUI and Menu objects into one object
 

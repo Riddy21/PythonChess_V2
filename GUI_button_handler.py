@@ -1,4 +1,4 @@
-import Game as g
+from Game import Game
 
 
 # Helper functions for GUI Button interaction
@@ -9,9 +9,8 @@ def goto_1p(GUI):
     GUI.frame.destroy()
 
     # Create Game object and pass in the GUI and set to self.game
-    GUI.game = g.Game(GUI)
-
-    # TODO: Initiate AI
+    game = Game(GUI)
+    GUI.game = game
 
     # Set GUI state to 1P
     GUI.state = '1P'
@@ -20,7 +19,9 @@ def goto_1p(GUI):
     GUI.create_board(1)
 
     # Must set board before being able to play
-    GUI.game.set_board("Hello")
+    game.set_board()
+
+    # TODO: Initiate AI
 
 
 # Function for Starting in 2 Player
@@ -29,7 +30,8 @@ def goto_2p(GUI):
     GUI.frame.destroy()
 
     # Create a game object and pass in the GUI as set self.game
-    GUI.game = g.Game(GUI)
+    game = Game(GUI)
+    GUI.game = game
 
     # Set GUI state to 2P
     GUI.state = '2P'
@@ -38,7 +40,17 @@ def goto_2p(GUI):
     GUI.create_board(2)
 
     # Must set board before being able to play
-    GUI.game.set_board("Hello")
+    game.set_board()
+
+
+# Registers a touch on the board and records it to the game
+def pressed(GUI, x, y):
+    print(x, y)
+    # Gets move status of last element of move queue
+
+    # If move is in progress, register the end location
+
+    # If move finished, start new move
 
 
 # Returns to main menu
