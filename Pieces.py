@@ -92,7 +92,7 @@ class King(_Piece):
             print("colour typo")
 
         # Makes a piece with set values and images
-        super().__init__(1000, colour, 'placeholder', image, str) # TODO: make value max int value
+        super().__init__(100000000, colour, 'placeholder', image, str) # TODO: make value max int value
 
 class Blank(_Piece):
     def __init__(self):

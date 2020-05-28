@@ -11,6 +11,10 @@ class Game:
         # 2D array of pieces to represent board
         self.board = [[Blank()] * 8 for i in range(8)]
 
+        # captured Pieces
+        self.captured_white = []
+        self.captured_black = []
+
         # stack of all old moves and current move
         self.moves = []
 
@@ -55,7 +59,7 @@ class Game:
 
         # TODO: set according to config
 
-        # TODO: sync board
+        # TODO: sync board **** if no GUI, don't sync
         self.GUI.sync_board()
 
     # TODO: Move interfacing functions
