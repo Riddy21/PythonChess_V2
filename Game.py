@@ -72,11 +72,9 @@ class Game:
         # Check if moving from or moving to
         if len(self.moves) == 0 or getattr(self.moves[-1], 'move_stage') == 'moved':
             # If fresh board with no moves or move is finished move from this location
-            print('from')
             self.move_from(x, y)
         else:
             #  If move is started finish and change side
-            print('to')
             self.move_to(x, y)
             self.switch_turn()
 
@@ -85,8 +83,7 @@ class Game:
     def move_from(self, x, y):
         # Check if it is a valid selection, if not, exit the function
         if not is_valid_selection(self.board, self.turn, x, y):
-            print("Not a valid selection!")
-            return
+            return -1
 
         # Create a new move and add to list
         self.moves.append(Move(self.board, self.turn, x, y))

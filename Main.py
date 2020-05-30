@@ -81,9 +81,6 @@ class Main():
     # Registers a touch on the board and records it to the game
     def pressed(self, x, y):
 
-        # console message
-        print(x, y)
-
         # make move based on move handler
         self.game.handle_move(x,y)
 

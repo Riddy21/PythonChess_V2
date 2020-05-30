@@ -66,11 +66,13 @@ class Move():
         toy = self.move_to[1]
 
         if self.move_type == 'capture':
+            print('capture: from %d,%d to %d,%d' %(frox, froy, tox, toy))
             self.captured = board[tox][toy].str_rep
             board[tox][toy] = board[frox][froy]
             board[frox][froy] = Blank()
 
         elif self.move_type == 'move':
+            print('move: from %d,%d to %d,%d' %(frox, froy, tox, toy))
             board[tox][toy], board[frox][froy] = board[frox][froy], board[tox][toy]
 
         # TODO: finish other move types
