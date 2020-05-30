@@ -1,14 +1,18 @@
-from tkthread import tk, TkThread
-import threading, time
-def main():
-    root = tk.Tk()  # create the root window
-    tkt = TkThread(root)  # make the thread-safe callable
+from typing import Any
 
-    def run(func):
-        threading.Thread(target=func).start()
 
-    run(lambda: tkt(root.wm_title, 'SUCCESS'))
-    run(lambda: tkt(root.wm_title, 'SUeCCESS'))
-    root.update()
-    time.sleep(2)  # _tkinter.c:WaitForMainloop fails
-    root.mainloop()
+class tester(object):
+    def __init__(self):
+        self.game = ''
+        self.hello = ''
+
+    def __setattr__(self, name: str, value: Any) -> None:
+        super().__setattr__(name, value)
+
+    def __getattribute__(self, name: str) -> Any:
+        return super().__getattribute__(name)
+
+
+tester = tester()
+setattr(tester,'game',"helllllllo")
+print(getattr(tester,'game'))

@@ -1,3 +1,5 @@
+from typing import Any
+
 from Pieces import Blank, Bishop, King, Knight, Rook, Pawn, Queen
 
 
@@ -14,7 +16,7 @@ class Move():
     # init
     def __init__(self, board, turn, x, y):
         # Parameter for move stage
-        self.move_stage = "select"
+        self.move_stage = "selected"
 
         # Parameter for to location, initiate as 'move not finished yet'
         self.move_to = -1, -1
@@ -41,12 +43,15 @@ class Move():
                 self.board_before[x][y] = board[x][y].str_rep
 
     # validate move and make the move based on the end coordinates
-    def make_move(self, x, y, board):
+    def make_move(self, board, x, y):
         # Check if it is a valid move
         # ** Don't set move to until validated
         if not self.is_valid_move(x, y):
             print("invalid move")
             return -1
+
+        # Set move stage
+        self.move_stage = 'moved'
 
         # set move_to to x y now that it is verified as a valid move
         self.move_to = x, y
@@ -68,7 +73,10 @@ class Move():
         elif self.move_type == 'move':
             board[tox][toy], board[frox][froy] = board[frox][froy], board[tox][toy]
 
-        # TODO: finish other ones
+        # TODO: finish other move types
+
+
+
 
     # TODO: Undo a move
     def undo_move(self):
@@ -107,5 +115,11 @@ class Move():
         # If is normal move
         else:
             return 'move'
+
+    def __getattribute__(self, name: str) -> Any:
+        return super().__getattribute__(name)
+
+    def __setattr__(self, name: str, value: Any) -> None:
+        super().__setattr__(name, value)
 
     # TODO: make converter from str_rep to object

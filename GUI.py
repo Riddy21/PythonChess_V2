@@ -1,32 +1,20 @@
 import tkinter as tk
-import GUI_button_handler as gbh
 from functools import partial
 
-
-
-# Static Functions
-# Create another window with menu
-# Passes back game window
-def create_window():
-    # Creates window and passes back to user
-    window = tk.Tk()
-    game_GUI = GUI(window)
-    return game_GUI
-
-
-# Loops GUIs to activate
-def loop(*GUIs):
-    # loop through all windows and loop them
-    for gui in GUIs:
-        gui.window.mainloop()
-
-
 # Main Page class
+from typing import Any
+
+
 class GUI:
     # Constructor  with reference to root
-    def __init__(self, window):
+    def __init__(self, main):
         # Create window
-        self.window = window
+        self.window = tk.Tk()
+
+        # main class needs to be passed in
+        # to access the button functions. Not conventional but used
+        # very frequently so more convenient this way
+        self.main = main
 
         # Setup window
         self.window.title("Chess")
@@ -36,23 +24,20 @@ class GUI:
         # GUI state
         self.state = "Menu"
 
-        # Game object tied to GUI
-        self.game = 'No game initiated'
-
         # Setup menu
-        self._create_menu()
+        self.create_menu()
 
     # Creates menu GUI
-    def _create_menu(self):
+    def create_menu(self):
         # console message
         print("Starting Menu....")
 
         # Create a frame and pack with interface
         self.frame = tk.Frame(self.window)
         self.title = tk.Label(self.frame, pady=85, text="Ridvan's Chess")
-        self.oneP = tk.Button(self.frame, text="One Player", padx=220, pady=50, command=lambda: gbh.goto_1p(self))
-        self.twoP = tk.Button(self.frame, text='Two Player', padx=220, pady=50, command=lambda: gbh.goto_2p(self))
-        self.close = tk.Button(self.frame, text='Close', padx=230, pady=20, command=lambda: gbh.quit_win(self))
+        self.oneP = tk.Button(self.frame, text="One Player", padx=220, pady=50, command=lambda: self.main.goto_1p())
+        self.twoP = tk.Button(self.frame, text='Two Player', padx=220, pady=50, command=lambda: self.main.goto_2p())
+        self.close = tk.Button(self.frame, text='Close', padx=230, pady=20, command=lambda: self.main.quit_win())
         self.title.grid(row=0)
         self.oneP.grid(row=1)
         self.twoP.grid(row=2)
@@ -77,8 +62,8 @@ class GUI:
             self.player2 = tk.Label(self.frame, text='Player 2')
 
         # bottom buttons
-        self.home = tk.Button(self.frame, text='Home', command=lambda: gbh.back_to_menu(self))
-        self.close = tk.Button(self.frame, text='Close', command=lambda: gbh.quit_win(self))
+        self.home = tk.Button(self.frame, text='Home', command=lambda: self.main.back_to_menu())
+        self.close = tk.Button(self.frame, text='Close', command=lambda: self.main.quit_win())
         self.undo = tk.Button(self.frame, text='Undo')
 
         self.player1.grid(columnspan=2, row=0, column=0)
@@ -97,26 +82,27 @@ class GUI:
             for x in range(8):
                 if i % 2 == 0 and y % 2 == 0:
                     self.boardGUI[x][y] = tk.Button(self.frame, highlightbackground='white', highlightthickness=4,
-                                                    command = partial(gbh.pressed, self, x, y))
+                                                    command = partial(self.main.pressed, x, y))
                 elif not i % 2 == 0 and not y % 2 == 0:
                     self.boardGUI[x][y] = tk.Button(self.frame, highlightbackground='white', highlightthickness=4,
-                                                    command = partial(gbh.pressed, self, x, y))
+                                                    command = partial(self.main.pressed, x, y))
                 else:
                     self.boardGUI[x][y] = tk.Button(self.frame, highlightbackground='black', highlightthickness=4,
-                                                    command = partial(gbh.pressed, self, x, y))
+                                                    command = partial(self.main.pressed, x, y))
                 i = i + 1
                 self.boardGUI[x][y].grid(row=y + 1, column=x)
 
+        self.sync_board()
+
     # Resync the board with the GUIs
     def sync_board(self):
-
-        # TODO: Read the game board and sync the pieces to the board
+        board = self.main.game.board
 
         # Sync board with the board array on game
 
         for y in range(8):
             for x in range(8):
-                image = tk.PhotoImage(file=self.game.board[x][y].image)
+                image = tk.PhotoImage(file=board[x][y].image)
                 self.boardGUI[x][y].configure(image=image)
                 self.boardGUI[x][y].photo = image
 
@@ -125,6 +111,27 @@ class GUI:
         pass
         # highlight the board squares that are indicated by the game in cyan
 
-    # Get game object from GUi
-    def get_game(self):
-        return self.game
+    # Put gui in mainloop
+    def loop(self):
+        self.window.mainloop()
+
+    def destroy_frame(self):
+        self.frame.destroy()
+
+    # Setters and getters
+    # # Get game object from GUi
+    # def get_game(self):
+    #     return self.game
+    #
+    # def set_game(self, game):
+    #     self.game = game
+    #
+    # def set_state(self):
+
+    def __setattr__(self, name: str, value: Any) -> None:
+        super().__setattr__(name, value)
+
+    def __getattribute__(self, name: str) -> Any:
+        return super().__getattribute__(name)
+
+

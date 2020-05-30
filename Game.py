@@ -1,13 +1,10 @@
 from Pieces import Blank, Bishop, King, Knight, Rook, Pawn, Queen
-from Move import Move
+from Move import Move, is_valid_selection
 
 
 # Game class initiated when the game board is displayed
 class Game:
-    def __init__(self, GUI):
-        # GUI pointer for changing GUI from game class
-        self.GUI = GUI
-
+    def __init__(self):
         # 2D array of pieces to represent board
         self.board = [[Blank()] * 8 for i in range(8)]
 
@@ -59,16 +56,45 @@ class Game:
 
         # TODO: set according to config
 
-        # TODO: sync board **** if no GUI, don't sync
-        self.GUI.sync_board()
-
     # TODO: Move interfacing functions
 
     # TODO: Function to make complete move from to-coordinates and from-coordinates
 
-    # TODO: Function to start move,
+    # Function to switch turns
+    def switch_turn(self):
+        if self.turn == 'white':
+            self.turn = 'black'
+        else:
+            self.turn = 'white'
 
-    # TODO: Function to end move,
+    # Function to check return what move stage we are at and handle move button
+    def handle_move(self, x, y):
+        # Check if moving from or moving to
+        if len(self.moves) == 0 or getattr(self.moves[-1], 'move_stage') == 'moved':
+            # If fresh board with no moves or move is finished move from this location
+            print('from')
+            self.move_from(x, y)
+        else:
+            #  If move is started finish and change side
+            print('to')
+            self.move_to(x, y)
+            self.switch_turn()
+
+
+    # Function to start move
+    def move_from(self, x, y):
+        # Check if it is a valid selection, if not, exit the function
+        if not is_valid_selection(self.board, self.turn, x, y):
+            print("Not a valid selection!")
+            return
+
+        # Create a new move and add to list
+        self.moves.append(Move(self.board, self.turn, x, y))
+
+    # Function to end move,
+    def move_to(self, x, y):
+        # Makes move on the most recent move
+        self.moves[-1].make_move(self.board, x, y)
 
     # TODO: Function to undo move
 
