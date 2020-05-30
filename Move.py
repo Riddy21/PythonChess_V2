@@ -1,13 +1,9 @@
 from Pieces import Blank, Bishop, King, Knight, Rook, Pawn, Queen
 
-# TODO:
-# check if str_rep check works
-# chack if passing board updates correctly
-
 
 # Function for checking if player picked a piece of the right colour and type
 def is_valid_selection(board, turn, x, y):
-    if board[x][y].str_rep != "_" and board[x][y].colour == turn:
+    if board[x][y].str_rep != "-" and board[x][y].colour == turn:
         return True
     print("Invalid selection")
     return False
@@ -105,7 +101,7 @@ class Move():
         y = self.move_to[1]
 
         # If is capture
-        if board[x][y].str_rep != "_":
+        if board[x][y].str_rep != "-":
             return 'capture'
 
         # If is normal move
