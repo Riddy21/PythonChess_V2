@@ -54,11 +54,7 @@ class Game:
         self.board[6][6] = Pawn('white')
         self.board[7][6] = Pawn('white')
 
-        # TODO: set according to config
-
-    # TODO: Move interfacing functions
-
-    # TODO: Function to make complete move from to-coordinates and from-coordinates
+        # TODO: set according to config\
 
     # Function to switch turns
     def switch_turn(self):
@@ -66,6 +62,12 @@ class Game:
             self.turn = 'black'
         else:
             self.turn = 'white'
+
+    # Function to make complete move from to-coordinates and from-coordinates
+    def full_move(self, frox, froy, tox, toy):
+        self.move_from(frox, froy)
+        self.move_to(tox, toy)
+        self.switch_turn()
 
     # Function to check return what move stage we are at and handle move button
     def handle_move(self, x, y):
@@ -78,7 +80,6 @@ class Game:
             self.move_to(x, y)
             self.switch_turn()
 
-
     # Function to start move
     def move_from(self, x, y):
         # Check if it is a valid selection, if not, exit the function
@@ -87,6 +88,7 @@ class Game:
 
         # Create a new move and add to list
         self.moves.append(Move(self.board, self.turn, x, y))
+
 
     # Function to end move,
     def move_to(self, x, y):

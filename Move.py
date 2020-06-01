@@ -5,7 +5,7 @@ from Pieces import Blank, Bishop, King, Knight, Rook, Pawn, Queen
 
 # Function for checking if player picked a piece of the right colour and type
 def is_valid_selection(board, turn, x, y):
-    if board[x][y].str_rep != "-" and board[x][y].colour == turn:
+    if getattr(board[x][y], 'str_rep') != "-" and getattr(board[x][y], 'colour') == turn:
         return True
     print("Invalid selection")
     return False
@@ -33,6 +33,9 @@ class Move():
         # Parameter for turn colour
         self.turn_colour = turn
 
+        # Parameter for possible next moves and set to the piece's move array
+        self.poss_moves = board[x][y].get_moves(x, y, board)
+
         # Parameter for captured Piece
         self.captured = 'None'
 
@@ -44,20 +47,27 @@ class Move():
 
     # validate move and make the move based on the end coordinates
     def make_move(self, board, x, y):
+
+        # Tries to check if move is valid and returns the move type
+        proposed_move = self._try_move(board, x, y)
         # Check if it is a valid move
         # ** Don't set move to until validated
-        if not self.is_valid_move(x, y):
+        if proposed_move == -1:
             print("invalid move")
             return -1
 
+        # if valid move then:
         # Set move stage
         self.move_stage = 'moved'
+
+        # Clear poss moves to empty
+        self.poss_moves = []
 
         # set move_to to x y now that it is verified as a valid move
         self.move_to = x, y
 
         # change game board based on move locations and move type and save to after move
-        self.move_type = self._get_move_type(board)
+        self.move_type = proposed_move
 
         # Make move
         frox = self.move_from[0]
@@ -65,20 +75,20 @@ class Move():
         tox = self.move_to[0]
         toy = self.move_to[1]
 
+        # Add move count to moved piece
+        setattr(board[frox][froy], 'move_count', getattr(board[frox][froy], 'move_count') + 1)
+
         if self.move_type == 'capture':
-            print('capture: from %d,%d to %d,%d' %(frox, froy, tox, toy))
+            print('capture: from %d,%d to %d,%d' % (frox, froy, tox, toy))
             self.captured = board[tox][toy].str_rep
             board[tox][toy] = board[frox][froy]
             board[frox][froy] = Blank()
 
         elif self.move_type == 'move':
-            print('move: from %d,%d to %d,%d' %(frox, froy, tox, toy))
+            print('move: from %d,%d to %d,%d' % (frox, froy, tox, toy))
             board[tox][toy], board[frox][froy] = board[frox][froy], board[tox][toy]
 
         # TODO: finish other move types
-
-
-
 
     # TODO: Undo a move
     def undo_move(self):
@@ -88,32 +98,22 @@ class Move():
     # Private: Validate move
     def is_valid_move(self, x, y):
         return True
-        # TODO: Do checks as such:
-        # if not self._turn_check():
-        #     return False
-        # else:
-        #     return True
+        # TODO: Check moves based on highlights that each piece allows
 
-    # TODO: Private: Checks if the move is a valid castle ** make sure to update move type here!
+    # Tries move and returns move type if valid
+    def _try_move(self, board, x, y):
 
-    # TODO: Private: Checks if the move is a valid enpassante ** make sure to update move type here!
+        # Check if valid move on highlights
+        if not self.is_valid_move(x, y):
+            return -1
 
-    # TODO: Private: Checks if the move is a valid pawn promotion ** make sure to update move type here!
-
-    # TODO: Find move type
-    def _get_move_type(self, board):
-        # Check if the move type has already been set as a castle, pawn_promo, or enpassante
-        if self.move_type == 'castle' or self.move_type == 'pawn_promo' or self.move_type == 'enpassante':
-            return self.move_type
-
-        # convert move_to to x,y
-        x = self.move_to[0]
-        y = self.move_to[1]
+        # Check what type of move based on the pieces unique rule set
+        # Check for castling, enpassente and pawn promotion
+        # If it does not fullfill requirements, return -1
 
         # If is capture
-        if board[x][y].str_rep != "-":
+        if getattr(board[x][y], 'str_rep') != "-":
             return 'capture'
-
         # If is normal move
         else:
             return 'move'

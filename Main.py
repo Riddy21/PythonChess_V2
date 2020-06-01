@@ -2,10 +2,8 @@ from GUI import GUI
 from Game import Game
 import time
 
-
-# Make functions to control interface
-
-# TODO: Make GUI button handler into main function! and have option to initiate GUI
+# TODO: Make self.main.game.moves easier to access from GUI
+# TODO: Reorganize move checking
 
 class Main():
     # Main function takes in parameters about GUI and kicks off GUI window setup according to with GUI or without GUI
@@ -13,7 +11,10 @@ class Main():
         self.game = ""
         # GUI enabled game
         if gui_en:
+            # Create GUI object
             self.gui = GUI(self)
+
+            # Loop gui
             self.loop()
 
 
@@ -82,7 +83,7 @@ class Main():
     def pressed(self, x, y):
 
         # make move based on move handler
-        self.game.handle_move(x,y)
+        self.game.handle_move(x, y)
 
         # sync board
         self.gui.sync_board()

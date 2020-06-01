@@ -24,6 +24,12 @@ class GUI:
         # GUI state
         self.state = "Menu"
 
+        # GUI highlights
+        self.highlights = [[''] * 8 for i in range(8)]
+
+        # Board Grid
+        self.boardGUI = [[0] * 8 for i in range(8)]
+
         # Setup menu
         self.create_menu()
 
@@ -72,9 +78,6 @@ class GUI:
         self.close.grid(columnspan=2, row=9, column=6)
         self.undo.grid(columnspan=2, row=9, column=3)
 
-        # Board Grid
-        self.boardGUI = [[0] * 8 for i in range(8)]
-
         i = 0
 
         # Create Board as series of buttons and save to 2D array
@@ -98,18 +101,42 @@ class GUI:
     def sync_board(self):
         board = self.main.game.board
 
-        # Sync board with the board array on game
+        self.set_highlights()
 
+        # Restore board colour
+        self._restore_board_colour()
+
+        # Sync board with the board array on game
         for y in range(8):
             for x in range(8):
-                image = tk.PhotoImage(file=board[x][y].image)
+                image = tk.PhotoImage(file=getattr(board[x][y], 'image'))
                 self.boardGUI[x][y].configure(image=image)
                 self.boardGUI[x][y].photo = image
+                if self.highlights[x][y] == 'cyan':
+                    self.boardGUI[x][y].configure(highlightbackground='cyan')
 
-    # Highlight squares that can be moved to
-    def highlight_board(self, game):
-        pass
-        # highlight the board squares that are indicated by the game in cyan
+        # Revert highlights back to default
+        self.highlights = [[''] * 8 for i in range(8)]
+
+    # Restore board colour back to checker board
+    def _restore_board_colour(self):
+        i = 0
+        for y in range(8):
+            for x in range(8):
+                if i % 2 == 0 and y % 2 == 0:
+                    self.boardGUI[x][y].configure(highlightbackground='white')
+                elif not i % 2 == 0 and not y % 2 == 0:
+                    self.boardGUI[x][y].configure(highlightbackground='white')
+                else:
+                    self.boardGUI[x][y].configure(highlightbackground='black')
+                i = i + 1
+
+    # Set highlighted squares that can be moved to
+    def set_highlights(self):
+        if len(self.main.game.moves) != 0:
+            # highlight the board squares that are indicated by the game in cyan
+            for elements in self.main.game.moves[-1].poss_moves:
+                self.highlights[elements[0]][elements[1]] = 'cyan'
 
     # Put gui in mainloop
     def loop(self):
