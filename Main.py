@@ -3,7 +3,7 @@ from Game import Game
 import time
 
 # TODO: Make self.main.game.moves easier to access from GUI
-# TODO: Reorganize move checking
+# TODO: Make move selection to be changeable
 
 class Main():
     # Main function takes in parameters about GUI and kicks off GUI window setup according to with GUI or without GUI

@@ -134,6 +134,7 @@ class GUI:
     # Set highlighted squares that can be moved to
     def set_highlights(self):
         if len(self.main.game.moves) != 0:
+
             # highlight the board squares that are indicated by the game in cyan
             for elements in self.main.game.moves[-1].poss_moves:
                 self.highlights[elements[0]][elements[1]] = 'cyan'

@@ -1,17 +1,23 @@
 from typing import Any
 
-from Pieces import Blank, Bishop, King, Knight, Rook, Pawn, Queen
+from Pieces import Blank
 
 
 # Function for checking if player picked a piece of the right colour and type
 def is_valid_selection(board, turn, x, y):
+    # if the piece is not blank and is the right colour for the turn
     if getattr(board[x][y], 'str_rep') != "-" and getattr(board[x][y], 'colour') == turn:
+
+        # If there is still moves left
+        if len(board[x][y].get_moves(x, y, board)) == 0:
+            print("No more moves")
+            return False
         return True
     print("Invalid selection")
     return False
 
 
-# TODO: Class to record moves and change game board
+# Class to record moves and change game board
 class Move():
     # init
     def __init__(self, board, turn, x, y):
@@ -69,7 +75,7 @@ class Move():
         # change game board based on move locations and move type and save to after move
         self.move_type = proposed_move
 
-        # Make move
+        # for easier recognition
         frox = self.move_from[0]
         froy = self.move_from[1]
         tox = self.move_to[0]
@@ -78,7 +84,21 @@ class Move():
         # Add move count to moved piece
         setattr(board[frox][froy], 'move_count', getattr(board[frox][froy], 'move_count') + 1)
 
-        if self.move_type == 'capture':
+        is_castle = board[frox][froy].is_castle(tox, toy)
+        # If is a castle, then do castle move
+        if is_castle == 'left':
+            print('left castle at %d, %d' % (frox, froy))
+            setattr(board[0][froy], 'move_count', getattr(board[frox][froy], 'move_count') + 1)
+            board[tox][toy], board[frox][froy] = board[frox][froy], board[tox][toy]
+            board[0][froy], board[3][froy] = board[3][froy], board[0][froy]
+
+        elif is_castle == 'right':
+            print('right castle at %d, %d' % (frox, froy))
+            setattr(board[7][froy], 'move_count', getattr(board[frox][froy], 'move_count') + 1)
+            board[tox][toy], board[frox][froy] = board[frox][froy], board[tox][toy]
+            board[7][froy], board[5][froy] = board[5][froy], board[7][froy]
+
+        elif self.move_type == 'capture':
             print('capture: from %d,%d to %d,%d' % (frox, froy, tox, toy))
             self.captured = board[tox][toy].str_rep
             board[tox][toy] = board[frox][froy]
@@ -96,15 +116,22 @@ class Move():
         pass
 
     # Private: Validate move
-    def is_valid_move(self, x, y):
-        return True
-        # TODO: Check moves based on highlights that each piece allows
+    def is_valid_move(self, board, tox, toy):
+        # Get starting location
+        frox = self.move_from[0]
+        froy = self.move_from[1]
+
+        # If the board piece has the move in its list of possible moves
+        if [tox, toy] in board[frox][froy].get_moves(frox, froy, board):
+            return True
+        else:
+            return False
 
     # Tries move and returns move type if valid
     def _try_move(self, board, x, y):
 
         # Check if valid move on highlights
-        if not self.is_valid_move(x, y):
+        if not self.is_valid_move(board, x, y):
             return -1
 
         # Check what type of move based on the pieces unique rule set

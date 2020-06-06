@@ -76,9 +76,15 @@ class Game:
             # If fresh board with no moves or move is finished move from this location
             self.move_from(x, y)
         else:
-            #  If move is started finish and change side
-            self.move_to(x, y)
-            self.switch_turn()
+            #  If move is started
+
+            # if the player selects a different piece to move
+            if getattr(self.board[x][y], 'colour') == self.turn:
+                self.moves.pop(-1)
+                self.move_from(x, y)
+
+            else:
+                self.move_to(x, y)
 
     # Function to start move
     def move_from(self, x, y):
@@ -89,11 +95,13 @@ class Game:
         # Create a new move and add to list
         self.moves.append(Move(self.board, self.turn, x, y))
 
-
     # Function to end move,
     def move_to(self, x, y):
-        # Makes move on the most recent move
-        self.moves[-1].make_move(self.board, x, y)
+        # Makes move on the most recent move, if invalid move, don't switch sides
+        if self.moves[-1].make_move(self.board, x, y) == -1:
+            return -1
+
+        self.switch_turn()
 
     # TODO: Function to undo move
 
