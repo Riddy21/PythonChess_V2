@@ -14,7 +14,7 @@ def _piece_detect(frox, froy, tox, toy, board):
         else:
             return 'unobstructed'
 
-
+#TODO: Make a piece with movecount and move history set to 0 and one with inserting a piece with a history
 # Abstract Piece Class
 class _Piece():
     def __init__(self, value, colour, image, str_rep):
@@ -25,10 +25,13 @@ class _Piece():
         self.str_rep = str_rep
         self.move_count = 0
 
-    def get_moves(self, x, y, board):
-        pass
+        # A list of all the move ids this piece made a move
+        self.move_num_history = []
 
-    def is_castle(self,x, y):
+    def add_move(self, move_id):
+        self.move_num_history.append(move_id)
+
+    def is_castle(self, x, y):
         return -1
 
     def __getattribute__(self, name: str) -> Any:
@@ -124,26 +127,30 @@ class Pawn(_Piece):
                 poss_moves.append([x - 1, y - 1])
 
             #enPassante
-            if (Main.piece[x][y].getColour() == 'w' and y == 3):
-                if (Main.piece[x + 1][y].getColour() == 'b' and Main.piece[x + 1][y].getMoveC() == 1 and Main.move[
-                    -2] == [
-                    x + 1, y]):
-                    pieceDetect(x, y, x + 1, y - 1)
-                if (Main.piece[x - 1][y].getColour() == 'b' and Main.piece[x - 1][y].getMoveC() == 1 and Main.move[
-                    -2] == [
-                    x - 1, y]):
-                    pieceDetect(x, y, x - 1, y - 1)
-                Move.enpass = True
-            elif (Main.piece[x][y].getColour() == 'b' and y == 4):
-                if (Main.piece[x + 1][y].getColour() == 'w' and Main.piece[x + 1][y].getMoveC() == 1 and Main.move[
-                    -2] == [
-                    x + 1, y]):
-                    pieceDetect(x, y, x + 1, y + 1)
-                if (Main.piece[x - 1][y].getColour() == 'w' and Main.piece[x - 1][y].getMoveC() == 1 and Main.move[
-                    -2] == [
-                    x - 1, y]):
-                    pieceDetect(x, y, x - 1, y + 1)
-                Move.enpass = True
+#            if getattr(board[x][y], colour) == 'white' and y == 3):
+#                if getattr(board[x + 1][y], colour) == 'black' and getattr(board[x + 1][y], move_count) == 1 and 
+
+
+#            if (Main.piece[x][y].getColour() == 'w' and y == 3):
+ #               if (Main.piece[x + 1][y].getColour() == 'b' and Main.piece[x + 1][y].getMoveC() == 1 and Main.move[
+#                    -2] == [
+#                    x + 1, y]):
+#                    pieceDetect(x, y, x + 1, y - 1)
+#                if (Main.piece[x - 1][y].getColour() == 'b' and Main.piece[x - 1][y].getMoveC() == 1 and Main.move[
+#                    -2] == [
+#                    x - 1, y]):
+#                    pieceDetect(x, y, x - 1, y - 1)
+#                Move.enpass = True
+#            elif (Main.piece[x][y].getColour() == 'b' and y == 4):
+#                if (Main.piece[x + 1][y].getColour() == 'w' and Main.piece[x + 1][y].getMoveC() == 1 and Main.move[
+#                    -2] == [
+#                    x + 1, y]):
+#                    pieceDetect(x, y, x + 1, y + 1)
+#                if (Main.piece[x - 1][y].getColour() == 'w' and Main.piece[x - 1][y].getMoveC() == 1 and Main.move[
+#                    -2] == [
+#                    x - 1, y]):
+#                    pieceDetect(x, y, x - 1, y + 1)
+#                Move.enpass = True
 
         # returns a list of all the places the pawn can move
         return poss_moves

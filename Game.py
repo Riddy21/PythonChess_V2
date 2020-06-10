@@ -63,11 +63,13 @@ class Game:
         else:
             self.turn = 'white'
 
+    # TODO: Might be errors if the full Move is not valid... test later
     # Function to make complete move from to-coordinates and from-coordinates
     def full_move(self, frox, froy, tox, toy):
-        self.move_from(frox, froy)
-        self.move_to(tox, toy)
-        self.switch_turn()
+        if self.move_from(frox, froy) == -1:
+            return -1
+        if self.move_to(tox, toy) == -1:
+            return -1
 
     # Function to check return what move stage we are at and handle move button
     def handle_move(self, x, y):
@@ -85,6 +87,7 @@ class Game:
 
             else:
                 self.move_to(x, y)
+                print(self.board[x][y].move_num_history)
 
     # Function to start move
     def move_from(self, x, y):
@@ -92,8 +95,8 @@ class Game:
         if not is_valid_selection(self.board, self.turn, x, y):
             return -1
 
-        # Create a new move and add to list
-        self.moves.append(Move(self.board, self.turn, x, y))
+        # Create a new move and add to list and pass the len of move list as move id
+        self.moves.append(Move(self.board, self.turn, x, y, len(self.moves)))
 
     # Function to end move,
     def move_to(self, x, y):
@@ -112,6 +115,7 @@ class Game:
     # TODO: Static: Converts String board to Object board
 
     # TODO: print board in string format using string representation
+
     def __str__(self):
         str = ''
 

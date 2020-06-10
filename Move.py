@@ -20,7 +20,10 @@ def is_valid_selection(board, turn, x, y):
 # Class to record moves and change game board
 class Move():
     # init
-    def __init__(self, board, turn, x, y):
+    def __init__(self, board, turn, x, y, id_number):
+        # Unique ID to the move by number
+        self.move_number = id_number
+
         # Parameter for move stage
         self.move_stage = "selected"
 
@@ -29,6 +32,9 @@ class Move():
 
         # Parameter for from location
         self.move_from = x, y
+
+        # Parameter for piece moved
+        self.move_piece = getattr(board[x][y], 'str_rep')
 
         # Parameters for move type
         self.move_type = "not set"
@@ -81,10 +87,15 @@ class Move():
         tox = self.move_to[0]
         toy = self.move_to[1]
 
+        # Add move id to piece's move history
+        board[frox][froy].add_move(self.move_number)
+
         # Add move count to moved piece
         setattr(board[frox][froy], 'move_count', getattr(board[frox][froy], 'move_count') + 1)
-
+        
+        # Confirms whether a castle happened when the piece was moved
         is_castle = board[frox][froy].is_castle(tox, toy)
+        
         # If is a castle, then do castle move
         if is_castle == 'left':
             print('left castle at %d, %d' % (frox, froy))
