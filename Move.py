@@ -101,9 +101,22 @@ class Move():
         
         # Confirms whether a castle happened when the piece was moved
         is_castle = board[frox][froy].is_castle(tox, toy)
+
+        # Confirms whether enpassant could happen when the piece is moved
+        is_enpassant = board[frox][froy].is_enpassant(tox,toy)
         
-        # If is a castle, then do castle move
-        if is_castle == 'left':
+        # Do corresponding move
+        if is_enpassant:
+            print('enpassant from %d, %d to %d, %d' % (frox, froy, tox, toy))
+            if self.turn_colour == 'black':
+                self.captured = board[tox][toy-1]
+                board[tox][toy - 1] = Blank()
+            else:
+                self.captured = board[tox][toy+1]
+                board[tox][toy + 1] = Blank()
+            board[tox][toy], board[frox][froy] = board[frox][froy], board[tox][toy]
+
+        elif is_castle == 'left':
             print('left castle at %d, %d' % (frox, froy))
             setattr(board[0][froy], 'move_count', getattr(board[frox][froy], 'move_count') + 1)
             board[tox][toy], board[frox][froy] = board[frox][froy], board[tox][toy]
@@ -117,7 +130,7 @@ class Move():
 
         elif self.move_type == 'capture':
             print('capture: from %d,%d to %d,%d' % (frox, froy, tox, toy))
-            self.captured = board[tox][toy].str_rep
+            self.captured = board[tox][toy]
             board[tox][toy] = board[frox][froy]
             board[frox][froy] = Blank()
 

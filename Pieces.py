@@ -37,6 +37,9 @@ class _Piece():
     def is_castle(self, x, y):
         return -1
 
+    def is_enpassant(self, x, y):
+        return False
+
     def __getattribute__(self, name: str) -> Any:
         return super().__getattribute__(name)
 
@@ -57,6 +60,9 @@ class Pawn(_Piece):
 
         # Makes a piece with set values and images
         super().__init__(1, colour, image, str)
+
+        # Make variable to store where enpassants are, set default as empty list
+        self.enpassant_pos = []
 
     # Pawn move set given the location of the piece
     def get_moves(self, x, y, board):
@@ -136,53 +142,40 @@ class Pawn(_Piece):
                     getattr(board[x + 1][y], 'move_num_history')[-1] == (self.move_num_history[-1] - 1):
                 if _piece_detect(x, y, x + 1, y - 1, board) == 'opponent obstructed' or \
                         _piece_detect(x, y, x + 1, y - 1, board) == 'unobstructed':
-                    poss_moves.append([x + 1, y - 1])    
+                    poss_moves.append([x + 1, y - 1])
+                    self.enpassant_pos.append([x + 1, y - 1])
             if getattr(board[x - 1][y], 'colour') == 'black' and \
                     getattr(board[x - 1][y], 'move_count') == 1 and \
                     getattr(board[x - 1][y], 'move_num_history')[-1] == (self.move_num_history[-1] - 1):
                 if _piece_detect(x, y, x - 1, y - 1, board) == 'opponent obstructed' or \
                         _piece_detect(x, y, x - 1, y - 1, board) == 'unobstructed':
-                    poss_moves.append([x - 1, y - 1]) 
+                    poss_moves.append([x - 1, y - 1])
+                    self.enpassant_pos.append([x - 1, y - 1])
         elif self.colour == 'black' and y == 4:
             if getattr(board[x + 1][y], 'colour') == 'white' and \
                     getattr(board[x + 1][y], 'move_count') == 1 and \
                     getattr(board[x + 1][y], 'move_num_history')[-1] == (self.move_num_history[-1] - 1):
                 if _piece_detect(x, y, x + 1, y + 1, board) == 'opponent obstructed' or \
                         _piece_detect(x, y, x + 1, y + 1, board) == 'unobstructed':
-                    poss_moves.append([x + 1, y + 1])    
+                    poss_moves.append([x + 1, y + 1])
+                    self.enpassant_pos.append([x + 1, y + 1])
             if getattr(board[x - 1][y], 'colour') == 'white' and \
                     getattr(board[x - 1][y], 'move_count') == 1 and \
                     getattr(board[x - 1][y], 'move_num_history')[-1] == (self.move_num_history[-1] - 1):
                 if _piece_detect(x, y, x - 1, y + 1, board) == 'opponent obstructed' or \
                         _piece_detect(x, y, x - 1, y + 1, board) == 'unobstructed':
-                    poss_moves.append([x - 1, y + 1]) 
+                    poss_moves.append([x - 1, y + 1])
+                    self.enpassant_pos.append([x - 1, y + 1])
                     
-
-
-#            if (Main.piece[x][y].getColour() == 'w' and y == 3):
-#               if (Main.piece[x + 1][y].getColour() == 'b' and Main.piece[x + 1][y].getMoveC() == 1 and Main.move[
-#                    -2] == [
-#                    x + 1, y]):
-#                    pieceDetect(x, y, x + 1, y - 1)
-#                if (Main.piece[x - 1][y].getColour() == 'b' and Main.piece[x - 1][y].getMoveC() == 1 and Main.move[
-#                    -2] == [
-#                    x - 1, y]):
-#                    pieceDetect(x, y, x - 1, y - 1)
-#                Move.enpass = True
-#            elif (Main.piece[x][y].getColour() == 'b' and y == 4):
-#                if (Main.piece[x + 1][y].getColour() == 'w' and Main.piece[x + 1][y].getMoveC() == 1 and Main.move[
-#                    -2] == [
-#                    x + 1, y]):
-#                    pieceDetect(x, y, x + 1, y + 1)
-#                if (Main.piece[x - 1][y].getColour() == 'w' and Main.piece[x - 1][y].getMoveC() == 1 and Main.move[
-#                    -2] == [
-#                    x - 1, y]):
-#                    pieceDetect(x, y, x - 1, y + 1)
-#                Move.enpass = True
-
         # returns a list of all the places the pawn can move
         return poss_moves
-
+    
+    # Returns True or False based on whether a enpassant was chosen
+    def is_enpassant(self, x, y):
+        if [x, y] in self.enpassant_pos:
+            self.enpassant_pos = []
+            return True
+        return False
 
 class Rook(_Piece):
     def __init__(self, colour):

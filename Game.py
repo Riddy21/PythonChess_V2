@@ -89,7 +89,6 @@ class Game:
 
             else:
                 self.move_to(x, y)
-                print(self.board[x][y].move_num_history)
 
     # Function to start move
     def move_from(self, x, y):
