@@ -82,6 +82,8 @@ class Game:
 
             # if the player selects a different piece to move
             if getattr(self.board[x][y], 'colour') == self.turn:
+                # Removes move_id from piece and deletes move
+                self.moves[-1].unmake_move(self.board)
                 self.moves.pop(-1)
                 self.move_from(x, y)
 

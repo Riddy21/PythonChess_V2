@@ -1,6 +1,6 @@
 from typing import Any
 
-
+#TODO: Move into Class
 # detects if pieces are blocking the way of other pieces
 def _piece_detect(frox, froy, tox, toy, board):
     # make sure its not checking its self
@@ -30,6 +30,9 @@ class _Piece():
 
     def add_move(self, move_id):
         self.move_num_history.append(move_id)
+
+    def delete_move(self):
+        self.move_num_history.pop(-1)
 
     def is_castle(self, x, y):
         return -1
@@ -125,14 +128,39 @@ class Pawn(_Piece):
                 poss_moves.append([x + 1, y - 1])
             if x > 0 and y >= 0 and getattr(board[x - 1][y - 1], 'colour') == 'black':
                 poss_moves.append([x - 1, y - 1])
-
-            #enPassante
-#            if getattr(board[x][y], colour) == 'white' and y == 3):
-#                if getattr(board[x + 1][y], colour) == 'black' and getattr(board[x + 1][y], move_count) == 1 and 
+            
+        #enPassante
+        if self.colour == 'white' and y == 3:
+            if getattr(board[x + 1][y], 'colour') == 'black' and \
+                    getattr(board[x + 1][y], 'move_count') == 1 and \
+                    getattr(board[x + 1][y], 'move_num_history')[-1] == (self.move_num_history[-1] - 1):
+                if _piece_detect(x, y, x + 1, y - 1, board) == 'opponent obstructed' or \
+                        _piece_detect(x, y, x + 1, y - 1, board) == 'unobstructed':
+                    poss_moves.append([x + 1, y - 1])    
+            if getattr(board[x - 1][y], 'colour') == 'black' and \
+                    getattr(board[x - 1][y], 'move_count') == 1 and \
+                    getattr(board[x - 1][y], 'move_num_history')[-1] == (self.move_num_history[-1] - 1):
+                if _piece_detect(x, y, x - 1, y - 1, board) == 'opponent obstructed' or \
+                        _piece_detect(x, y, x - 1, y - 1, board) == 'unobstructed':
+                    poss_moves.append([x - 1, y - 1]) 
+        elif self.colour == 'black' and y == 4:
+            if getattr(board[x + 1][y], 'colour') == 'white' and \
+                    getattr(board[x + 1][y], 'move_count') == 1 and \
+                    getattr(board[x + 1][y], 'move_num_history')[-1] == (self.move_num_history[-1] - 1):
+                if _piece_detect(x, y, x + 1, y + 1, board) == 'opponent obstructed' or \
+                        _piece_detect(x, y, x + 1, y + 1, board) == 'unobstructed':
+                    poss_moves.append([x + 1, y + 1])    
+            if getattr(board[x - 1][y], 'colour') == 'white' and \
+                    getattr(board[x - 1][y], 'move_count') == 1 and \
+                    getattr(board[x - 1][y], 'move_num_history')[-1] == (self.move_num_history[-1] - 1):
+                if _piece_detect(x, y, x - 1, y + 1, board) == 'opponent obstructed' or \
+                        _piece_detect(x, y, x - 1, y + 1, board) == 'unobstructed':
+                    poss_moves.append([x - 1, y + 1]) 
+                    
 
 
 #            if (Main.piece[x][y].getColour() == 'w' and y == 3):
- #               if (Main.piece[x + 1][y].getColour() == 'b' and Main.piece[x + 1][y].getMoveC() == 1 and Main.move[
+#               if (Main.piece[x + 1][y].getColour() == 'b' and Main.piece[x + 1][y].getMoveC() == 1 and Main.move[
 #                    -2] == [
 #                    x + 1, y]):
 #                    pieceDetect(x, y, x + 1, y - 1)

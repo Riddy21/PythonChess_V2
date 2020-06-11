@@ -32,6 +32,10 @@ class Move():
 
         # Parameter for from location
         self.move_from = x, y
+        
+        # Add move_id to piece being moved (must be changed before get_moves)
+        frox, froy = self.move_from[0], self.move_from[1]
+        board[frox][froy].add_move(self.move_number)
 
         # Parameter for piece moved
         self.move_piece = getattr(board[x][y], 'str_rep')
@@ -56,6 +60,11 @@ class Move():
         for x in range(8):
             for y in range(8):
                 self.board_before[x][y] = board[x][y].str_rep
+        
+    # Removes move_id from piece being moved in case of reselection
+    def unmake_move(self,board):
+        frox, froy = self.move_from[0], self.move_from[1]
+        board[frox][froy].delete_move()
 
     # validate move and make the move based on the end coordinates
     def make_move(self, board, x, y):
@@ -86,9 +95,6 @@ class Move():
         froy = self.move_from[1]
         tox = self.move_to[0]
         toy = self.move_to[1]
-
-        # Add move id to piece's move history
-        board[frox][froy].add_move(self.move_number)
 
         # Add move count to moved piece
         setattr(board[frox][froy], 'move_count', getattr(board[frox][froy], 'move_count') + 1)
