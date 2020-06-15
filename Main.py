@@ -3,14 +3,18 @@ from Game import Game
 import time
 
 # TODO: Make self.main.game.moves easier to access from GUI
-# TODO: Make move selection to be changeable
+# TODO: Include mode choice in Game class
 
 class Main():
     # Main function takes in parameters about GUI and kicks off GUI window setup according to with GUI or without GUI
-    def __init__(self, gui_en=True):
+    # Mode = 1 for interactive GUI
+    # Mode = 2 for Command line control with GUI
+    # Mode = 3 for Command line control with no GUI in 1 player mode
+    # Mode = 4 for Command line control with no GUI in 2 player mode
+    def __init__(self, mode = 1):
         self.game = ""
         # GUI enabled game
-        if gui_en:
+        if mode == 1:
             # Create GUI object
             self.gui = GUI(self)
 
@@ -18,9 +22,20 @@ class Main():
             self.loop()
 
 
-        # GUI non enabled main
+        # GUI enabled main without loop
+        elif mode == 2:
+            self.gui = GUI(self)
+
+        # Comand line control with no GUI
+        elif mode == 3:
+            self.game = Game()
+
+        elif mode == 4:
+            self.game = Game()
+
         else:
-            pass
+            print("Not a selection!")
+
 
     # GUI functions
 
@@ -53,6 +68,8 @@ class Main():
         # sync GUI
         self.gui.sync_board()
 
+        self.gui.update()
+
         # TODO: Initiate AI
 
     # Function for Starting in 2 Player
@@ -79,6 +96,8 @@ class Main():
         # sync GUI
         self.gui.sync_board()
 
+        self.gui.update()
+
     # Registers a touch on the board and records it to the game
     def pressed(self, x, y):
 
@@ -87,6 +106,8 @@ class Main():
 
         # sync board
         self.gui.sync_board()
+
+        self.gui.update()
 
     # Returns to main menu
     def back_to_menu(self):
@@ -104,6 +125,8 @@ class Main():
         # Switch to main page
         self.gui.create_menu()
 
+        self.gui.update()
+
     def quit_win(self):
         # console message
         print("Quitting game")
@@ -112,6 +135,8 @@ class Main():
 
         # Quit
         self.gui.window.quit()
+
+        self.gui.update()
 
 
 # def main():

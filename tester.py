@@ -1,6 +1,7 @@
 from typing import Any
 
-#HELLLLLO
+
+# HELLLLLO
 
 class tester(object):
     def __init__(self):
@@ -15,5 +16,5 @@ class tester(object):
 
 
 tester = tester()
-setattr(tester,'game',"helllllllo")
-print(getattr(tester,'game'))
+setattr(tester, 'game', "helllllllo")
+print(getattr(tester, 'game'))

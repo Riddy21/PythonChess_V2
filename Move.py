@@ -3,20 +3,6 @@ from typing import Any
 from Pieces import Blank
 
 
-# Function for checking if player picked a piece of the right colour and type
-def is_valid_selection(board, turn, x, y):
-    # if the piece is not blank and is the right colour for the turn
-    if getattr(board[x][y], 'str_rep') != "-" and getattr(board[x][y], 'colour') == turn:
-
-        # If there is still moves left
-        if len(board[x][y].get_moves(x, y, board)) == 0:
-            print("No more moves")
-            return False
-        return True
-    print("Invalid selection")
-    return False
-
-
 # Class to record moves and change game board
 class Move():
     # init
@@ -32,22 +18,19 @@ class Move():
 
         # Parameter for from location
         self.move_from = x, y
-        
+
         # Add move_id to piece being moved (must be changed before get_moves)
         frox, froy = self.move_from[0], self.move_from[1]
         board[frox][froy].add_move(self.move_number)
 
         # Parameter for piece moved
-        self.move_piece = getattr(board[x][y], 'str_rep')
+        self.move_piece = board[x][y]
 
         # Parameters for move type
         self.move_type = "not set"
 
         # Parameter for Move color
         self.move_colour = board[x][y].colour
-
-        # Parameter for turn colour
-        self.turn_colour = turn
 
         # Parameter for possible next moves and set to the piece's move array
         self.poss_moves = board[x][y].get_moves(x, y, board)
@@ -60,9 +43,23 @@ class Move():
         for x in range(8):
             for y in range(8):
                 self.board_before[x][y] = board[x][y].str_rep
-        
+
+    # Function for checking if player picked a piece of the right colour and type
+    @staticmethod
+    def is_valid_selection(board, turn, x, y):
+        # if the piece is not blank and is the right colour for the turn
+        if getattr(board[x][y], 'str_rep') != "-" and getattr(board[x][y], 'colour') == turn:
+
+            # If there is still moves left
+            if len(board[x][y].get_moves(x, y, board)) == 0:
+                print("No more moves")
+                return False
+            return True
+        print("Invalid selection")
+        return False
+
     # Removes move_id from piece being moved in case of reselection
-    def unmake_move(self,board):
+    def deselect_move(self, board):
         frox, froy = self.move_from[0], self.move_from[1]
         board[frox][froy].delete_move()
 
@@ -98,21 +95,21 @@ class Move():
 
         # Add move count to moved piece
         setattr(board[frox][froy], 'move_count', getattr(board[frox][froy], 'move_count') + 1)
-        
+
         # Confirms whether a castle happened when the piece was moved
         is_castle = board[frox][froy].is_castle(tox, toy)
 
         # Confirms whether enpassant could happen when the piece is moved
-        is_enpassant = board[frox][froy].is_enpassant(tox,toy)
-        
+        is_enpassant = board[frox][froy].is_enpassant(tox, toy)
+
         # Do corresponding move
         if is_enpassant:
             print('enpassant from %d, %d to %d, %d' % (frox, froy, tox, toy))
             if self.turn_colour == 'black':
-                self.captured = board[tox][toy-1]
+                self.captured = board[tox][toy - 1]
                 board[tox][toy - 1] = Blank()
             else:
-                self.captured = board[tox][toy+1]
+                self.captured = board[tox][toy + 1]
                 board[tox][toy + 1] = Blank()
             board[tox][toy], board[frox][froy] = board[frox][froy], board[tox][toy]
 
@@ -180,5 +177,19 @@ class Move():
 
     def __setattr__(self, name: str, value: Any) -> None:
         super().__setattr__(name, value)
+
+    def __str__(self):
+        str = ''
+        str += 'id_number: %s\n' \
+               'move stage: %s\n' \
+               'move to: %s\n' \
+               'move from: %s\n' \
+               'move piece: %s\n' \
+               'move type: %s\n' \
+               'move colour: %s\n' \
+               'captured pieces: %s\n' \
+               % (self.move_number, self.move_stage, self.move_to, self.move_from,
+                  self.move_piece, self.move_type, self.move_colour, self.captured)
+        return str
 
     # TODO: make converter from str_rep to object

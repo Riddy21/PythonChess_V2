@@ -1,32 +1,35 @@
 from typing import Any
+import uuid
 
-#TODO: Move into Class
-# detects if pieces are blocking the way of other pieces
-def _piece_detect(frox, froy, tox, toy, board):
-    # make sure its not checking its self
-    if tox != frox or toy != froy:
-        # Same colour pieces
-        if getattr(board[tox][toy], 'colour') == getattr(board[frox][froy], 'colour'):
-            return 'self obstructed'
-        # opponent pieces
-        elif getattr(board[tox][toy], 'colour') != 'none':
-            return 'opponent obstructed'
-        else:
-            return 'unobstructed'
 
-#TODO: Make a piece with movecount and move history set to 0 and one with inserting a piece with a history
+# TODO: Make a piece with move count and move history set to 0 and one with inserting a piece with a history
 # Abstract Piece Class
 class _Piece():
-    def __init__(self, value, colour, image, str_rep):
+    def __init__(self, value, colour, image, str_rep, move_count, move_hist, id):
         # initiate variables
         self.value = value
         self.colour = colour
         self.image = image
         self.str_rep = str_rep
-        self.move_count = 0
+        self.id = id
+        self.move_count = move_count
 
         # A list of all the move ids this piece made a move
-        self.move_num_history = []
+        self.move_num_history = move_hist
+
+    # detects if pieces are blocking the way of other pieces
+    @staticmethod
+    def _piece_detect(frox, froy, tox, toy, board):
+        # make sure its not checking its self
+        if tox != frox or toy != froy:
+            # Same colour pieces
+            if getattr(board[tox][toy], 'colour') == getattr(board[frox][froy], 'colour'):
+                return 'self obstructed'
+            # opponent pieces
+            elif getattr(board[tox][toy], 'colour') != 'none':
+                return 'opponent obstructed'
+            else:
+                return 'unobstructed'
 
     def add_move(self, move_id):
         self.move_num_history.append(move_id)
@@ -40,15 +43,28 @@ class _Piece():
     def is_enpassant(self, x, y):
         return False
 
+    # TODO: Make an undo move function to reset the move count
+
     def __getattribute__(self, name: str) -> Any:
         return super().__getattribute__(name)
 
     def __setattr__(self, name: str, value: Any) -> None:
         super().__setattr__(name, value)
 
+    def __str__(self):
+        str = '\n    colour: %s\n' \
+              '    str_rep: %s\n' \
+              '    id: %s\n' \
+              '    move count: %s\n' \
+              '    move history: %s' \
+              % (self.colour, self.str_rep, self.id, self.move_count, self.move_num_history)
+        return str
+
 
 class Pawn(_Piece):
-    def __init__(self, colour):
+    def __init__(self, colour, move_count=0, move_hist=None, piece_id=uuid.uuid4()):
+        if move_hist is None:
+            move_hist = []
         if colour == 'white':
             image = 'Assets/Chess_tile_pl.png'
             str = 'P'
@@ -57,9 +73,11 @@ class Pawn(_Piece):
             str = 'p'
         else:
             print("colour typo")
+            image = 'not set'
+            str = 'error'
 
         # Makes a piece with set values and images
-        super().__init__(1, colour, image, str)
+        super().__init__(1, colour, image, str, move_count, move_hist, piece_id)
 
         # Make variable to store where enpassants are, set default as empty list
         self.enpassant_pos = []
@@ -74,7 +92,7 @@ class Pawn(_Piece):
 
             # Do Move detection
             while (i <= 2 and y + i <= 7):
-                piece_detect = _piece_detect(x, y, x, y + i, board)
+                piece_detect = self._piece_detect(x, y, x, y + i, board)
                 # piece in front blocks move
                 if getattr(board[x][y + i], 'colour') == 'white':
                     break
@@ -107,7 +125,7 @@ class Pawn(_Piece):
             i = 1
 
             while (i <= 2 and y - i >= 0):
-                piece_detect = _piece_detect(x, y, x, y - i, board)
+                piece_detect = self._piece_detect(x, y, x, y - i, board)
 
                 # piece in front blocks move
                 if getattr(board[x][y - i], 'colour') == 'black':
@@ -134,42 +152,42 @@ class Pawn(_Piece):
                 poss_moves.append([x + 1, y - 1])
             if x > 0 and y >= 0 and getattr(board[x - 1][y - 1], 'colour') == 'black':
                 poss_moves.append([x - 1, y - 1])
-            
-        #enPassante
+
+        # enPassante
         if self.colour == 'white' and y == 3:
             if getattr(board[x + 1][y], 'colour') == 'black' and \
                     getattr(board[x + 1][y], 'move_count') == 1 and \
                     getattr(board[x + 1][y], 'move_num_history')[-1] == (self.move_num_history[-1] - 1):
-                if _piece_detect(x, y, x + 1, y - 1, board) == 'opponent obstructed' or \
-                        _piece_detect(x, y, x + 1, y - 1, board) == 'unobstructed':
+                if self._piece_detect(x, y, x + 1, y - 1, board) == 'opponent obstructed' or \
+                        self._piece_detect(x, y, x + 1, y - 1, board) == 'unobstructed':
                     poss_moves.append([x + 1, y - 1])
                     self.enpassant_pos.append([x + 1, y - 1])
             if getattr(board[x - 1][y], 'colour') == 'black' and \
                     getattr(board[x - 1][y], 'move_count') == 1 and \
                     getattr(board[x - 1][y], 'move_num_history')[-1] == (self.move_num_history[-1] - 1):
-                if _piece_detect(x, y, x - 1, y - 1, board) == 'opponent obstructed' or \
-                        _piece_detect(x, y, x - 1, y - 1, board) == 'unobstructed':
+                if self._piece_detect(x, y, x - 1, y - 1, board) == 'opponent obstructed' or \
+                        self._piece_detect(x, y, x - 1, y - 1, board) == 'unobstructed':
                     poss_moves.append([x - 1, y - 1])
                     self.enpassant_pos.append([x - 1, y - 1])
         elif self.colour == 'black' and y == 4:
             if getattr(board[x + 1][y], 'colour') == 'white' and \
                     getattr(board[x + 1][y], 'move_count') == 1 and \
                     getattr(board[x + 1][y], 'move_num_history')[-1] == (self.move_num_history[-1] - 1):
-                if _piece_detect(x, y, x + 1, y + 1, board) == 'opponent obstructed' or \
-                        _piece_detect(x, y, x + 1, y + 1, board) == 'unobstructed':
+                if self._piece_detect(x, y, x + 1, y + 1, board) == 'opponent obstructed' or \
+                        self._piece_detect(x, y, x + 1, y + 1, board) == 'unobstructed':
                     poss_moves.append([x + 1, y + 1])
                     self.enpassant_pos.append([x + 1, y + 1])
             if getattr(board[x - 1][y], 'colour') == 'white' and \
                     getattr(board[x - 1][y], 'move_count') == 1 and \
                     getattr(board[x - 1][y], 'move_num_history')[-1] == (self.move_num_history[-1] - 1):
-                if _piece_detect(x, y, x - 1, y + 1, board) == 'opponent obstructed' or \
-                        _piece_detect(x, y, x - 1, y + 1, board) == 'unobstructed':
+                if self._piece_detect(x, y, x - 1, y + 1, board) == 'opponent obstructed' or \
+                        self._piece_detect(x, y, x - 1, y + 1, board) == 'unobstructed':
                     poss_moves.append([x - 1, y + 1])
                     self.enpassant_pos.append([x - 1, y + 1])
-                    
+
         # returns a list of all the places the pawn can move
         return poss_moves
-    
+
     # Returns True or False based on whether a enpassant was chosen
     def is_enpassant(self, x, y):
         if [x, y] in self.enpassant_pos:
@@ -177,8 +195,11 @@ class Pawn(_Piece):
             return True
         return False
 
+
 class Rook(_Piece):
-    def __init__(self, colour):
+    def __init__(self, colour, move_count=0, move_hist=None, piece_id=uuid.uuid4()):
+        if move_hist is None:
+            move_hist = []
         if colour == 'white':
             image = 'Assets/Chess_tile_rl.png'
             str = 'R'
@@ -187,9 +208,11 @@ class Rook(_Piece):
             str = 'r'
         else:
             print("colour typo")
+            image = 'not set'
+            str = 'error'
 
         # Makes a piece with set values and images
-        super().__init__(5, colour, image, str)
+        super().__init__(5, colour, image, str, move_count, move_hist, piece_id)
 
     # Returns possible moves this piece can make
     def get_moves(self, x, y, board):
@@ -198,9 +221,9 @@ class Rook(_Piece):
         i = 1
         # All x moves below x
         while x - i >= 0:
-            if _piece_detect(x, y, x - i, y, board) == 'self obstructed':
+            if self._piece_detect(x, y, x - i, y, board) == 'self obstructed':
                 break
-            elif _piece_detect(x, y, x - i, y, board) == 'opponent obstructed':
+            elif self._piece_detect(x, y, x - i, y, board) == 'opponent obstructed':
                 poss_moves.append([x - i, y])
                 break
             poss_moves.append([x - i, y])
@@ -209,9 +232,9 @@ class Rook(_Piece):
         i = 1
         # All x moves above x
         while (x + i) <= 7:
-            if _piece_detect(x, y, x + i, y, board) == 'self obstructed':
+            if self._piece_detect(x, y, x + i, y, board) == 'self obstructed':
                 break
-            elif _piece_detect(x, y, x + i, y, board) == 'opponent obstructed':
+            elif self._piece_detect(x, y, x + i, y, board) == 'opponent obstructed':
                 poss_moves.append([x + i, y])
                 break
             poss_moves.append([x + i, y])
@@ -220,9 +243,9 @@ class Rook(_Piece):
         i = 1
         # All y moves below y
         while y - i >= 0:
-            if _piece_detect(x, y, x, y - i, board) == 'self obstructed':
+            if self._piece_detect(x, y, x, y - i, board) == 'self obstructed':
                 break
-            elif _piece_detect(x, y, x, y - i, board) == 'opponent obstructed':
+            elif self._piece_detect(x, y, x, y - i, board) == 'opponent obstructed':
                 poss_moves.append([x, y - i])
                 break
             poss_moves.append([x, y - i])
@@ -230,9 +253,9 @@ class Rook(_Piece):
         i = 1
         # All x moves above y
         while (y + i) <= 7:
-            if _piece_detect(x, y, x, y + i, board) == 'self obstructed':
+            if self._piece_detect(x, y, x, y + i, board) == 'self obstructed':
                 break
-            elif _piece_detect(x, y, x, y + i, board) == 'opponent obstructed':
+            elif self._piece_detect(x, y, x, y + i, board) == 'opponent obstructed':
                 poss_moves.append([x, y + i])
                 break
             poss_moves.append([x, y + i])
@@ -242,7 +265,9 @@ class Rook(_Piece):
 
 
 class Knight(_Piece):
-    def __init__(self, colour):
+    def __init__(self, colour, move_count=0, move_hist=None, piece_id=uuid.uuid4()):
+        if move_hist is None:
+            move_hist = []
         if colour == 'white':
             image = 'Assets/Chess_tile_nl.png'
             str = 'N'
@@ -251,56 +276,60 @@ class Knight(_Piece):
             str = 'n'
         else:
             print("colour typo")
+            image = 'not set'
+            str = 'error'
 
         # Makes a piece with set values and images
-        super().__init__(3, colour, image, str)
+        super().__init__(3, colour, image, str, move_count, move_hist, piece_id)
 
     # Returns possible moves this piece can make
     def get_moves(self, x, y, board):
         poss_moves = []
-        if (x + 2 <= 7):
-            if (y + 1 <= 7):
-                if _piece_detect(x, y, x + 2, y + 1, board) == 'opponent obstructed' or \
-                        _piece_detect(x, y, x + 2, y + 1, board) == 'unobstructed':
+        if x + 2 <= 7:
+            if y + 1 <= 7:
+                if self._piece_detect(x, y, x + 2, y + 1, board) == 'opponent obstructed' or \
+                        self._piece_detect(x, y, x + 2, y + 1, board) == 'unobstructed':
                     poss_moves.append([x + 2, y + 1])
-            if (y - 1 >= 0):
-                if _piece_detect(x, y, x + 2, y - 1, board) == 'opponent obstructed' or \
-                        _piece_detect(x, y, x + 2, y - 1, board) == 'unobstructed':
+            if y - 1 >= 0:
+                if self._piece_detect(x, y, x + 2, y - 1, board) == 'opponent obstructed' or \
+                        self._piece_detect(x, y, x + 2, y - 1, board) == 'unobstructed':
                     poss_moves.append([x + 2, y - 1])
 
-        if (x + 1 <= 7):
-            if (y + 2 <= 7):
-                if _piece_detect(x, y, x + 1, y + 2, board) == 'opponent obstructed' or \
-                        _piece_detect(x, y, x + 1, y + 2, board) == 'unobstructed':
+        if x + 1 <= 7:
+            if y + 2 <= 7:
+                if self._piece_detect(x, y, x + 1, y + 2, board) == 'opponent obstructed' or \
+                        self._piece_detect(x, y, x + 1, y + 2, board) == 'unobstructed':
                     poss_moves.append([x + 1, y + 2])
-            if (y - 2 >= 0):
-                if _piece_detect(x, y, x + 1, y - 2, board) == 'opponent obstructed' or \
-                        _piece_detect(x, y, x + 1, y - 2, board) == 'unobstructed':
+            if y - 2 >= 0:
+                if self._piece_detect(x, y, x + 1, y - 2, board) == 'opponent obstructed' or \
+                        self._piece_detect(x, y, x + 1, y - 2, board) == 'unobstructed':
                     poss_moves.append([x + 1, y - 2])
-        if (x - 2 >= 0):
-            if (y + 1 <= 7):
-                if _piece_detect(x, y, x - 2, y + 1, board) == 'opponent obstructed' or \
-                        _piece_detect(x, y, x - 2, y + 1, board) == 'unobstructed':
+        if x - 2 >= 0:
+            if y + 1 <= 7:
+                if self._piece_detect(x, y, x - 2, y + 1, board) == 'opponent obstructed' or \
+                        self._piece_detect(x, y, x - 2, y + 1, board) == 'unobstructed':
                     poss_moves.append([x - 2, y + 1])
-            if (y - 1 >= 0):
-                if _piece_detect(x, y, x - 2, y - 1, board) == 'opponent obstructed' or \
-                        _piece_detect(x, y, x - 2, y - 1, board) == 'unobstructed':
+            if y - 1 >= 0:
+                if self._piece_detect(x, y, x - 2, y - 1, board) == 'opponent obstructed' or \
+                        self._piece_detect(x, y, x - 2, y - 1, board) == 'unobstructed':
                     poss_moves.append([x - 2, y - 1])
-        if (x - 1 >= 0):
-            if (y + 2 <= 7):
-                if _piece_detect(x, y, x - 1, y + 2, board) == 'opponent obstructed' or \
-                        _piece_detect(x, y, x - 1, y + 2, board) == 'unobstructed':
+        if x - 1 >= 0:
+            if y + 2 <= 7:
+                if self._piece_detect(x, y, x - 1, y + 2, board) == 'opponent obstructed' or \
+                        self._piece_detect(x, y, x - 1, y + 2, board) == 'unobstructed':
                     poss_moves.append([x - 1, y + 2])
-            if (y - 2 >= 0):
-                if _piece_detect(x, y, x - 1, y - 2, board) == 'opponent obstructed' or \
-                        _piece_detect(x, y, x - 1, y - 2, board) == 'unobstructed':
+            if y - 2 >= 0:
+                if self._piece_detect(x, y, x - 1, y - 2, board) == 'opponent obstructed' or \
+                        self._piece_detect(x, y, x - 1, y - 2, board) == 'unobstructed':
                     poss_moves.append([x - 1, y - 2])
 
         return poss_moves
 
 
 class Bishop(_Piece):
-    def __init__(self, colour):
+    def __init__(self, colour, move_count=0, move_hist=None, piece_id=uuid.uuid4()):
+        if move_hist is None:
+            move_hist = []
         if colour == 'white':
             image = 'Assets/Chess_tile_bl.png'
             str = 'B'
@@ -309,9 +338,11 @@ class Bishop(_Piece):
             str = 'b'
         else:
             print("colour typo")
+            image = 'not set'
+            str = 'error'
 
         # Makes a piece with set values and images
-        super().__init__(1, colour, image, str)
+        super().__init__(1, colour, image, str, move_count, move_hist, piece_id)
 
     def get_moves(self, x, y, board):
         poss_moves = []
@@ -319,9 +350,9 @@ class Bishop(_Piece):
         i = 1
         # All moves top left
         while x - i >= 0 and y - i >= 0:
-            if _piece_detect(x, y, x - i, y - i, board) == 'self obstructed':
+            if self._piece_detect(x, y, x - i, y - i, board) == 'self obstructed':
                 break
-            elif _piece_detect(x, y, x - i, y - i, board) == 'opponent obstructed':
+            elif self._piece_detect(x, y, x - i, y - i, board) == 'opponent obstructed':
                 poss_moves.append([x - i, y - i])
                 break
             poss_moves.append([x - i, y - i])
@@ -330,9 +361,9 @@ class Bishop(_Piece):
         i = 1
         # All moves bottom right
         while x + i <= 7 and y + i <= 7:
-            if _piece_detect(x, y, x + i, y + i, board) == 'self obstructed':
+            if self._piece_detect(x, y, x + i, y + i, board) == 'self obstructed':
                 break
-            elif _piece_detect(x, y, x + i, y + i, board) == 'opponent obstructed':
+            elif self._piece_detect(x, y, x + i, y + i, board) == 'opponent obstructed':
                 poss_moves.append([x + i, y + i])
                 break
             poss_moves.append([x + i, y + i])
@@ -341,9 +372,9 @@ class Bishop(_Piece):
         i = 1
         # All y moves below y
         while x - i >= 0 and y + i <= 7:
-            if _piece_detect(x, y, x - i, y + i, board) == 'self obstructed':
+            if self._piece_detect(x, y, x - i, y + i, board) == 'self obstructed':
                 break
-            elif _piece_detect(x, y, x - i, y + i, board) == 'opponent obstructed':
+            elif self._piece_detect(x, y, x - i, y + i, board) == 'opponent obstructed':
                 poss_moves.append([x - i, y + i])
                 break
             poss_moves.append([x - i, y + i])
@@ -352,9 +383,9 @@ class Bishop(_Piece):
         i = 1
         # All x moves above y
         while x + i <= 7 and y - i >= 0:
-            if _piece_detect(x, y, x + i, y - i, board) == 'self obstructed':
+            if self._piece_detect(x, y, x + i, y - i, board) == 'self obstructed':
                 break
-            elif _piece_detect(x, y, x + i, y - i, board) == 'opponent obstructed':
+            elif self._piece_detect(x, y, x + i, y - i, board) == 'opponent obstructed':
                 poss_moves.append([x + i, y - i])
                 break
             poss_moves.append([x + i, y - i])
@@ -364,7 +395,9 @@ class Bishop(_Piece):
 
 
 class Queen(_Piece):
-    def __init__(self, colour):
+    def __init__(self, colour, move_count=0, move_hist=None, piece_id=uuid.uuid4()):
+        if move_hist is None:
+            move_hist = []
         if colour == 'white':
             image = 'Assets/Chess_tile_ql.png'
             str = 'Q'
@@ -373,9 +406,11 @@ class Queen(_Piece):
             str = 'q'
         else:
             print("colour typo")
+            image = 'not set'
+            str = 'error'
 
         # Makes a piece with set values and images
-        super().__init__(9, colour, image, str)
+        super().__init__(9, colour, image, str, move_count, move_hist, piece_id)
 
     def get_moves(self, x, y, board):
         poss_moves = []
@@ -384,9 +419,9 @@ class Queen(_Piece):
         i = 1
         # All moves top left
         while x - i >= 0 and y - i >= 0:
-            if _piece_detect(x, y, x - i, y - i, board) == 'self obstructed':
+            if self._piece_detect(x, y, x - i, y - i, board) == 'self obstructed':
                 break
-            elif _piece_detect(x, y, x - i, y - i, board) == 'opponent obstructed':
+            elif self._piece_detect(x, y, x - i, y - i, board) == 'opponent obstructed':
                 poss_moves.append([x - i, y - i])
                 break
             poss_moves.append([x - i, y - i])
@@ -395,9 +430,9 @@ class Queen(_Piece):
         i = 1
         # All moves bottom right
         while x + i <= 7 and y + i <= 7:
-            if _piece_detect(x, y, x + i, y + i, board) == 'self obstructed':
+            if self._piece_detect(x, y, x + i, y + i, board) == 'self obstructed':
                 break
-            elif _piece_detect(x, y, x + i, y + i, board) == 'opponent obstructed':
+            elif self._piece_detect(x, y, x + i, y + i, board) == 'opponent obstructed':
                 poss_moves.append([x + i, y + i])
                 break
             poss_moves.append([x + i, y + i])
@@ -406,9 +441,9 @@ class Queen(_Piece):
         i = 1
         # All y moves below y
         while x - i >= 0 and y + i <= 7:
-            if _piece_detect(x, y, x - i, y + i, board) == 'self obstructed':
+            if self._piece_detect(x, y, x - i, y + i, board) == 'self obstructed':
                 break
-            elif _piece_detect(x, y, x - i, y + i, board) == 'opponent obstructed':
+            elif self._piece_detect(x, y, x - i, y + i, board) == 'opponent obstructed':
                 poss_moves.append([x - i, y + i])
                 break
             poss_moves.append([x - i, y + i])
@@ -417,9 +452,9 @@ class Queen(_Piece):
         i = 1
         # All x moves above y
         while x + i <= 7 and y - i >= 0:
-            if _piece_detect(x, y, x + i, y - i, board) == 'self obstructed':
+            if self._piece_detect(x, y, x + i, y - i, board) == 'self obstructed':
                 break
-            elif _piece_detect(x, y, x + i, y - i, board) == 'opponent obstructed':
+            elif self._piece_detect(x, y, x + i, y - i, board) == 'opponent obstructed':
                 poss_moves.append([x + i, y - i])
                 break
             poss_moves.append([x + i, y - i])
@@ -428,9 +463,9 @@ class Queen(_Piece):
         i = 1
         # All x moves below x
         while x - i >= 0:
-            if _piece_detect(x, y, x - i, y, board) == 'self obstructed':
+            if self._piece_detect(x, y, x - i, y, board) == 'self obstructed':
                 break
-            elif _piece_detect(x, y, x - i, y, board) == 'opponent obstructed':
+            elif self._piece_detect(x, y, x - i, y, board) == 'opponent obstructed':
                 poss_moves.append([x - i, y])
                 break
             poss_moves.append([x - i, y])
@@ -439,9 +474,9 @@ class Queen(_Piece):
         i = 1
         # All x moves above x
         while (x + i) <= 7:
-            if _piece_detect(x, y, x + i, y, board) == 'self obstructed':
+            if self._piece_detect(x, y, x + i, y, board) == 'self obstructed':
                 break
-            elif _piece_detect(x, y, x + i, y, board) == 'opponent obstructed':
+            elif self._piece_detect(x, y, x + i, y, board) == 'opponent obstructed':
                 poss_moves.append([x + i, y])
                 break
             poss_moves.append([x + i, y])
@@ -450,9 +485,9 @@ class Queen(_Piece):
         i = 1
         # All y moves below y
         while y - i >= 0:
-            if _piece_detect(x, y, x, y - i, board) == 'self obstructed':
+            if self._piece_detect(x, y, x, y - i, board) == 'self obstructed':
                 break
-            elif _piece_detect(x, y, x, y - i, board) == 'opponent obstructed':
+            elif self._piece_detect(x, y, x, y - i, board) == 'opponent obstructed':
                 poss_moves.append([x, y - i])
                 break
             poss_moves.append([x, y - i])
@@ -460,9 +495,9 @@ class Queen(_Piece):
         i = 1
         # All x moves above y
         while (y + i) <= 7:
-            if _piece_detect(x, y, x, y + i, board) == 'self obstructed':
+            if self._piece_detect(x, y, x, y + i, board) == 'self obstructed':
                 break
-            elif _piece_detect(x, y, x, y + i, board) == 'opponent obstructed':
+            elif self._piece_detect(x, y, x, y + i, board) == 'opponent obstructed':
                 poss_moves.append([x, y + i])
                 break
             poss_moves.append([x, y + i])
@@ -472,7 +507,9 @@ class Queen(_Piece):
 
 
 class King(_Piece):
-    def __init__(self, colour):
+    def __init__(self, colour, move_count=0, move_hist=None, piece_id=uuid.uuid4()):
+        if move_hist is None:
+            move_hist = []
         if colour == 'white':
             image = 'Assets/Chess_tile_kl.png'
             str = 'K'
@@ -481,9 +518,11 @@ class King(_Piece):
             str = 'k'
         else:
             print("colour typo")
+            image = 'not set'
+            str = 'error'
 
         # Makes a piece with set values and images
-        super().__init__(100000000, colour, image, str)  # TODO: make value max int value
+        super().__init__(100000000, colour, image, str, move_count, move_hist, piece_id)  # TODO: make value max int value
 
         # Parameter for storing castle coordinates if castle move is possible
         self.left_castle = -1, -1
@@ -497,50 +536,50 @@ class King(_Piece):
 
         # All moves top left
         if x - 1 >= 0 and y - 1 >= 0:
-            if _piece_detect(x, y, x - 1, y - 1, board) == 'opponent obstructed' or \
-                    _piece_detect(x, y, x - 1, y - 1, board) == 'unobstructed':
+            if self._piece_detect(x, y, x - 1, y - 1, board) == 'opponent obstructed' or \
+                    self._piece_detect(x, y, x - 1, y - 1, board) == 'unobstructed':
                 poss_moves.append([x - 1, y - 1])
 
         # All moves bottom right
         if x + 1 <= 7 and y + 1 <= 7:
-            if _piece_detect(x, y, x + 1, y + 1, board) == 'opponent obstructed' or \
-                    _piece_detect(x, y, x + 1, y + 1, board) == 'unobstructed':
+            if self._piece_detect(x, y, x + 1, y + 1, board) == 'opponent obstructed' or \
+                    self._piece_detect(x, y, x + 1, y + 1, board) == 'unobstructed':
                 poss_moves.append([x + 1, y + 1])
 
         # All y moves below y
         if x - 1 >= 0 and y + 1 <= 7:
-            if _piece_detect(x, y, x - 1, y + 1, board) == 'opponent obstructed' or \
-                    _piece_detect(x, y, x - 1, y + 1, board) == 'unobstructed':
+            if self._piece_detect(x, y, x - 1, y + 1, board) == 'opponent obstructed' or \
+                    self._piece_detect(x, y, x - 1, y + 1, board) == 'unobstructed':
                 poss_moves.append([x - 1, y + 1])
 
         # All x moves above y
         if x + 1 <= 7 and y - 1 >= 0:
-            if _piece_detect(x, y, x + 1, y - 1, board) == 'opponent obstructed' or \
-                    _piece_detect(x, y, x + 1, y - 1, board) == 'unobstructed':
+            if self._piece_detect(x, y, x + 1, y - 1, board) == 'opponent obstructed' or \
+                    self._piece_detect(x, y, x + 1, y - 1, board) == 'unobstructed':
                 poss_moves.append([x + 1, y - 1])
 
         # All x moves below x
         if x - 1 >= 0:
-            if _piece_detect(x, y, x - 1, y, board) == 'opponent obstructed' or \
-                    _piece_detect(x, y, x - 1, y, board) == 'unobstructed':
+            if self._piece_detect(x, y, x - 1, y, board) == 'opponent obstructed' or \
+                    self._piece_detect(x, y, x - 1, y, board) == 'unobstructed':
                 poss_moves.append([x - 1, y])
 
         # All x moves above x
         if x + 1 <= 7:
-            if _piece_detect(x, y, x + 1, y, board) == 'opponent obstructed' or \
-                    _piece_detect(x, y, x + 1, y, board) == 'unobstructed':
+            if self._piece_detect(x, y, x + 1, y, board) == 'opponent obstructed' or \
+                    self._piece_detect(x, y, x + 1, y, board) == 'unobstructed':
                 poss_moves.append([x + 1, y])
 
         # All y moves below y
         if y - 1 >= 0:
-            if _piece_detect(x, y, x, y - 1, board) == 'opponent obstructed' or \
-                    _piece_detect(x, y, x, y - 1, board) == 'unobstructed':
+            if self._piece_detect(x, y, x, y - 1, board) == 'opponent obstructed' or \
+                    self._piece_detect(x, y, x, y - 1, board) == 'unobstructed':
                 poss_moves.append([x, y - 1])
 
         # All x moves above y
         if y + 1 <= 7:
-            if _piece_detect(x, y, x, y + 1, board) == 'opponent obstructed' or \
-                    _piece_detect(x, y, x, y + 1, board) == 'unobstructed':
+            if self._piece_detect(x, y, x, y + 1, board) == 'opponent obstructed' or \
+                    self._piece_detect(x, y, x, y + 1, board) == 'unobstructed':
                 poss_moves.append([x, y + 1])
 
         # Castling
@@ -616,6 +655,7 @@ class King(_Piece):
         else:
             return -1
 
+
 class Blank(_Piece):
     def __init__(self):
-        super().__init__(0, 'none', 'Assets/Blank.png', '-')
+        super().__init__(0, 'none', 'Assets/Blank.png', '-', None, None, None)

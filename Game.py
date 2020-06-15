@@ -1,5 +1,7 @@
+from typing import Any
+
 from Pieces import Blank, Bishop, King, Knight, Rook, Pawn, Queen
-from Move import Move, is_valid_selection
+from Move import Move
 
 
 # Game class initiated when the game board is displayed
@@ -78,22 +80,20 @@ class Game:
             # If fresh board with no moves or move is finished move from this location
             self.move_from(x, y)
         else:
-            #  If move is started
-
             # if the player selects a different piece to move
             if getattr(self.board[x][y], 'colour') == self.turn:
                 # Removes move_id from piece and deletes move
-                self.moves[-1].unmake_move(self.board)
+                self.moves[-1].deselect_move(self.board)
                 self.moves.pop(-1)
                 self.move_from(x, y)
-
+            # otherwise start a new move
             else:
                 self.move_to(x, y)
 
     # Function to start move
     def move_from(self, x, y):
         # Check if it is a valid selection, if not, exit the function
-        if not is_valid_selection(self.board, self.turn, x, y):
+        if not Move.is_valid_selection(self.board, self.turn, x, y):
             return -1
 
         # Create a new move and add to list and pass the len of move list as move id
@@ -104,6 +104,15 @@ class Game:
         # Makes move on the most recent move, if invalid move, don't switch sides
         if self.moves[-1].make_move(self.board, x, y) == -1:
             return -1
+
+        # Append captured pieces to the correct captured list
+        captured_piece = getattr(self.moves[-1], 'captured')
+        if captured_piece == 'None':
+            pass
+        elif getattr(captured_piece, 'colour') == 'black':
+            self.captured_black.append(captured_piece)
+        elif getattr(captured_piece, 'colour') == 'white':
+            self.captured_white.append(captured_piece)
 
         self.switch_turn()
 
@@ -116,6 +125,9 @@ class Game:
     # TODO: Static: Converts String board to Object board
 
     # TODO: print board in string format using string representation
+
+    def __getattribute__(self, name: str) -> Any:
+        return super().__getattribute__(name)
 
     def __str__(self):
         str = ''

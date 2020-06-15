@@ -33,6 +33,8 @@ class GUI:
         # Setup menu
         self.create_menu()
 
+        self.update()
+
     # Creates menu GUI
     def create_menu(self):
         # console message
@@ -142,6 +144,10 @@ class GUI:
     # Put gui in mainloop
     def loop(self):
         self.window.mainloop()
+
+    # Updates gui for one cycle
+    def update(self):
+        self.window.update()
 
     def destroy_frame(self):
         self.frame.destroy()
