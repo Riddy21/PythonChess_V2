@@ -15,6 +15,7 @@ class Game:
         self.captured_black = []
 
         # stack of all old moves and current move
+        # TODO: Make the list as a max undo of a certain length
         self.moves = []
 
         # string representing the turn colour of the game
@@ -97,7 +98,7 @@ class Game:
             return -1
 
         # Create a new move and add to list and pass the len of move list as move id
-        self.moves.append(Move(self.board, self.turn, x, y, len(self.moves)))
+        self.moves.append(Move(self.board, x, y, len(self.moves)))
 
     # Function to end move,
     def move_to(self, x, y):

@@ -1,12 +1,12 @@
 from typing import Any
-
+import copy
 from Pieces import Blank
 
 
 # Class to record moves and change game board
 class Move():
     # init
-    def __init__(self, board, turn, x, y, id_number):
+    def __init__(self, board, x, y, id_number):
         # Unique ID to the move by number
         self.move_number = id_number
 
@@ -23,8 +23,8 @@ class Move():
         frox, froy = self.move_from[0], self.move_from[1]
         board[frox][froy].add_move(self.move_number)
 
-        # Parameter for piece moved
-        self.move_piece = board[x][y]
+        # Parameter for piece moved, ** DEEP COPY ** used for reverting moves
+        self.move_piece = copy.deepcopy(board[x][y])
 
         # Parameters for move type
         self.move_type = "not set"
@@ -127,6 +127,7 @@ class Move():
 
         elif self.move_type == 'capture':
             print('capture: from %d,%d to %d,%d' % (frox, froy, tox, toy))
+            # Capture can be passed by reference because it will never be touched again after being captured
             self.captured = board[tox][toy]
             board[tox][toy] = board[frox][froy]
             board[frox][froy] = Blank()
