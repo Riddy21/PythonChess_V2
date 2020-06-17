@@ -21,6 +21,12 @@ class GUI:
         self.window.geometry("500x500")
         self.window.resizable(0, 0)
 
+        # Make GUI frame
+        self.frame = ""
+
+        # Make popup window
+        self.popup = ""
+
         # GUI state
         self.state = "Menu"
 
@@ -42,14 +48,14 @@ class GUI:
 
         # Create a frame and pack with interface
         self.frame = tk.Frame(self.window)
-        self.title = tk.Label(self.frame, pady=85, text="Ridvan's Chess")
-        self.oneP = tk.Button(self.frame, text="One Player", padx=220, pady=50, command=lambda: self.main.goto_1p())
-        self.twoP = tk.Button(self.frame, text='Two Player', padx=220, pady=50, command=lambda: self.main.goto_2p())
-        self.close = tk.Button(self.frame, text='Close', padx=230, pady=20, command=lambda: self.main.quit_win())
-        self.title.grid(row=0)
-        self.oneP.grid(row=1)
-        self.twoP.grid(row=2)
-        self.close.grid(row=3)
+        title = tk.Label(self.frame, pady=85, text="Ridvan's Chess")
+        oneP = tk.Button(self.frame, text="One Player", padx=220, pady=50, command=lambda: self.main.goto_1p())
+        twoP = tk.Button(self.frame, text='Two Player', padx=220, pady=50, command=lambda: self.main.goto_2p())
+        close = tk.Button(self.frame, text='Close', padx=230, pady=20, command=lambda: self.main.quit_win())
+        title.grid(row=0)
+        oneP.grid(row=1)
+        twoP.grid(row=2)
+        close.grid(row=3)
         self.frame.pack()
 
     # Function for Quitting
@@ -62,23 +68,23 @@ class GUI:
 
         # 1P or 2P screen setup
         if mode == 1:
-            self.player1 = tk.Label(self.frame, text='You')
-            self.player2 = tk.Label(self.frame, text='CPU')
+            player1 = tk.Label(self.frame, text='You')
+            player2 = tk.Label(self.frame, text='CPU')
 
         else:
-            self.player1 = tk.Label(self.frame, text='Player 1')
-            self.player2 = tk.Label(self.frame, text='Player 2')
+            player1 = tk.Label(self.frame, text='Player 1')
+            player2 = tk.Label(self.frame, text='Player 2')
 
         # bottom buttons
-        self.home = tk.Button(self.frame, text='Home', command=lambda: self.main.back_to_menu())
-        self.close = tk.Button(self.frame, text='Close', command=lambda: self.main.quit_win())
-        self.undo = tk.Button(self.frame, text='Undo')
+        home = tk.Button(self.frame, text='Home', command=lambda: self.main.back_to_menu())
+        close = tk.Button(self.frame, text='Close', command=lambda: self.main.quit_win())
+        undo = tk.Button(self.frame, text='Undo', command=self.main.undo)
 
-        self.player1.grid(columnspan=2, row=0, column=0)
-        self.player2.grid(columnspan=2, row=0, column=6)
-        self.home.grid(columnspan=2, row=9, column=0)
-        self.close.grid(columnspan=2, row=9, column=6)
-        self.undo.grid(columnspan=2, row=9, column=3)
+        player1.grid(columnspan=2, row=0, column=0)
+        player2.grid(columnspan=2, row=0, column=6)
+        home.grid(columnspan=2, row=9, column=0)
+        close.grid(columnspan=2, row=9, column=6)
+        undo.grid(columnspan=2, row=9, column=3)
 
         i = 0
 
@@ -120,6 +126,13 @@ class GUI:
         # Revert highlights back to default
         self.highlights = [[''] * 8 for i in range(8)]
 
+        # Update for non-interactive mode
+        self.update()
+
+        # Listen for pawn promotion, if pawn promoted initiate popup window
+        if self.main.is_pawn_promo_state() == 'ready':
+            self.make_popup()
+
     # Restore board colour back to checker board
     def _restore_board_colour(self):
         i = 0
@@ -138,7 +151,7 @@ class GUI:
         if len(self.main.game.moves) != 0:
 
             # highlight the board squares that are indicated by the game in cyan
-            for elements in self.main.game.moves[-1].poss_moves:
+            for elements in self.main.get_poss_moves():
                 self.highlights[elements[0]][elements[1]] = 'cyan'
 
     # Put gui in mainloop
@@ -149,18 +162,54 @@ class GUI:
     def update(self):
         self.window.update()
 
+    # Destroys the frame to switch windows
     def destroy_frame(self):
         self.frame.destroy()
 
-    # Setters and getters
-    # # Get game object from GUi
-    # def get_game(self):
-    #     return self.game
-    #
-    # def set_game(self, game):
-    #     self.game = game
-    #
-    # def set_state(self):
+    # Popup functions
+
+    # Makes a popup frame for paw promotion
+    def make_popup(self):
+        # Make popup window
+        self.popup = tk.Tk()
+
+        # configure and style
+        self.popup.title("Promotion")
+        self.popup.geometry("315x50")
+        self.popup.resizable(0, 0)
+        tk.Label(self.popup, text='Choose Piece').grid(row=1, columnspan=2, column=1)
+        textlist = ['Queen', 'Rook', 'Knight', 'Bishop']
+        c = 0
+        for i in textlist:
+            # Command is partial because needs to be current i
+            button = tk.Button(self.popup, padx=17, text=i, command=partial(self.main.choose_pawn_promo, i))
+            button.grid(row=2, column=c)
+            c += 1
+
+        # add closing handler
+        self.popup.protocol("WM_DELETE_WINDOW", self.on_closing)
+
+        # if in gamemode 1
+        if self.main.game_mode == 1:
+            # put in loop
+            self.popup.mainloop()
+
+        # if not interactive
+        else:
+            self.popup.update()
+
+    # handles popup manual closing event
+    def on_closing(self):
+        self.main.choose_pawn_promo('Queen')
+        self.destroy_popup()
+
+    # Quits the popup
+    def destroy_popup(self):
+        try:
+            self.popup.destroy()
+        except:
+            pass
+
 
     def __setattr__(self, name: str, value: Any) -> None:
         super().__setattr__(name, value)

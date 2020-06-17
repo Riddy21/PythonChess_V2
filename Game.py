@@ -6,7 +6,7 @@ from Move import Move
 
 # Game class initiated when the game board is displayed
 class Game:
-    def __init__(self):
+    def __init__(self, config=None):
         # 2D array of pieces to represent board
         self.board = [[Blank()] * 8 for i in range(8)]
 
@@ -20,6 +20,9 @@ class Game:
 
         # string representing the turn colour of the game
         self.turn = 'white'
+
+        # TODO: Add functionality to set board from savefile
+        self.set_board()
 
     # TODO: set board as a specific config
     def set_board(self):
@@ -73,6 +76,24 @@ class Game:
             return -1
         if self.move_to(tox, toy) == -1:
             return -1
+
+    # Function to change pawn promotion piece
+    def make_pawn_promo(self, type):
+        self.moves[-1].make_pawn_promo(type, self.board)
+
+    # Function to undo a move and remove it from the move list
+    def undo_move(self):
+        # undo move and delete move
+        if len(self.moves) != 0:
+            # if in selection mode
+            if getattr(self.moves[-1], 'move_stage') == 'selected':
+                # exit from selection mode
+                self.moves[-1].deselect_move(self.board)
+                self.moves.pop(-1)
+            else:
+                self.moves[-1].undo_move(self.board)
+                self.moves.pop(-1)
+                self.switch_turn()
 
     # Function to check return what move stage we are at and handle move button
     def handle_move(self, x, y):

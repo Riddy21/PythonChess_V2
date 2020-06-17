@@ -13,8 +13,9 @@ class Main():
     # Mode = 4 for Command line control with no GUI in 2 player mode
     def __init__(self, mode = 1):
         self.game = ""
+        self.game_mode = mode
         # GUI enabled game
-        if mode == 1:
+        if self.game_mode == 1:
             # Create GUI object
             self.gui = GUI(self)
 
@@ -23,21 +24,54 @@ class Main():
 
 
         # GUI enabled main without loop
-        elif mode == 2:
+        elif self.game_mode == 2:
             self.gui = GUI(self)
 
         # Comand line control with no GUI
-        elif mode == 3:
+        elif self.game_mode == 3:
             self.game = Game()
 
-        elif mode == 4:
+        elif self.game_mode == 4:
             self.game = Game()
 
         else:
             print("Not a selection!")
 
+    # Get the next possible moves for the piece selected
+    def get_poss_moves(self):
+        # TODO: make corresponding passing function in game
+        return self.game.moves[-1].poss_moves
 
-    # GUI functions
+    # returns True or False based on whether the game is in the pawn promo state
+    def is_pawn_promo_state(self):
+        if len(self.game.moves) != 0:
+            # TODO: make corresponding passing function in game
+            return self.game.moves[-1].pawn_promo
+        return -1
+
+    # Chooses pawn promotion piece when in pawn promo state
+    def choose_pawn_promo(self, piece):
+        # If the game is in pawn promo stage
+        if self.is_pawn_promo_state() == 'ready':
+            # Make pawn promotion
+            self.game.make_pawn_promo(piece)
+            self.gui.destroy_popup()
+        else:
+            print('Not in pawn promo state')
+
+        # Rebuild the game board buttons if gui is used
+        if self.game_mode <= 2:
+            self.gui.sync_board()
+
+    # Function to undo a move on the board
+    def undo(self):
+        self.game.undo_move()
+
+        # Rebuild the game board buttons if gui is used
+        if self.game_mode <= 2:
+            self.gui.sync_board()
+
+    # GUI functions ** Only to be used in GUI mode **
 
     # Loops GUIs to activate
     def loop(self):
@@ -61,9 +95,6 @@ class Main():
 
         # Generate 1p game board
         self.gui.create_board(1)
-
-        # Must set board before being able to play
-        self.game.set_board()
 
         # sync GUI
         self.gui.sync_board()
@@ -89,9 +120,6 @@ class Main():
 
         # Generate 1p game board
         self.gui.create_board(1)
-
-        # Must set board before being able to play
-        self.game.set_board()
 
         # sync GUI
         self.gui.sync_board()

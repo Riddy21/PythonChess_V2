@@ -37,13 +37,18 @@ class _Piece():
     def delete_move(self):
         self.move_num_history.pop(-1)
 
+    def increment_move_count(self, inc):
+        self.move_count += inc
+
+    # Base functions that will be overriden when necessary
     def is_castle(self, x, y):
         return -1
 
     def is_enpassant(self, x, y):
         return False
 
-    # TODO: Make an undo move function to reset the move count
+    def is_pawn_promo(self, x, y):
+        return False
 
     def __getattribute__(self, name: str) -> Any:
         return super().__getattribute__(name)
@@ -192,6 +197,12 @@ class Pawn(_Piece):
     def is_enpassant(self, x, y):
         if [x, y] in self.enpassant_pos:
             self.enpassant_pos = []
+            return True
+        return False
+
+    # Returns True or False based on whether a pawn promotion is possible
+    def is_pawn_promo(self, x, y):
+        if y == 7 or y == 0:
             return True
         return False
 
@@ -528,9 +539,7 @@ class King(_Piece):
         self.left_castle = -1, -1
         self.right_castle = -1, -1
 
-    # TODO:
     def get_moves(self, x, y, board):
-        # TODO: beyond doing regular moves, make castle move checker
         # If castle move is possible, store castle coordinates into parameters
         poss_moves = []
 
@@ -637,12 +646,11 @@ class King(_Piece):
 
         return poss_moves
 
-    # TODO: Check for whether castle move was made
+    # Check for whether castle move was made
     def is_castle(self, x, y):
         # Clear both castle variables
         left = self.left_castle
         right = self.right_castle
-        print('castle', x, y)
         # check passed parameters with castle possible coordinates
         if (x, y) == left:
             self.right_castle = -1, -1

@@ -1,12 +1,13 @@
 from typing import Any
 import copy
-from Pieces import Blank
-
+from Pieces import Blank, Queen, Bishop, Rook, Knight, Pawn
 
 # Class to record moves and change game board
 class Move():
     # init
     def __init__(self, board, x, y, id_number):
+        # Board was not included to save a bit on memory
+
         # Unique ID to the move by number
         self.move_number = id_number
 
@@ -20,14 +21,13 @@ class Move():
         self.move_from = x, y
 
         # Add move_id to piece being moved (must be changed before get_moves)
-        frox, froy = self.move_from[0], self.move_from[1]
+        frox, froy = self.move_from
         board[frox][froy].add_move(self.move_number)
-
-        # Parameter for piece moved, ** DEEP COPY ** used for reverting moves
-        self.move_piece = copy.deepcopy(board[x][y])
 
         # Parameters for move type
         self.move_type = "not set"
+
+        self.pawn_promo = 'disabled'
 
         # Parameter for Move color
         self.move_colour = board[x][y].colour
@@ -37,12 +37,6 @@ class Move():
 
         # Parameter for captured Piece
         self.captured = 'None'
-
-        self.board_before = [[""] * 8 for i in range(8)]
-        # Parameter for board in string rep before move
-        for x in range(8):
-            for y in range(8):
-                self.board_before[x][y] = board[x][y].str_rep
 
     # Function for checking if player picked a piece of the right colour and type
     @staticmethod
@@ -62,6 +56,41 @@ class Move():
     def deselect_move(self, board):
         frox, froy = self.move_from[0], self.move_from[1]
         board[frox][froy].delete_move()
+
+    # Makes a pawn promotion by creating and replacing an old piece
+    def make_pawn_promo(self, piece_type, board):
+        # Set as for easier use
+        tox, toy = self.move_to
+
+        # Make a new piece with same ID, moves history, move history count
+        if piece_type == 'Queen':
+            new_piece = Queen(colour=self.move_colour,
+                              move_count=getattr(board[tox][toy], 'move_count'),
+                              move_hist=getattr(board[tox][toy], 'move_num_history'),
+                              piece_id=getattr(board[tox][toy], 'id'))
+        elif piece_type == 'Rook':
+            new_piece = Rook(colour=self.move_colour,
+                             move_count=getattr(board[tox][toy], 'move_count'),
+                             move_hist=getattr(board[tox][toy], 'move_num_history'),
+                             piece_id=getattr(board[tox][toy], 'id'))
+        elif piece_type == 'Knight':
+            new_piece = Knight(colour=self.move_colour,
+                               move_count=getattr(board[tox][toy], 'move_count'),
+                               move_hist=getattr(board[tox][toy], 'move_num_history'),
+                               piece_id=getattr(board[tox][toy], 'id'))
+        elif piece_type == 'Bishop':
+            new_piece = Bishop(colour=self.move_colour,
+                              move_count=getattr(board[tox][toy], 'move_count'),
+                              move_hist=getattr(board[tox][toy], 'move_num_history'),
+                              piece_id=getattr(board[tox][toy], 'id'))
+        else:
+            print("Error, wrong piece choice")
+            return -1
+
+        # Place in old piece's spot
+        board[tox][toy] = new_piece
+
+        self.pawn_promo = 'completed'
 
     # validate move and make the move based on the end coordinates
     def make_move(self, board, x, y):
@@ -88,24 +117,16 @@ class Move():
         self.move_type = proposed_move
 
         # for easier recognition
-        frox = self.move_from[0]
-        froy = self.move_from[1]
-        tox = self.move_to[0]
-        toy = self.move_to[1]
+        frox, froy = self.move_from
+        tox, toy = self.move_to
 
         # Add move count to moved piece
-        setattr(board[frox][froy], 'move_count', getattr(board[frox][froy], 'move_count') + 1)
-
-        # Confirms whether a castle happened when the piece was moved
-        is_castle = board[frox][froy].is_castle(tox, toy)
-
-        # Confirms whether enpassant could happen when the piece is moved
-        is_enpassant = board[frox][froy].is_enpassant(tox, toy)
+        board[frox][froy].increment_move_count(1)
 
         # Do corresponding move
-        if is_enpassant:
+        if self.move_type == 'enpassant':
             print('enpassant from %d, %d to %d, %d' % (frox, froy, tox, toy))
-            if self.turn_colour == 'black':
+            if self.move_colour == 'black':
                 self.captured = board[tox][toy - 1]
                 board[tox][toy - 1] = Blank()
             else:
@@ -113,15 +134,21 @@ class Move():
                 board[tox][toy + 1] = Blank()
             board[tox][toy], board[frox][froy] = board[frox][froy], board[tox][toy]
 
-        elif is_castle == 'left':
+        elif self.move_type == 'lcastle':
             print('left castle at %d, %d' % (frox, froy))
-            setattr(board[0][froy], 'move_count', getattr(board[frox][froy], 'move_count') + 1)
+            # add move count to rook
+            board[0][froy].increment_move_count(1)
+            # add move id to rook
+            board[0][froy].add_move(self.move_number)
             board[tox][toy], board[frox][froy] = board[frox][froy], board[tox][toy]
             board[0][froy], board[3][froy] = board[3][froy], board[0][froy]
 
-        elif is_castle == 'right':
+        elif self.move_type == 'rcastle':
             print('right castle at %d, %d' % (frox, froy))
-            setattr(board[7][froy], 'move_count', getattr(board[frox][froy], 'move_count') + 1)
+            # add move count to rook
+            board[7][froy].increment_move_count(1)
+            # add move id to rook
+            board[7][froy].add_move(self.move_number)
             board[tox][toy], board[frox][froy] = board[frox][froy], board[tox][toy]
             board[7][froy], board[5][froy] = board[5][froy], board[7][froy]
 
@@ -139,15 +166,68 @@ class Move():
         # TODO: finish other move types
 
     # TODO: Undo a move
-    def undo_move(self):
-        # undo move using the board_before and capture pieces
-        pass
+    def undo_move(self, board):
+        # for easier recognition
+        frox, froy = self.move_from
+        tox, toy = self.move_to
+
+        print('undo')
+
+        # if pawn Promotion is true
+        if self.pawn_promo == 'completed':
+            # convert piece back into pawn with all specifications
+            pawn_id = getattr(board[tox][toy], 'id')
+            pawn_move_count = getattr(board[tox][toy], 'move_count')
+            pawn_move_history = getattr(board[tox][toy], 'move_num_history')
+            board[tox][toy] = Pawn(
+                colour=self.move_colour,
+                piece_id=pawn_id,
+                move_count=pawn_move_count,
+                move_hist=pawn_move_history
+            )
+
+        # revert move piece's move count and move history
+        board[tox][toy].increment_move_count(-1)
+        board[tox][toy].delete_move()
+
+        # revert move piece back to from location by switching to and from
+        board[tox][toy], board[frox][froy] = board[frox][froy], board[tox][toy]
+
+        # If the move was a left castle
+        if self.move_type == 'lcastle':
+            # delete rook move id and decrement move count
+            board[3][toy].increment_move_count(-1)
+            board[3][toy].delete_move()
+            # revert rook back to location
+            board[0][toy], board[3][toy] = board[3][toy], board[0][toy]
+
+        # else If the move was a right castle
+        elif self.move_type == 'rcastle':
+            # delete rook move id and decrement move count
+            board[5][toy].increment_move_count(-1)
+            board[5][toy].delete_move()
+            # revert rook back to location
+            board[7][toy], board[5][toy] = board[5][toy], board[7][toy]
+
+        # else If the move was an enpassant
+        elif self.move_type == 'enpassant':
+            # replace captured piece back to old location
+            if self.move_colour == 'black':
+                board[tox][toy - 1] = self.captured
+            elif self.move_colour == 'white':
+                board[tox][toy + 1] = self.captured
+
+        # else if the move was a capture
+        elif self.move_type == 'capture':
+            # replace captured piece back to location
+            board[tox][toy] = self.captured
+
+        # else if the move was a move do nothing
 
     # Private: Validate move
     def is_valid_move(self, board, tox, toy):
         # Get starting location
-        frox = self.move_from[0]
-        froy = self.move_from[1]
+        frox, froy = self.move_from
 
         # If the board piece has the move in its list of possible moves
         if [tox, toy] in board[frox][froy].get_moves(frox, froy, board):
@@ -162,12 +242,30 @@ class Move():
         if not self.is_valid_move(board, x, y):
             return -1
 
-        # Check what type of move based on the pieces unique rule set
-        # Check for castling, enpassente and pawn promotion
-        # If it does not fullfill requirements, return -1
+        frox, froy = self.move_from
 
+        # Confirms whether a castle happened when the piece was moved
+        is_castle = board[frox][froy].is_castle(x, y)
+
+        # Confirms whether enpassant could happen when the piece is moved
+        is_enpassant = board[frox][froy].is_enpassant(x, y)
+
+        # Sets instance variable pawn promo based on whether the piece is ready for a pawn promotion
+        if board[frox][froy].is_pawn_promo(x, y):
+            self.pawn_promo = 'ready'
+            print('Pawn promotion is valid')
+
+        # If it is left castle
+        if is_castle == 'left':
+            return 'lcastle'
+        # If it is right castle
+        elif is_castle == 'right':
+            return 'rcastle'
+        # If the move is enpassant
+        elif is_enpassant:
+            return 'enpassant'
         # If is capture
-        if getattr(board[x][y], 'str_rep') != "-":
+        elif getattr(board[x][y], 'str_rep') != "-":
             return 'capture'
         # If is normal move
         else:
