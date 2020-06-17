@@ -96,7 +96,7 @@ class Pawn(_Piece):
             i = 1
 
             # Do Move detection
-            while (i <= 2 and y + i <= 7):
+            while i <= 2 and y + i <= 7:
                 piece_detect = self._piece_detect(x, y, x, y + i, board)
                 # piece in front blocks move
                 if getattr(board[x][y + i], 'colour') == 'white':
@@ -110,7 +110,7 @@ class Pawn(_Piece):
                     break
 
                 # no 2nd move on 2nd turn
-                if (self.move_count >= 1):
+                if self.move_count >= 1:
                     poss_moves.append([x, y + i])
                     break
 
@@ -124,12 +124,11 @@ class Pawn(_Piece):
             if x > 0 and y <= 7 and getattr(board[x - 1][y + 1], 'colour') == 'white':
                 poss_moves.append([x - 1, y + 1])
 
-
         # white moves
         elif getattr(board[x][y], 'colour') == 'white':
             i = 1
 
-            while (i <= 2 and y - i >= 0):
+            while i <= 2 and y - i >= 0:
                 piece_detect = self._piece_detect(x, y, x, y - i, board)
 
                 # piece in front blocks move
@@ -144,7 +143,7 @@ class Pawn(_Piece):
                     break
 
                 # no 2nd move on 2nd turn
-                elif (self.move_count >= 1):
+                elif self.move_count >= 1:
                     poss_moves.append([x, y - i])
                     break
 
@@ -533,7 +532,8 @@ class King(_Piece):
             str = 'error'
 
         # Makes a piece with set values and images
-        super().__init__(100000000, colour, image, str, move_count, move_hist, piece_id)  # TODO: make value max int value
+        super().__init__(100000000, colour, image, str, move_count, move_hist,
+                         piece_id)  # TODO: make value max int value
 
         # Parameter for storing castle coordinates if castle move is possible
         self.left_castle = -1, -1

@@ -1,6 +1,7 @@
 from typing import Any
 import copy
 from Pieces import Blank, Queen, Bishop, Rook, Knight, Pawn
+import Game
 
 # Class to record moves and change game board
 class Move():
@@ -163,9 +164,7 @@ class Move():
             print('move: from %d,%d to %d,%d' % (frox, froy, tox, toy))
             board[tox][toy], board[frox][froy] = board[frox][froy], board[tox][toy]
 
-        # TODO: finish other move types
-
-    # TODO: Undo a move
+    # Undo a move
     def undo_move(self, board):
         # for easier recognition
         frox, froy = self.move_from
@@ -225,21 +224,25 @@ class Move():
         # else if the move was a move do nothing
 
     # Private: Validate move
-    def is_valid_move(self, board, tox, toy):
-        # Get starting location
-        frox, froy = self.move_from
-
+    def is_valid_move(self, tox, toy):
         # If the board piece has the move in its list of possible moves
-        if [tox, toy] in board[frox][froy].get_moves(frox, froy, board):
+        if [tox, toy] in self.poss_moves:
             return True
         else:
             return False
+
+    # Private: Limits possible moves based on check cases
+    def limit_poss_moves(self, board):
+        # Make a copy of the current game using the board and turn
+
+        #
+        pass
 
     # Tries move and returns move type if valid
     def _try_move(self, board, x, y):
 
         # Check if valid move on highlights
-        if not self.is_valid_move(board, x, y):
+        if not self.is_valid_move(x, y):
             return -1
 
         frox, froy = self.move_from

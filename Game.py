@@ -6,26 +6,30 @@ from Move import Move
 
 # Game class initiated when the game board is displayed
 class Game:
-    def __init__(self, config=None):
+    def __init__(self, turn='white', board=[], moves=[], captured_white=[], captured_black=[]):
         # 2D array of pieces to represent board
-        self.board = [[Blank()] * 8 for i in range(8)]
+        self.board = board
 
         # captured Pieces
-        self.captured_white = []
-        self.captured_black = []
+        self.captured_white = captured_white
+        self.captured_black = captured_black
 
         # stack of all old moves and current move
         # TODO: Make the list as a max undo of a certain length
-        self.moves = []
+        self.moves = moves
 
         # string representing the turn colour of the game
-        self.turn = 'white'
+        self.turn = turn
 
         # TODO: Add functionality to set board from savefile
-        self.set_board()
+        # if board was not loaded by passing a parameter, set the board
+        if self.board == []:
+            self.set_board()
 
     # TODO: set board as a specific config
     def set_board(self):
+        # Create blank board
+        self.board = [[Blank()] * 8 for i in range(8)]
         # set board by updating self.board
         self.board[0][0] = Rook('black')
         self.board[7][0] = Rook('black')
