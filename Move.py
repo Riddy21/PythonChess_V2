@@ -1,12 +1,12 @@
 from typing import Any
 import copy
 from Pieces import Blank, Queen, Bishop, Rook, Knight, Pawn
-import Game
+
 
 # Class to record moves and change game board
 class Move():
     # init
-    def __init__(self, board, x, y, id_number):
+    def __init__(self, board, x, y, id_number, poss_moves, scan_mode=False):
         # Board was not included to save a bit on memory
 
         # Unique ID to the move by number
@@ -21,10 +21,6 @@ class Move():
         # Parameter for from location
         self.move_from = x, y
 
-        # Add move_id to piece being moved (must be changed before get_moves)
-        frox, froy = self.move_from
-        board[frox][froy].add_move(self.move_number)
-
         # Parameters for move type
         self.move_type = "not set"
 
@@ -34,24 +30,43 @@ class Move():
         self.move_colour = board[x][y].colour
 
         # Parameter for possible next moves and set to the piece's move array
-        self.poss_moves = board[x][y].get_moves(x, y, board)
+        self.poss_moves = poss_moves
 
         # Parameter for captured Piece
         self.captured = 'None'
 
+        # Scan mode
+        self.scan_mode = scan_mode
+
     # Function for checking if player picked a piece of the right colour and type
     @staticmethod
-    def is_valid_selection(board, turn, x, y):
+    def get_poss_moves(board, turn, x, y, move_number, scan_mode=False, look_ahead=False):
         # if the piece is not blank and is the right colour for the turn
         if getattr(board[x][y], 'str_rep') != "-" and getattr(board[x][y], 'colour') == turn:
+            # Add move_id to piece being moved (must be changed before get_moves)
+            # only is added if its proper valid move and append move stays true
+            # When only will append when the function is not looking ahead to the next move
+            board[x][y].add_move(move_number)
+
+            # Get the possible moves
+            poss_moves = board[x][y].get_moves(x, y, board, scan_mode=scan_mode)
 
             # If there is still moves left
-            if len(board[x][y].get_moves(x, y, board)) == 0:
-                print("No more moves")
-                return False
-            return True
-        print("Invalid selection")
-        return False
+            if not poss_moves:
+                if not scan_mode:
+                    print("No more moves")
+
+                # Remove move num hist
+                board[x][y].delete_move()
+                return []
+
+            if look_ahead:
+                board[x][y].delete_move()
+            # Return the proper poss_moves
+            return poss_moves
+        if not scan_mode:
+            print("Invalid selection")
+        return []
 
     # Removes move_id from piece being moved in case of reselection
     def deselect_move(self, board):
@@ -81,9 +96,9 @@ class Move():
                                piece_id=getattr(board[tox][toy], 'id'))
         elif piece_type == 'Bishop':
             new_piece = Bishop(colour=self.move_colour,
-                              move_count=getattr(board[tox][toy], 'move_count'),
-                              move_hist=getattr(board[tox][toy], 'move_num_history'),
-                              piece_id=getattr(board[tox][toy], 'id'))
+                               move_count=getattr(board[tox][toy], 'move_count'),
+                               move_hist=getattr(board[tox][toy], 'move_num_history'),
+                               piece_id=getattr(board[tox][toy], 'id'))
         else:
             print("Error, wrong piece choice")
             return -1
@@ -126,7 +141,8 @@ class Move():
 
         # Do corresponding move
         if self.move_type == 'enpassant':
-            print('enpassant from %d, %d to %d, %d' % (frox, froy, tox, toy))
+            if not self.scan_mode:
+                print('enpassant from %d, %d to %d, %d' % (frox, froy, tox, toy))
             if self.move_colour == 'black':
                 self.captured = board[tox][toy - 1]
                 board[tox][toy - 1] = Blank()
@@ -136,7 +152,8 @@ class Move():
             board[tox][toy], board[frox][froy] = board[frox][froy], board[tox][toy]
 
         elif self.move_type == 'lcastle':
-            print('left castle at %d, %d' % (frox, froy))
+            if not self.scan_mode:
+                print('left castle at %d, %d' % (frox, froy))
             # add move count to rook
             board[0][froy].increment_move_count(1)
             # add move id to rook
@@ -145,7 +162,8 @@ class Move():
             board[0][froy], board[3][froy] = board[3][froy], board[0][froy]
 
         elif self.move_type == 'rcastle':
-            print('right castle at %d, %d' % (frox, froy))
+            if not self.scan_mode:
+                print('right castle at %d, %d' % (frox, froy))
             # add move count to rook
             board[7][froy].increment_move_count(1)
             # add move id to rook
@@ -154,14 +172,16 @@ class Move():
             board[7][froy], board[5][froy] = board[5][froy], board[7][froy]
 
         elif self.move_type == 'capture':
-            print('capture: from %d,%d to %d,%d' % (frox, froy, tox, toy))
+            if not self.scan_mode:
+                print('capture: from %d,%d to %d,%d' % (frox, froy, tox, toy))
             # Capture can be passed by reference because it will never be touched again after being captured
             self.captured = board[tox][toy]
             board[tox][toy] = board[frox][froy]
             board[frox][froy] = Blank()
 
         elif self.move_type == 'move':
-            print('move: from %d,%d to %d,%d' % (frox, froy, tox, toy))
+            if not self.scan_mode:
+                print('move: from %d,%d to %d,%d' % (frox, froy, tox, toy))
             board[tox][toy], board[frox][froy] = board[frox][froy], board[tox][toy]
 
     # Undo a move
@@ -170,7 +190,8 @@ class Move():
         frox, froy = self.move_from
         tox, toy = self.move_to
 
-        print('undo')
+        if not self.scan_mode:
+            print('undo')
 
         # if pawn Promotion is true
         if self.pawn_promo == 'completed':
@@ -195,7 +216,8 @@ class Move():
         # If the move was a left castle
         if self.move_type == 'lcastle':
             # delete rook move id and decrement move count
-            board[3][toy].increment_move_count(-1)
+            if getattr(board[3][toy],'str_rep') != '-':
+                board[3][toy].increment_move_count(-1)
             board[3][toy].delete_move()
             # revert rook back to location
             board[0][toy], board[3][toy] = board[3][toy], board[0][toy]
@@ -203,7 +225,8 @@ class Move():
         # else If the move was a right castle
         elif self.move_type == 'rcastle':
             # delete rook move id and decrement move count
-            board[5][toy].increment_move_count(-1)
+            if getattr(board[5][toy], 'str_rep') != '-':
+                board[5][toy].increment_move_count(-1)
             board[5][toy].delete_move()
             # revert rook back to location
             board[7][toy], board[5][toy] = board[5][toy], board[7][toy]
@@ -230,13 +253,6 @@ class Move():
             return True
         else:
             return False
-
-    # Private: Limits possible moves based on check cases
-    def limit_poss_moves(self, board):
-        # Make a copy of the current game using the board and turn
-
-        #
-        pass
 
     # Tries move and returns move type if valid
     def _try_move(self, board, x, y):

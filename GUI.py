@@ -30,9 +30,6 @@ class GUI:
         # GUI state
         self.state = "Menu"
 
-        # GUI highlights
-        self.highlights = [[''] * 8 for i in range(8)]
-
         # Board Grid
         self.boardGUI = [[0] * 8 for i in range(8)]
 
@@ -109,7 +106,7 @@ class GUI:
     def sync_board(self):
         board = self.main.game.board
 
-        self.set_highlights()
+        highlights = self.set_highlights()
 
         # Restore board colour
         self._restore_board_colour()
@@ -120,11 +117,8 @@ class GUI:
                 image = tk.PhotoImage(file=getattr(board[x][y], 'image'))
                 self.boardGUI[x][y].configure(image=image)
                 self.boardGUI[x][y].photo = image
-                if self.highlights[x][y] == 'cyan':
+                if highlights[x][y] == 'cyan':
                     self.boardGUI[x][y].configure(highlightbackground='cyan')
-
-        # Revert highlights back to default
-        self.highlights = [[''] * 8 for i in range(8)]
 
         # Update for non-interactive mode
         self.update()
@@ -132,6 +126,8 @@ class GUI:
         # Listen for pawn promotion, if pawn promoted initiate popup window
         if self.main.is_pawn_promo_state() == 'ready':
             self.make_popup()
+
+        print(self.main.game.get_game_state())
 
     # Restore board colour back to checker board
     def _restore_board_colour(self):
@@ -148,11 +144,16 @@ class GUI:
 
     # Set highlighted squares that can be moved to
     def set_highlights(self):
-        if len(self.main.game.moves) != 0:
+        # Initiate highlights
+        highlights = [[''] * 8 for i in range(8)]
 
+        # Only in select mode
+        if self.main.game.moves != [] and self.main.game.moves[-1].move_stage == 'selected':
             # highlight the board squares that are indicated by the game in cyan
-            for elements in self.main.get_poss_moves():
-                self.highlights[elements[0]][elements[1]] = 'cyan'
+            for elements in self.main.game.get_current_poss_moves():
+                highlights[elements[0]][elements[1]] = 'cyan'
+
+        return highlights
 
     # Put gui in mainloop
     def loop(self):

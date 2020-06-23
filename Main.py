@@ -37,11 +37,6 @@ class Main():
         else:
             print("Not a selection!")
 
-    # Get the next possible moves for the piece selected
-    def get_poss_moves(self):
-        # TODO: make corresponding passing function in game
-        return self.game.moves[-1].poss_moves
-
     # returns True or False based on whether the game is in the pawn promo state
     def is_pawn_promo_state(self):
         if len(self.game.moves) != 0:

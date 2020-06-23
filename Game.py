@@ -1,12 +1,21 @@
 from typing import Any
-
+import sys, os
 from Pieces import Blank, Bishop, King, Knight, Rook, Pawn, Queen
 from Move import Move
 
 
 # Game class initiated when the game board is displayed
 class Game:
-    def __init__(self, turn='white', board=[], moves=[], captured_white=[], captured_black=[]):
+    def __init__(self, turn='white', board=None, moves=None, captured_white=None, captured_black=None, scan_mode=False):
+        if captured_black is None:
+            captured_black = []
+        if captured_white is None:
+            captured_white = []
+        if moves is None:
+            moves = []
+        if board is None:
+            board = []
+
         # 2D array of pieces to represent board
         self.board = board
 
@@ -21,10 +30,16 @@ class Game:
         # string representing the turn colour of the game
         self.turn = turn
 
+        # scan mode to stop recursive loop of checking check and checkmate
+        self.scan_mode = scan_mode
+
         # TODO: Add functionality to set board from savefile
         # if board was not loaded by passing a parameter, set the board
-        if self.board == []:
+        if not self.board:
             self.set_board()
+
+        # games state
+        self.game_state = 'normal'
 
     # TODO: set board as a specific config
     def set_board(self):
@@ -82,8 +97,8 @@ class Game:
             return -1
 
     # Function to change pawn promotion piece
-    def make_pawn_promo(self, type):
-        self.moves[-1].make_pawn_promo(type, self.board)
+    def make_pawn_promo(self, promo_type):
+        self.moves[-1].make_pawn_promo(promo_type, self.board)
 
     # Function to undo a move and remove it from the move list
     def undo_move(self):
@@ -93,16 +108,16 @@ class Game:
             if getattr(self.moves[-1], 'move_stage') == 'selected':
                 # exit from selection mode
                 self.moves[-1].deselect_move(self.board)
-                self.moves.pop(-1)
+                del self.moves[-1]
             else:
                 self.moves[-1].undo_move(self.board)
-                self.moves.pop(-1)
+                del self.moves[-1]
                 self.switch_turn()
 
     # Function to check return what move stage we are at and handle move button
     def handle_move(self, x, y):
         # Check if moving from or moving to
-        if len(self.moves) == 0 or getattr(self.moves[-1], 'move_stage') == 'moved':
+        if not self.moves or getattr(self.moves[-1], 'move_stage') == 'moved':
             # If fresh board with no moves or move is finished move from this location
             self.move_from(x, y)
         else:
@@ -110,7 +125,7 @@ class Game:
             if getattr(self.board[x][y], 'colour') == self.turn:
                 # Removes move_id from piece and deletes move
                 self.moves[-1].deselect_move(self.board)
-                self.moves.pop(-1)
+                del self.moves[-1]
                 self.move_from(x, y)
             # otherwise start a new move
             else:
@@ -118,12 +133,27 @@ class Game:
 
     # Function to start move
     def move_from(self, x, y):
+        # Get possible moves
+        poss_moves = Move.get_poss_moves(self.board, self.turn, x, y, len(self.moves), scan_mode=self.scan_mode)
+
         # Check if it is a valid selection, if not, exit the function
-        if not Move.is_valid_selection(self.board, self.turn, x, y):
+        if not poss_moves:
             return -1
 
         # Create a new move and add to list and pass the len of move list as move id
-        self.moves.append(Move(self.board, x, y, len(self.moves)))
+        self.moves.append(Move(self.board, x, y, len(self.moves), poss_moves, scan_mode=self.scan_mode))
+
+    # Function to return possible moves for the piece entered without making the move
+    def get_next_poss_moves(self, x, y):
+        poss_moves = Move.get_poss_moves(self.board, self.turn, x, y, len(self.moves), scan_mode=self.scan_mode,
+                                         look_ahead=True)
+
+        return poss_moves
+
+    # Faster way to access current poss moves without recalculating all poss moves
+    def get_current_poss_moves(self):
+        if self.moves:
+            return self.moves[-1].poss_moves
 
     # Function to end move,
     def move_to(self, x, y):
@@ -142,15 +172,56 @@ class Game:
 
         self.switch_turn()
 
-    # TODO: Function to undo move
+    # Gets the the state of the game
+    # white checked
+    # white checkmated
+    # black checked
+    # black checkmated
+    # stalemate
+    # MUST BE IN THE TURN OF THE SIDE YOU'RE CHECKING
+    def get_game_state(self):
+        # Disable print statements
+        sys.stdout = open(os.devnull, 'w')
+
+        can_move = False
+        in_check = False
+
+        # in opponent's turn currently
+
+        # loops through all pieces on the board
+        for y in range(8):
+            for x in range(8):
+                # If the piece iterated on is piece of the next turn
+                if getattr(self.board[x][y], 'colour') == self.turn:
+                    # If the piece is the king
+                    if getattr(self.board[x][y], 'str_rep') == 'k' or getattr(self.board[x][y], 'str_rep') == 'K':
+                        # Test if it is in check
+                        in_check = self.board[x][y].isin_check(x, y, self)
+                    # Try to move it and if there are no more moves
+                    if self.get_next_poss_moves(x, y):
+                        # set can move to true and break out
+                        can_move = True
+
+        # Restore print statements
+        sys.stdout = sys.__stdout__
+
+        if not can_move:
+            if in_check:
+                return '%s checkmate' % self.turn
+            else:
+                return 'stalemate'
+
+        elif in_check:
+            return '%s check' % self.turn
+
+        else:
+            return 'normal'
 
     # TODO: Convert chess coords to int coords
 
     # TODO: Static: Converts Object board to string board
 
     # TODO: Static: Converts String board to Object board
-
-    # TODO: print board in string format using string representation
 
     def __getattribute__(self, name: str) -> Any:
         return super().__getattribute__(name)
