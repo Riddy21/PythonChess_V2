@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from GUI import GUI
 from Game import Game
 import time
