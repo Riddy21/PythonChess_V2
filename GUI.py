@@ -1,4 +1,6 @@
 import tkinter as tk
+from PIL.ImageTk import PhotoImage
+
 from functools import partial
 
 # Main Page class
@@ -7,14 +9,14 @@ from typing import Any
 
 class GUI:
     # Constructor  with reference to root
-    def __init__(self, main):
+    def __init__(self, manager):
         # Create window
         self.window = tk.Tk()
 
-        # main class needs to be passed in
+        # manager class needs to be passed in
         # to access the button functions. Not conventional but used
         # very frequently so more convenient this way
-        self.main = main
+        self.manager = manager
 
         # Setup window
         self.window.title("Chess")
@@ -30,6 +32,9 @@ class GUI:
         # GUI state
         self.state = "Menu"
 
+        # Turn of the game
+        self.turn = 'white'
+
         # Board Grid
         self.boardGUI = [[0] * 8 for i in range(8)]
 
@@ -43,12 +48,15 @@ class GUI:
         # console message
         print("Starting Menu....")
 
+	# Destroy all popups
+        self.destroy_popup()
+
         # Create a frame and pack with interface
         self.frame = tk.Frame(self.window)
         title = tk.Label(self.frame, pady=85, text="Ridvan's Chess")
-        oneP = tk.Button(self.frame, text="One Player", padx=220, pady=50, command=lambda: self.main.goto_1p())
-        twoP = tk.Button(self.frame, text='Two Player', padx=220, pady=50, command=lambda: self.main.goto_2p())
-        close = tk.Button(self.frame, text='Close', padx=230, pady=20, command=lambda: self.main.quit_win())
+        oneP = tk.Button(self.frame, text="One Player", padx=220, pady=50, command=lambda: self.manager.goto_1p())
+        twoP = tk.Button(self.frame, text='Two Player', padx=220, pady=50, command=lambda: self.manager.goto_2p())
+        close = tk.Button(self.frame, text='Close', padx=230, pady=20, command=lambda: self.manager.quit_win())
         title.grid(row=0)
         oneP.grid(row=1)
         twoP.grid(row=2)
@@ -73,9 +81,9 @@ class GUI:
             player2 = tk.Label(self.frame, text='Player 2')
 
         # bottom buttons
-        home = tk.Button(self.frame, text='Home', command=lambda: self.main.back_to_menu())
-        close = tk.Button(self.frame, text='Close', command=lambda: self.main.quit_win())
-        undo = tk.Button(self.frame, text='Undo', command=self.main.undo)
+        home = tk.Button(self.frame, text='Home', command=lambda: self.manager.back_to_menu())
+        close = tk.Button(self.frame, text='Close', command=lambda: self.manager.quit_win())
+        undo = tk.Button(self.frame, text='Undo', command=self.manager.undo)
 
         player1.grid(columnspan=2, row=0, column=0)
         player2.grid(columnspan=2, row=0, column=6)
@@ -90,13 +98,13 @@ class GUI:
             for x in range(8):
                 if i % 2 == 0 and y % 2 == 0:
                     self.boardGUI[x][y] = tk.Button(self.frame, highlightbackground='white', highlightthickness=4,
-                                                    command = partial(self.main.pressed, x, y))
+                                                    command = partial(self.manager.pressed, x, y))
                 elif not i % 2 == 0 and not y % 2 == 0:
                     self.boardGUI[x][y] = tk.Button(self.frame, highlightbackground='white', highlightthickness=4,
-                                                    command = partial(self.main.pressed, x, y))
+                                                    command = partial(self.manager.pressed, x, y))
                 else:
                     self.boardGUI[x][y] = tk.Button(self.frame, highlightbackground='black', highlightthickness=4,
-                                                    command = partial(self.main.pressed, x, y))
+                                                    command = partial(self.manager.pressed, x, y))
                 i = i + 1
                 self.boardGUI[x][y].grid(row=y + 1, column=x)
 
@@ -104,7 +112,7 @@ class GUI:
 
     # Resync the board with the GUIs
     def sync_board(self):
-        board = self.main.game.board
+        board = self.manager.game.board
 
         highlights = self.set_highlights()
 
@@ -114,20 +122,45 @@ class GUI:
         # Sync board with the board array on game
         for y in range(8):
             for x in range(8):
-                image = tk.PhotoImage(file=getattr(board[x][y], 'image'))
-                self.boardGUI[x][y].configure(image=image)
-                self.boardGUI[x][y].photo = image
+                image = PhotoImage(file=getattr(board[x][y], 'image'))
+                if self.manager.game.turn == 'black':
+                    gui_x = 7 - x
+                    gui_y = 7 - y
+                else:
+                    gui_x = x
+                    gui_y = y
+                self.boardGUI[gui_x][gui_y].configure(image=image,
+                                                      command=partial(self.manager.pressed, x, y))
+                self.boardGUI[gui_x][gui_y].photo = image
                 if highlights[x][y] == 'cyan':
-                    self.boardGUI[x][y].configure(highlightbackground='cyan')
+                    self.boardGUI[gui_x][gui_y].configure(highlightbackground='cyan')
 
         # Update for non-interactive mode
         self.update()
 
         # Listen for pawn promotion, if pawn promoted initiate popup window
-        if self.main.is_pawn_promo_state() == 'ready':
-            self.make_popup()
+        if self.manager.is_pawn_promo_state() == 'ready':
+            self.make_promo_popup()
 
-        print(self.main.game.get_game_state())
+        # Check gamestate for check and checkmates
+        gamestate = self.manager.game.get_game_state()
+
+        if self._is_new_turn() and gamestate.endswith('checkmate'):
+            self.make_checkmated_popup()
+
+        if self._is_new_turn() and gamestate.endswith('check'):
+            self.make_checked_popup()
+
+        self.turn = self.manager.game.turn 
+
+        print(self.manager.game.get_game_state())
+
+    # Checks if this is a fresh new turn
+    def _is_new_turn(self):
+        if self.turn != self.manager.game.turn:
+            return True
+        return False
+
 
     # Restore board colour back to checker board
     def _restore_board_colour(self):
@@ -148,9 +181,9 @@ class GUI:
         highlights = [[''] * 8 for i in range(8)]
 
         # Only in select mode
-        if self.main.game.moves != [] and self.main.game.moves[-1].move_stage == 'selected':
+        if self.manager.game.moves != [] and self.manager.game.moves[-1].move_stage == 'selected':
             # highlight the board squares that are indicated by the game in cyan
-            for elements in self.main.game.get_current_poss_moves():
+            for elements in self.manager.game.get_current_poss_moves():
                 highlights[elements[0]][elements[1]] = 'cyan'
 
         return highlights
@@ -170,7 +203,9 @@ class GUI:
     # Popup functions
 
     # Makes a popup frame for paw promotion
-    def make_popup(self):
+    def make_promo_popup(self):
+        # Disable the board
+        self.window.disable()
         # Make popup window
         self.popup = tk.Tk()
 
@@ -183,7 +218,7 @@ class GUI:
         c = 0
         for i in textlist:
             # Command is partial because needs to be current i
-            button = tk.Button(self.popup, padx=17, text=i, command=partial(self.main.choose_pawn_promo, i))
+            button = tk.Button(self.popup, padx=17, text=i, command=partial(self.manager.choose_pawn_promo, i))
             button.grid(row=2, column=c)
             c += 1
 
@@ -191,7 +226,7 @@ class GUI:
         self.popup.protocol("WM_DELETE_WINDOW", self.on_closing)
 
         # if in gamemode 1
-        if self.main.game_mode == 1:
+        if self.manager.game_mode == 1:
             # put in loop
             self.popup.mainloop()
 
@@ -199,9 +234,33 @@ class GUI:
         else:
             self.popup.update()
 
+    # Makes a popup frame for check
+    def make_checked_popup(self):
+        # Make popup window
+        self.popup = tk.Tk()
+
+        # configure and style
+        tk.Label(self.popup, text='%s checked!' % self.manager.game.turn).pack()
+        self.popup.geometry("315x50")
+        self.popup.resizable(0, 0)
+        button = tk.Button(self.popup, padx=17, text='Ok',
+                           command=self.destroy_popup).pack()
+
+    # Makes a popup frame for checkmate
+    def make_checkmated_popup(self):
+        # Make popup window
+        self.popup = tk.Tk()
+
+        # configure and style
+        tk.Label(self.popup, text='%s checkmated!' % self.manager.game.turn).pack()
+        self.popup.geometry("315x50")
+        self.popup.resizable(0, 0)
+        button = tk.Button(self.popup, padx=17, text='Main Menu',
+                           command=self.manager.back_to_menu).pack()
+
     # handles popup manual closing event
     def on_closing(self):
-        self.main.choose_pawn_promo('Queen')
+        self.manager.choose_pawn_promo('Queen')
         self.destroy_popup()
 
     # Quits the popup

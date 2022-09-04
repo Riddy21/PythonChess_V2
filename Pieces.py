@@ -642,41 +642,42 @@ class King(_Piece):
                     self._piece_detect(x, y, x + 1, y + 1, board) == 'unobstructed':
                 poss_moves.append([x + 1, y + 1])
 
-        # All y moves below y
+        # All moves bottom left
         if x - 1 >= 0 and y + 1 <= 7:
             if self._piece_detect(x, y, x - 1, y + 1, board) == 'opponent obstructed' or \
                     self._piece_detect(x, y, x - 1, y + 1, board) == 'unobstructed':
                 poss_moves.append([x - 1, y + 1])
 
-        # All x moves above y
+        # All moves top right
         if x + 1 <= 7 and y - 1 >= 0:
             if self._piece_detect(x, y, x + 1, y - 1, board) == 'opponent obstructed' or \
                     self._piece_detect(x, y, x + 1, y - 1, board) == 'unobstructed':
                 poss_moves.append([x + 1, y - 1])
 
-        # All x moves below x
+        # All moves left
         if x - 1 >= 0:
             if self._piece_detect(x, y, x - 1, y, board) == 'opponent obstructed' or \
                     self._piece_detect(x, y, x - 1, y, board) == 'unobstructed':
                 poss_moves.append([x - 1, y])
 
-        # All x moves above x
+        # All moves right
         if x + 1 <= 7:
             if self._piece_detect(x, y, x + 1, y, board) == 'opponent obstructed' or \
                     self._piece_detect(x, y, x + 1, y, board) == 'unobstructed':
                 poss_moves.append([x + 1, y])
 
-        # All y moves below y
+        # All up
         if y - 1 >= 0:
             if self._piece_detect(x, y, x, y - 1, board) == 'opponent obstructed' or \
                     self._piece_detect(x, y, x, y - 1, board) == 'unobstructed':
                 poss_moves.append([x, y - 1])
 
-        # All x moves above y
+        # All moves bottom
         if y + 1 <= 7:
             if self._piece_detect(x, y, x, y + 1, board) == 'opponent obstructed' or \
                     self._piece_detect(x, y, x, y + 1, board) == 'unobstructed':
                 poss_moves.append([x, y + 1])
+
 
         # Castling
 
@@ -740,6 +741,7 @@ class King(_Piece):
         if not scan_mode:
             poss_moves = self.chk_limit_moves(board, x, y, poss_moves)
 
+
         return poss_moves
 
     # Private: Limits possible moves based on check cases
@@ -765,7 +767,7 @@ class King(_Piece):
 
                 # If the piece is a pawn, add the left and right capture into op_moves
                 # and remove the move in front of the pawn
-                if getattr(board[x][y], 'str_rep') == 'p':
+                if game.turn == 'black' and getattr(board[x][y], 'str_rep') == 'p':
                     if x < 7 and y <= 7:
                         op_moves.append([x + 1, y + 1])
                     if x > 0 and y <= 7:
@@ -776,7 +778,7 @@ class King(_Piece):
                             op_moves.remove([x, y + 2])
                         except ValueError:
                             pass
-                elif getattr(board[x][y], 'str_rep') == 'P':
+                elif game.turn == 'white' and getattr(board[x][y], 'str_rep') == 'P':
                     if x < 7 and y >= 0:
                         op_moves.append([x + 1, y - 1])
                     if x > 0 and y >= 0:
@@ -801,8 +803,8 @@ class King(_Piece):
         game.switch_turn()
 
         # loop all moves surrounding king
-        for i in (-1, 1):
-            for j in (-1, 1):
+        for i in range(-1, 2):
+            for j in range(-1, 2):
                 x = myx + i
                 y = myy + j
                 # If there is a piece of the opposite colour

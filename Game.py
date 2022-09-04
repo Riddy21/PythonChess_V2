@@ -38,9 +38,6 @@ class Game:
         if not self.board:
             self.set_board()
 
-        # games state
-        self.game_state = 'normal'
-
     # TODO: set board as a specific config
     def set_board(self):
         # Create blank board
@@ -79,7 +76,7 @@ class Game:
         self.board[6][6] = Pawn('white')
         self.board[7][6] = Pawn('white')
 
-        # TODO: set according to config\
+        # TODO: set according to config
 
     # Function to switch turns
     def switch_turn(self):
@@ -173,10 +170,10 @@ class Game:
         self.switch_turn()
 
     # Gets the the state of the game
-    # white checked
-    # white checkmated
-    # black checked
-    # black checkmated
+    # white check
+    # white checkmate
+    # black check
+    # black checkmate
     # stalemate
     # MUST BE IN THE TURN OF THE SIDE YOU'RE CHECKING
     def get_game_state(self):
