@@ -1,6 +1,6 @@
 from typing import Any
 import uuid
-import Game
+import game
 
 
 # TODO: Make a piece with move count and move history set to 0 and one with inserting a piece with a history
@@ -58,14 +58,16 @@ class _Piece():
     def chk_limit_moves(self, board, myx, myy, poss_moves):
         # Make a copy of the current game using the board and turn
         if self.colour == 'white':
-            game = Game.Game(turn='white', board=board, scan_mode=True)
+            probe_game = game.Game(turn='white', board=board, scan_mode=True)
         else:
-            game = Game.Game(turn='black', board=board, scan_mode=True)
+            probe_game = game.Game(turn='black', board=board, scan_mode=True)
 
         bad_moves = []
 
         # Start a move
-        game.handle_move(myx, myy)
+        probe_game.handle_move(myx, myy)
+
+        is_king = False
 
         # Find personal king
         for y in range(8):
@@ -73,11 +75,18 @@ class _Piece():
                 if self.colour == 'white' and getattr(board[x][y], 'str_rep') == 'K':
                     king_x = x
                     king_y = y
+                    is_king = True
+                    break
                 elif self.colour == 'black' and getattr(board[x][y], 'str_rep') == 'k':
                     king_x = x
                     king_y = y
+                    is_king = True
+                    break
 
-        current_poss_moves = game.get_current_poss_moves()
+        if not is_king:
+            return poss_moves
+
+        current_poss_moves = probe_game.get_current_poss_moves()
 
         # Skips iterations if nothing can move
         if not current_poss_moves:
@@ -86,22 +95,22 @@ class _Piece():
         # For each move the piece can make
         for my_move in current_poss_moves:
             # Make the move to my move
-            game.handle_move(my_move[0], my_move[1])
+            probe_game.handle_move(my_move[0], my_move[1])
 
             # switch turn to king's turn
-            game.switch_turn()
+            probe_game.switch_turn()
             # Checks if king is in check
-            if board[king_x][king_y].isin_check(king_x, king_y, game):
+            if board[king_x][king_y].isin_check(king_x, king_y, probe_game):
                 bad_moves.append([my_move[0], my_move[1]])
 
             # switches back
-            game.switch_turn()
+            probe_game.switch_turn()
 
-            game.undo_move()
+            probe_game.undo_move()
 
-            game.handle_move(myx, myy)
+            probe_game.handle_move(myx, myy)
 
-        game.undo_move()
+        probe_game.undo_move()
 
         # Finding difference between 2 sets
         def diff(li1, li2):
@@ -683,9 +692,9 @@ class King(_Piece):
 
         # If in check can't castle
         if not scan_mode:
-            game = Game.Game(turn=self.colour, board=board, scan_mode=True)
+            probe_game = game.Game(turn=self.colour, board=board, scan_mode=True)
 
-        if scan_mode or not self.isin_check(x, y, game):
+        if scan_mode or not self.isin_check(x, y, probe_game):
             # White Piece
             if getattr(board[x][y], 'colour') == 'white':
                 # The king must be at starting position with 0 move count
@@ -749,9 +758,9 @@ class King(_Piece):
         # Make a copy of the current game using the board and turn
         # ** NOT USING DEEP COPY TO SAVE MEM AND SPEED
         if self.colour == 'white':
-            game = Game.Game(turn='black', board=board, scan_mode=True)
+            probe_game = game.Game(turn='black', board=board, scan_mode=True)
         else:
-            game = Game.Game(turn='white', board=board, scan_mode=True)
+            probe_game = game.Game(turn='white', board=board, scan_mode=True)
 
         bad_moves = []
 
@@ -763,11 +772,11 @@ class King(_Piece):
         for y in range(8):
             for x in range(8):
                 # Advance each opponent piece and save possible moves
-                op_moves = game.get_next_poss_moves(x, y)
+                op_moves = probe_game.get_next_poss_moves(x, y)
 
                 # If the piece is a pawn, add the left and right capture into op_moves
                 # and remove the move in front of the pawn
-                if game.turn == 'black' and getattr(board[x][y], 'str_rep') == 'p':
+                if probe_game.turn == 'black' and getattr(board[x][y], 'str_rep') == 'p':
                     if x < 7 and y <= 7:
                         op_moves.append([x + 1, y + 1])
                     if x > 0 and y <= 7:
@@ -778,7 +787,7 @@ class King(_Piece):
                             op_moves.remove([x, y + 2])
                         except ValueError:
                             pass
-                elif game.turn == 'white' and getattr(board[x][y], 'str_rep') == 'P':
+                elif probe_game.turn == 'white' and getattr(board[x][y], 'str_rep') == 'P':
                     if x < 7 and y >= 0:
                         op_moves.append([x + 1, y - 1])
                     if x > 0 and y >= 0:
@@ -800,7 +809,7 @@ class King(_Piece):
 
         # If there is any move beside the king that cant be captured but not picked up by the check limit
         # Capture the piece and check for check
-        game.switch_turn()
+        probe_game.switch_turn()
 
         # loop all moves surrounding king
         for i in range(-1, 2):
@@ -810,18 +819,18 @@ class King(_Piece):
                 # If there is a piece of the opposite colour
                 if (x in range(8)) and (y in range(8)) and getattr(board[x][y], 'colour') != self.colour:
                     # Try the move
-                    game.full_move(myx, myy, x, y)
+                    probe_game.full_move(myx, myy, x, y)
 
                     # switch to king's turn to check move
-                    game.switch_turn()
+                    probe_game.switch_turn()
                     # check if the king is in check
-                    if self.isin_check(x, y, game):
+                    if self.isin_check(x, y, probe_game):
                         # if it is add to bad moves
                         bad_moves.append([x, y])
                     # switch back
-                    game.switch_turn()
+                    probe_game.switch_turn()
                     # undo move
-                    game.undo_move()
+                    probe_game.undo_move()
 
         # Finding difference between 2 sets
         def diff(li1, li2):
@@ -834,7 +843,7 @@ class King(_Piece):
         poss_moves = diff(poss_moves, bad_moves)
 
         # delete the new game
-        del game
+        del probe_game
 
         # Return poss_moves
         return poss_moves

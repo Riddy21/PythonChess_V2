@@ -1,6 +1,6 @@
 from typing import Any
 import copy
-from Pieces import Blank, Queen, Bishop, Rook, Knight, Pawn
+from pieces import Blank, Queen, Bishop, Rook, Knight, Pawn
 
 
 # Class to record moves and change game board
@@ -75,6 +75,11 @@ class Move():
 
     # Makes a pawn promotion by creating and replacing an old piece
     def make_pawn_promo(self, piece_type, board):
+        #only make promotion if in ready state
+        if self.pawn_promo != 'ready':
+            print("Invalid pawn promotion")
+            return -1
+
         # Set as for easier use
         tox, toy = self.move_to
 
@@ -107,6 +112,7 @@ class Move():
         board[tox][toy] = new_piece
 
         self.pawn_promo = 'completed'
+        print('Pawn promoted to %s' % piece_type)
 
     # validate move and make the move based on the end coordinates
     def make_move(self, board, x, y):
@@ -272,7 +278,6 @@ class Move():
         # Sets instance variable pawn promo based on whether the piece is ready for a pawn promotion
         if board[frox][froy].is_pawn_promo(x, y):
             self.pawn_promo = 'ready'
-            print('Pawn promotion is valid')
 
         # If it is left castle
         if is_castle == 'left':

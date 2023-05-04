@@ -153,8 +153,6 @@ class GUI:
 
         self.turn = self.manager.game.turn 
 
-        print(self.manager.game.get_game_state())
-
     # Checks if this is a fresh new turn
     def _is_new_turn(self):
         if self.turn != self.manager.game.turn:

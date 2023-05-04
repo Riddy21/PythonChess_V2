@@ -1,7 +1,7 @@
 from typing import Any
 import sys, os
-from Pieces import Blank, Bishop, King, Knight, Rook, Pawn, Queen
-from Move import Move
+from pieces import Blank, Bishop, King, Knight, Rook, Pawn, Queen
+from move import Move
 
 
 # Game class initiated when the game board is displayed
@@ -32,6 +32,8 @@ class Game:
 
         # scan mode to stop recursive loop of checking check and checkmate
         self.scan_mode = scan_mode
+
+        self.pawn_promo = False
 
         # TODO: Add functionality to set board from savefile
         # if board was not loaded by passing a parameter, set the board
@@ -85,7 +87,6 @@ class Game:
         else:
             self.turn = 'white'
 
-    # TODO: Might be errors if the full Move is not valid... test later
     # Function to make complete move from to-coordinates and from-coordinates
     def full_move(self, frox, froy, tox, toy):
         if self.move_from(frox, froy) == -1:
@@ -95,7 +96,9 @@ class Game:
 
     # Function to change pawn promotion piece
     def make_pawn_promo(self, promo_type):
-        self.moves[-1].make_pawn_promo(promo_type, self.board)
+        # if the pawn promotion goes through, switch turns
+        if self.moves[-1].make_pawn_promo(promo_type, self.board) != -1:
+            self.switch_turn()
 
     # Function to undo a move and remove it from the move list
     def undo_move(self):
@@ -130,6 +133,10 @@ class Game:
 
     # Function to start move
     def move_from(self, x, y):
+        # DOn't allow move if pawn promotion is valid
+        if self.moves and self.moves[-1].pawn_promo == 'ready':
+            print("Invalid Selection, pawn promotion underway")
+            return -1
         # Get possible moves
         poss_moves = Move.get_poss_moves(self.board, self.turn, x, y, len(self.moves), scan_mode=self.scan_mode)
 
@@ -167,7 +174,11 @@ class Game:
         elif getattr(captured_piece, 'colour') == 'white':
             self.captured_white.append(captured_piece)
 
-        self.switch_turn()
+        # if the move results in pawn promotion don't switch turn
+        if self.moves[-1].pawn_promo == 'ready':
+            print('Pawn Promotion is valid')
+        else:
+            self.switch_turn()
 
     # Gets the the state of the game
     # white check
@@ -227,8 +238,8 @@ class Game:
         str = ''
 
         # Add board string reps
-        for y in range(8):
-            for x in range(8):
+        for y in range(len(self.board[0])):
+            for x in range(len(self.board)):
                 str += self.board[x][y].str_rep + ' '
             str += '\n'
 

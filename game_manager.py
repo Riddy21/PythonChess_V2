@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-from GUI import GUI
-from Game import Game
+from gui import GUI
+from game import Game
 import time
 
 # TODO: Make self.main.game.moves easier to access from GUI
