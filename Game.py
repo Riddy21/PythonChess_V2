@@ -176,7 +176,8 @@ class Game:
 
         # if the move results in pawn promotion don't switch turn
         if self.moves[-1].pawn_promo == 'ready':
-            print('Pawn Promotion is valid')
+            if not self.scan_mode:
+                print('Pawn Promotion is valid')
         else:
             self.switch_turn()
 

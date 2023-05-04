@@ -203,7 +203,8 @@ class GUI:
     # Makes a popup frame for paw promotion
     def make_promo_popup(self):
         # Disable the board
-        self.window.disable()
+        # FIXME: This line doesn't work
+        #self.window.disable()
         # Make popup window
         self.popup = tk.Tk()
 
