@@ -1,4 +1,6 @@
 from game import Game
+from ai import Ai
+from time import sleep
 from pieces import *
 
 
@@ -8,6 +10,8 @@ board[1][1] = Pawn('white')
 board[2][2] = Pawn('black')
 
 game = Game(board=board)
+ai = Ai(game=game, color='black')
+ai_thread = ai.start()
 
 print(game)
 
@@ -16,19 +20,16 @@ game.full_move(0, 2, 0, 1)
 print(game.get_game_state())
 print(game.turn)
 print(game)
-game.full_move(2, 2, 2, 4)
+sleep(1)
 print(game.get_game_state())
 print(game.turn)
 print(game)
-game.full_move(0, 1, 0, 0)
-print(game.get_game_state())
-print(game.turn)
-print(game)
+game.full_move(1, 1, 1, 0)
 game.make_pawn_promo('Queen')
 print(game.get_game_state())
 print(game.turn)
 print(game)
-game.make_pawn_promo('Rook')
+sleep(1)
 print(game.get_game_state())
 print(game.turn)
 print(game)

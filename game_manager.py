@@ -2,6 +2,7 @@
 
 from gui import GUI
 from game import Game
+from ai import Ai
 import time
 
 # TODO: Make self.main.game.moves easier to access from GUI
@@ -93,12 +94,15 @@ class GameManager():
         # Generate 1p game board
         self.gui.create_board(1)
 
+        # TODO: Initiate AI and run in thread
+        ai = Ai(self.game, 'black', self.gui)
+        ai.start()
+
         # sync GUI
         self.gui.sync_board()
 
         self.gui.update()
 
-        # TODO: Initiate AI
 
     # Function for Starting in 2 Player
     def goto_2p(self):

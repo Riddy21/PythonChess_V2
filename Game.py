@@ -159,6 +159,16 @@ class Game:
         if self.moves:
             return self.moves[-1].poss_moves
 
+    # get the coordinates of the pieces that are playable on that turn
+    def get_playable_piece_coords(self):
+        playable = set()
+        for y in range(len(self.board[0])):
+            for x in range(len(self.board)):
+                if self.board[x][y].colour == self.turn:
+                    playable.add((x, y))
+        return playable
+
+
     # Function to end move,
     def move_to(self, x, y):
         # Makes move on the most recent move, if invalid move, don't switch sides
@@ -198,8 +208,8 @@ class Game:
         # in opponent's turn currently
 
         # loops through all pieces on the board
-        for y in range(8):
-            for x in range(8):
+        for y in range(len(self.board[0])):
+            for x in range(len(self.board)):
                 # If the piece iterated on is piece of the next turn
                 if getattr(self.board[x][y], 'colour') == self.turn:
                     # If the piece is the king
