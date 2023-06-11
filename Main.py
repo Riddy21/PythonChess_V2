@@ -1,4 +1,8 @@
-from game_manager import GameManager
+from game import Game
+from gui import ChessboardGUI
 
 if __name__ == "__main__":
-    GameManager()
+    game = Game()
+    gui = ChessboardGUI(game)
+
+    gui.run()
