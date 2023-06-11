@@ -33,8 +33,8 @@ class ChessboardGUI:
             "p": pygame.image.load("./Assets/Chess_tile_pd.png"),
             "R": pygame.image.load("./Assets/Chess_tile_rl.png"),
             "N": pygame.image.load("./Assets/Chess_tile_nl.png"),
-            "N": pygame.image.load("./Assets/Chess_tile_bl.png"),
             "Q": pygame.image.load("./Assets/Chess_tile_ql.png"),
+            "B": pygame.image.load("./Assets/Chess_tile_bl.png"),
             "K": pygame.image.load("./Assets/Chess_tile_kl.png"),
             "P": pygame.image.load("./Assets/Chess_tile_pl.png"),
         }
@@ -75,7 +75,7 @@ class ChessboardGUI:
             self.window.blit(self.chessboard_image, (0, 0))
 
             # Get the current chessboard state from the API
-            chessboard_state = [['r' for i in range(8)] for i in range(8)]
+            chessboard_state = self.api.get_chess_board_string_array()
 
             # Draw the chess pieces
             for row in range(8):
@@ -89,4 +89,4 @@ class ChessboardGUI:
         # Quit the game
         pygame.quit()
 
-ChessboardGUI(None).run()
+#ChessboardGUI(None).run()

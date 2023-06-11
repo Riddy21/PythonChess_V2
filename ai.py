@@ -4,13 +4,10 @@ from time import sleep
 
 # Ai class that can analyse a game and take control of a specific color
 class Ai:
-    def __init__(self, game, color, gui=None):
+    def __init__(self, game, color):
         # Needs a game to control and a color to control
         self.game = game
         self.color = color
-
-        # If there is a GUI must be updated
-        self.gui = gui
 
     def start(self):
         def threaded_start():
@@ -39,13 +36,4 @@ class Ai:
         move = random.sample(playable_moves, 1)[0]
 
         self.game.full_move(*move)
-
-        # if there is GUI, then update
-        if self.gui:
-            self.gui.sync_board()
-            self.gui.update()
-
-
-        
-        
 

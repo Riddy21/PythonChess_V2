@@ -236,9 +236,13 @@ class Game:
         else:
             return 'normal'
 
-    # TODO: Convert chess coords to int coords
+    # Convert chess coords to int coords
+    def get_chess_coords(self, col, row):
+        return f"{chr(97+col)}{8-row}"
 
-    # TODO: Static: Converts Object board to string board
+    # Static: Converts Object board to string board
+    def get_chess_board_string_array(self):
+        return [[self.board[x][y].str_rep for x in range(8)] for y in range(8)]
 
     # TODO: Static: Converts String board to Object board
 
