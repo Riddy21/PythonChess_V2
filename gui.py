@@ -1,4 +1,6 @@
 import pygame
+import tkinter as tk
+import tkinter.messagebox
 
 # Set up the colors
 WHITE = (255, 255, 255)
@@ -133,10 +135,16 @@ class ChessboardGUI:
             # Draw highlights for next moves
             self.draw_highlights(self.api.get_current_poss_moves())
 
-
-            # TODO: If in check, show Popup use TKinter
-
+            # TODO: If in check, show Popup using TKinter
+            game_state = self.api.get_game_state()
+            if 'checkmate' in game_state:
+                response = tk.messagebox.askyesno("Checkmate", "Checkmate! Do you want to quit?")
+                if response:
+                    running = False
             # TODO: If in checkmate, show GUI for quitting
+            elif 'check' in game_state:
+                tk.messagebox.showinfo("Check", "You are in check!")
+
 
             # Have AI do move if ai is enabled
             if self.ai and self.api.turn == self.ai.color:
