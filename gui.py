@@ -117,10 +117,6 @@ class ChessboardGUI:
 
                     self.handle_click(pos)
 
-                    # If move change
-                    if self.api.turn == self.ai.color:
-                        self.ai.make_move()
-
                 elif event.type == pygame.KEYDOWN:
                     # Ctrl-Z was pressed
                     if event.key == pygame.K_z and \
@@ -141,6 +137,11 @@ class ChessboardGUI:
             # TODO: If in check, show Popup use TKinter
 
             # TODO: If in checkmate, show GUI for quitting
+
+            # Have AI do move if ai is enabled
+            if self.ai and self.api.turn == self.ai.color:
+                self.ai.make_move()
+
 
             # Update the display
             pygame.display.flip()

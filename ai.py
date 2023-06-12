@@ -30,6 +30,8 @@ class Ai:
         # FIXME: Check will cause "no more moves"
         for piece in playable_pieces:
             moves = self.game.get_next_poss_moves(*piece)
+            print(self.game.board[piece[0]][piece[1]])
+            print(moves)
             for move in moves:
                 playable_moves.add((*piece, *move))
 

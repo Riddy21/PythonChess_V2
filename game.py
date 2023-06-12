@@ -24,7 +24,6 @@ class Game:
         self.captured_black = captured_black
 
         # stack of all old moves and current move
-        # TODO: Make the list as a max undo of a certain length
         self.moves = moves
 
         # string representing the turn colour of the game
@@ -150,10 +149,14 @@ class Game:
 
     # Function to return possible moves for the piece entered without making the move
     def get_next_poss_moves(self, x, y):
-        poss_moves = Move.get_poss_moves(self.board, self.turn, x, y, len(self.moves), scan_mode=True,
+        poss_moves = Move.get_poss_moves(self.board, self.turn, x, y, len(self.moves), scan_mode=self.scan_mode,
                                          look_ahead=True)
 
         return poss_moves
+
+    def get_all_poss_moves(self):
+        """Gets all the possible moves playable on the board currently"""
+
 
     # Faster way to access current poss moves without recalculating all poss moves
     def get_current_poss_moves(self):
