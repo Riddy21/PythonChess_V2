@@ -5,17 +5,19 @@ WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 TAN = (236, 235, 205)
 GREEN = (104, 139, 80)
+GREY = (200, 200, 200)
 
 class ChessboardGUI:
-    def __init__(self, api):
+    def __init__(self, api, ai=None):
         self.api = api
+        self.ai = ai
 
         # Initialize Pygame
         pygame.init()
 
         # Set up the window
-        self.WIDTH = 480
-        self.HEIGHT = 480
+        self.WIDTH = 400
+        self.HEIGHT = 400
         self.window = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
         pygame.display.set_caption("Pygame Chessboard")
 
@@ -24,6 +26,7 @@ class ChessboardGUI:
 
         # Load the chess piece images
         self.piece_images = {
+            "-": pygame.image.load("./Assets/Blank.png"),
             "r": pygame.image.load("./Assets/Chess_tile_rd.png"),
             "n": pygame.image.load("./Assets/Chess_tile_nd.png"),
             "b": pygame.image.load("./Assets/Chess_tile_bd.png"),
@@ -39,23 +42,25 @@ class ChessboardGUI:
         }
 
     def draw_board(self):
-        # TODO: Delete that line and write a generative board
         # Clear the window
-        self.window.fill(WHITE)
-
         for row in range(8):
             for col in range(8):
                 color = GREEN if (row%2 == 1 and col%2 == 0) or (row%2 == 0 and col%2 == 1)else TAN
+                col, row = self.orient((col, row))
                 x = col * self.SQUARE_SIZE
                 y = row * self.SQUARE_SIZE
                 rect = pygame.Rect(x, y, self.SQUARE_SIZE, self.SQUARE_SIZE)
                 pygame.draw.rect(self.window, color, rect)
 
-    # TODO: Draw the highlights of the board for next move
+    # Draw the highlights of the board for next move
     def draw_highlights(self, locations):
-        pass
+        for col, row in locations:
+            col, row = self.orient((col, row))
+            x = col * self.SQUARE_SIZE + 0.5 * self.SQUARE_SIZE
+            y = row * self.SQUARE_SIZE + 0.5 * self.SQUARE_SIZE
+            rect = pygame.draw.circle(self.window, GREY, (x, y), self.SQUARE_SIZE/7)
 
-    # TODO: draw the pieces from the game object
+    # draw the pieces from the game object
     def draw_pieces(self, board):
         # Get the current chessboard state from the API
         chessboard_state = self.api.get_chess_board_string_array()
@@ -70,9 +75,11 @@ class ChessboardGUI:
     def draw_piece(self, piece, col, row):
         piece_image = self.piece_images.get(piece)
         if piece_image:
+            col, row = self.orient((col, row))
             x = col * self.SQUARE_SIZE
             y = row * self.SQUARE_SIZE
-            self.window.blit(piece_image, (x, y))
+            width, height = piece_image.get_size()
+            self.window.blit(piece_image, (x+(self.SQUARE_SIZE- width)/2, y+(self.SQUARE_SIZE-height)/2))
 
     def handle_click(self, pos):
         # Calculate the clicked square
@@ -83,16 +90,22 @@ class ChessboardGUI:
         position = f"{chr(97+col)}{8-row}"
 
         # Call the API method to interact with the chessboard
-        print(position)
+        col, row = self.orient((col, row))
+        self.api.handle_move(col, row)
         #self.api.make_move(position)
 
+    def orient(self, coords):
+        if self.ai:
+            return coords
+        
+        if self.api.turn == 'white':
+            return coords
+        elif self.api.turn == 'black':
+            return 7-coords[0], 7-coords[1]
 
     def run(self):
         # Main game loop
         running = True
-        
-        # Draw the chess board
-        self.draw_board()
 
         while running:
             for event in pygame.event.get():
@@ -103,13 +116,27 @@ class ChessboardGUI:
                     pos = pygame.mouse.get_pos()
 
                     self.handle_click(pos)
-                # TODO: Add undo buttons based on keyboard shortcut Ctrl-z
 
-            # Draw highlights for next moves
-            self.draw_highlights(None)
+                    # If move change
+                    if self.api.turn == self.ai.color:
+                        self.ai.make_move()
+
+                elif event.type == pygame.KEYDOWN:
+                    # Ctrl-Z was pressed
+                    if event.key == pygame.K_z and \
+                            (pygame.key.get_mods() & pygame.KMOD_CTRL or \
+                             pygame.key.get_mods() & pygame.KMOD_META):
+                        self.api.undo_move()
+
+            # Draw the chess board
+            self.draw_board()
 
             # Draw the pieces
             self.draw_pieces(self.api.get_chess_board_string_array())
+
+            # Draw highlights for next moves
+            self.draw_highlights(self.api.get_current_poss_moves())
+
 
             # TODO: If in check, show Popup use TKinter
 

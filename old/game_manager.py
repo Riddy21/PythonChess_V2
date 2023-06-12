@@ -95,7 +95,7 @@ class GameManager():
         self.gui.create_board(1)
 
         # TODO: Initiate AI and run in thread
-        ai = Ai(self.game, 'black', self.gui)
+        ai = Ai(self.game, 'black')
         ai.start()
 
         # sync GUI

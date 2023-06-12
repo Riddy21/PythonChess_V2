@@ -12,8 +12,7 @@ class Ai:
     def start(self):
         def threaded_start():
             while 'mate' not in self.game.get_game_state():
-                # TODO: Change this to event based later
-                sleep(0.1)
+                # FIXME: Change this to event based later
                 if self.game.turn == self.color:
                     self.make_move()
         start_thread = threading.Thread(target=threaded_start)
@@ -27,7 +26,6 @@ class Ai:
 
         # Get all possible moves
         playable_moves = set()
-        # FIXME: Check will cause "no more moves"
         for piece in playable_pieces:
             moves = self.game.get_next_poss_moves(*piece)
             for move in moves:
