@@ -1,6 +1,5 @@
 import pygame
-import tkinter as tk
-import tkinter.messagebox
+import easygui
 
 # Set up the colors
 WHITE = (255, 255, 255)
@@ -138,12 +137,13 @@ class ChessboardGUI:
             # TODO: If in check, show Popup using TKinter
             game_state = self.api.get_game_state()
             if 'checkmate' in game_state:
-                response = tk.messagebox.askyesno("Checkmate", "Checkmate! Do you want to quit?")
+                response = easygui.ynbox("Checkmate", "Checkmate! Do you want to quit?", ('Yes', 'No'))
                 if response:
                     running = False
+
             # TODO: If in checkmate, show GUI for quitting
             elif 'check' in game_state:
-                tk.messagebox.showinfo("Check", "You are in check!")
+                easygui.msgbox("Check", "You are in check!")
 
 
             # Have AI do move if ai is enabled
