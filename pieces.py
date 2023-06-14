@@ -195,9 +195,9 @@ class Pawn(_Piece):
 
             # TODO: ONLY WHEN SCAN MODE AND KING CAN BE CAPTURED
             # Sideways Capture, ** if in scan mode, side captures count even if there is no piece currently there
-            if x < 7 and y <= 7 and getattr(board[x + 1][y + 1], 'colour') == 'white':
+            if x < 7 and y < 7 and getattr(board[x + 1][y + 1], 'colour') == 'white':
                 poss_moves.append([x + 1, y + 1])
-            if x > 0 and y <= 7 and getattr(board[x - 1][y + 1], 'colour') == 'white':
+            if x > 0 and y < 7 and getattr(board[x - 1][y + 1], 'colour') == 'white':
                 poss_moves.append([x - 1, y + 1])
 
         # white moves
