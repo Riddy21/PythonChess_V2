@@ -39,6 +39,7 @@ class Game:
         if not self.board:
             self.set_board()
 
+
     # TODO: set board as a specific config
     def set_board(self):
         # Create blank board
@@ -81,7 +82,7 @@ class Game:
 
     # Function to switch turns
     def switch_turn(self):
-        # FIXME: raise an event for each turn switch
+
         if self.turn == 'white':
             self.turn = 'black'
         else:
@@ -153,9 +154,6 @@ class Game:
                                          look_ahead=True)
 
         return poss_moves
-
-    def get_all_poss_moves(self):
-        """Gets all the possible moves playable on the board currently"""
 
 
     # Faster way to access current poss moves without recalculating all poss moves
@@ -240,6 +238,15 @@ class Game:
 
         else:
             return 'normal'
+
+    # Get the coordinates of that type of piece
+    def get_piece_coords(self, piece_str):
+        coords = set()
+        for y in range(len(self.board[0])):
+            for x in range(len(self.board)):
+                if getattr(self.board[x][y], 'str_rep') == piece_str:
+                    coords.add((x,y))
+        return coords
 
     # Convert chess coords to int coords
     def get_chess_coords(self, col, row):

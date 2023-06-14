@@ -7,6 +7,7 @@ BLACK = (0, 0, 0)
 TAN = (236, 235, 205)
 GREEN = (104, 139, 80)
 GREY = (200, 200, 200)
+RED = (255, 200, 200)
 
 class ChessboardGUI:
     def __init__(self, api, ai=None):
@@ -54,12 +55,24 @@ class ChessboardGUI:
                 pygame.draw.rect(self.window, color, rect)
 
     # Draw the highlights of the board for next move
-    def draw_highlights(self, locations):
+    def draw_poss_moves(self, locations):
         for col, row in locations:
             col, row = self.orient((col, row))
-            x = col * self.SQUARE_SIZE + 0.5 * self.SQUARE_SIZE
-            y = row * self.SQUARE_SIZE + 0.5 * self.SQUARE_SIZE
-            rect = pygame.draw.circle(self.window, GREY, (x, y), self.SQUARE_SIZE/7)
+            self.draw_dot(col, row)
+
+    # Draws the highligh on the king that is in check
+    def draw_check_highlight(self, game_state):
+        if 'check' not in game_state:
+            return
+        if 'black' in game_state:
+            coords = self.api.get_piece_coords('k')
+        elif 'white' in game_state:
+            coords = self.api.get_piece_coords('K')
+        if len(coords) != 1:
+            print('Error: more than one king')
+            return
+        for col, row in coords:
+            self.draw_highlight(col, row)
 
     # draw the pieces from the game object
     def draw_pieces(self, board):
@@ -72,6 +85,18 @@ class ChessboardGUI:
                 piece = chessboard_state[row][col]
                 self.draw_piece(piece, col, row)
 
+    # Draw highlight on piece
+    def draw_highlight(self, col, row):
+        x = col * self.SQUARE_SIZE
+        y = row * self.SQUARE_SIZE
+        rect = pygame.Rect(x, y, self.SQUARE_SIZE, self.SQUARE_SIZE)
+        pygame.draw.rect(self.window, RED, rect)
+
+    # Draw dot on pieces
+    def draw_dot(self, col, row):
+        x = col * self.SQUARE_SIZE + 0.5 * self.SQUARE_SIZE
+        y = row * self.SQUARE_SIZE + 0.5 * self.SQUARE_SIZE
+        rect = pygame.draw.circle(self.window, GREY, (x, y), self.SQUARE_SIZE/7)
 
     def draw_piece(self, piece, col, row):
         piece_image = self.piece_images.get(piece)
@@ -125,25 +150,26 @@ class ChessboardGUI:
                              pygame.key.get_mods() & pygame.KMOD_META):
                         self.api.undo_move()
 
+            game_state = self.api.get_game_state()
+
             # Draw the chess board
             self.draw_board()
+
+            # If in check, draw the error highlights
+            self.draw_check_highlight(game_state)
 
             # Draw the pieces
             self.draw_pieces(self.api.get_chess_board_string_array())
 
-            # Draw highlights for next moves
-            self.draw_highlights(self.api.get_current_poss_moves())
+            # Draw markers for next moves
+            self.draw_poss_moves(self.api.get_current_poss_moves())
 
             # TODO: If in check, show Popup using TKinter
-            game_state = self.api.get_game_state()
             if 'checkmate' in game_state:
                 response = easygui.ynbox("Checkmate", "Checkmate! Do you want to quit?", ('Yes', 'No'))
                 if response:
                     running = False
 
-            # TODO: If in checkmate, show GUI for quitting
-            elif 'check' in game_state:
-                easygui.msgbox("Check", "You are in check!")
 
 
             # Have AI do move if ai is enabled
