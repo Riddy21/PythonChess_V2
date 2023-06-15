@@ -142,7 +142,6 @@ class ChessboardGUI:
                     pos = pygame.mouse.get_pos()
 
                     self.handle_click(pos)
-                    self.api.print_move_hist()
 
                 elif event.type == pygame.KEYDOWN:
                     # Ctrl-Z was pressed
