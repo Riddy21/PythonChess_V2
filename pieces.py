@@ -696,6 +696,7 @@ class King(_Piece):
 
         if scan_mode or not self.isin_check(x, y, probe_game):
             # White Piece
+            # FIXME: If castle is possible and you don't, error occurs
             if getattr(board[x][y], 'colour') == 'white':
                 # The king must be at starting position with 0 move count
                 if x == 4 and y == 7 and getattr(board[x][y], 'move_count') == 0:
@@ -709,6 +710,9 @@ class King(_Piece):
                             poss_moves.append([2, 7])
                             # add left castle to self
                             self.left_castle = 2, 7
+                else:
+                    # Reset once castle is not valid
+                    self.left_castle = -1, -1
 
                 if x == 4 and y == 7 and getattr(board[x][y], 'move_count') == 0:
                     # The rook on the right must be at starting position with 0 move count
@@ -720,6 +724,9 @@ class King(_Piece):
                             poss_moves.append([6, 7])
                             # add right castle to self
                             self.right_castle = 6, 7
+                else:
+                    # Reset once castle is not valid
+                    self.right_castle = -1, -1
             # Black Piece
             if getattr(board[x][y], 'colour') == 'black':
                 # The king must be at starting position with 0 move count
@@ -734,6 +741,9 @@ class King(_Piece):
                             poss_moves.append([2, 0])
                             # add left castle to self
                             self.left_castle = 2, 0
+                else:
+                    # Reset once castle is not valid
+                    self.left_castle = -1, -1
 
                 if x == 4 and y == 0 and getattr(board[x][y], 'move_count') == 0:
                     # The rook on the right must be at starting position with 0 move count
@@ -745,6 +755,9 @@ class King(_Piece):
                             poss_moves.append([6, 0])
                             # add right castle to self
                             self.right_castle = 6, 0
+                else:
+                    # Reset once castle is not valid
+                    self.right_castle = -1, -1
 
         # only do this line if not scanning opponent for check to avoid getting stuck in recursive loop
         if not scan_mode:
@@ -891,4 +904,7 @@ class King(_Piece):
 
 class Blank(_Piece):
     def __init__(self):
-        super().__init__(0, 'none', 'Assets/Blank.png', '-', None, None, None)
+        super().__init__(0, 'none', 'Assets/Blank.png', '-', 0, [], None)
+    def increment_move_count(self, inc):
+        print('Trying to increment a blank piece')
+        #raise RuntimeError

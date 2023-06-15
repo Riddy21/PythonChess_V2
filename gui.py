@@ -142,12 +142,17 @@ class ChessboardGUI:
                     pos = pygame.mouse.get_pos()
 
                     self.handle_click(pos)
+                    self.api.print_move_hist()
 
                 elif event.type == pygame.KEYDOWN:
                     # Ctrl-Z was pressed
                     if event.key == pygame.K_z and \
                             (pygame.key.get_mods() & pygame.KMOD_CTRL or \
                              pygame.key.get_mods() & pygame.KMOD_META):
+                        # One player undo twice
+                        if self.ai:
+                            self.api.undo_move()
+
                         self.api.undo_move()
 
             game_state = self.api.get_game_state()

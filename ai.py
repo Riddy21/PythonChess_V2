@@ -13,7 +13,7 @@ class Ai:
         def threaded_start():
             while 'mate' not in self.game.get_game_state():
                 # TODO: Change this to event based later
-                sleep(0.1)
+                sleep(1)
                 if self.game.turn == self.color:
                     self.make_move()
         start_thread = threading.Thread(target=threaded_start)

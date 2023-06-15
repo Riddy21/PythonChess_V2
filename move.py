@@ -21,6 +21,8 @@ class Move():
         # Parameter for from location
         self.move_from = x, y
 
+        self.move_piece = board[x][y].str_rep
+
         # Parameters for move type
         self.move_type = "not set"
 
@@ -158,24 +160,30 @@ class Move():
             board[tox][toy], board[frox][froy] = board[frox][froy], board[tox][toy]
 
         elif self.move_type == 'lcastle':
-            if not self.scan_mode:
-                print('left castle at %d, %d' % (frox, froy))
-            # add move count to rook
-            board[0][froy].increment_move_count(1)
-            # add move id to rook
-            board[0][froy].add_move(self.move_number)
-            board[tox][toy], board[frox][froy] = board[frox][froy], board[tox][toy]
-            board[0][froy], board[3][froy] = board[3][froy], board[0][froy]
+            if getattr(board[0][froy],'str_rep') != '-':
+                if not self.scan_mode:
+                    print('left castle at %d, %d' % (frox, froy))
+                # add move count to rook
+                board[0][froy].increment_move_count(1)
+                # add move id to rook
+                board[0][froy].add_move(self.move_number)
+                board[tox][toy], board[frox][froy] = board[frox][froy], board[tox][toy]
+                board[0][froy], board[3][froy] = board[3][froy], board[0][froy]
+            else:
+                print(self.move_type, "WRONG")
 
         elif self.move_type == 'rcastle':
-            if not self.scan_mode:
-                print('right castle at %d, %d' % (frox, froy))
-            # add move count to rook
-            board[7][froy].increment_move_count(1)
-            # add move id to rook
-            board[7][froy].add_move(self.move_number)
-            board[tox][toy], board[frox][froy] = board[frox][froy], board[tox][toy]
-            board[7][froy], board[5][froy] = board[5][froy], board[7][froy]
+            if getattr(board[7][froy],'str_rep') != '-':
+                if not self.scan_mode:
+                    print('right castle at %d, %d' % (frox, froy))
+                # add move count to rook
+                board[7][froy].increment_move_count(1)
+                # add move id to rook
+                board[7][froy].add_move(self.move_number)
+                board[tox][toy], board[frox][froy] = board[frox][froy], board[tox][toy]
+                board[7][froy], board[5][froy] = board[5][froy], board[7][froy]
+            else:
+                print(self.move_type, "WRONG")
 
         elif self.move_type == 'capture':
             if not self.scan_mode:
@@ -224,18 +232,18 @@ class Move():
             # delete rook move id and decrement move count
             if getattr(board[3][toy],'str_rep') != '-':
                 board[3][toy].increment_move_count(-1)
-            board[3][toy].delete_move()
-            # revert rook back to location
-            board[0][toy], board[3][toy] = board[3][toy], board[0][toy]
+                board[3][toy].delete_move()
+                # revert rook back to location
+                board[0][toy], board[3][toy] = board[3][toy], board[0][toy]
 
         # else If the move was a right castle
         elif self.move_type == 'rcastle':
             # delete rook move id and decrement move count
             if getattr(board[5][toy], 'str_rep') != '-':
                 board[5][toy].increment_move_count(-1)
-            board[5][toy].delete_move()
-            # revert rook back to location
-            board[7][toy], board[5][toy] = board[5][toy], board[7][toy]
+                board[5][toy].delete_move()
+                # revert rook back to location
+                board[7][toy], board[5][toy] = board[5][toy], board[7][toy]
 
         # else If the move was an enpassant
         elif self.move_type == 'enpassant':

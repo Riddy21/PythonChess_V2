@@ -218,14 +218,15 @@ class Game:
                     # If the piece is the king
                     if getattr(self.board[x][y], 'str_rep') == 'k' or getattr(self.board[x][y], 'str_rep') == 'K':
                         # Test if it is in check
+                        print('1.', self.turn)
                         in_check = self.board[x][y].isin_check(x, y, self)
                     # Try to move it and if there are no more moves
                     if self.get_next_poss_moves(x, y):
                         # set can move to true and break out
                         can_move = True
 
-        # Restore print statements
         sys.stdout = sys.__stdout__
+
 
         if not can_move:
             if in_check:
@@ -262,12 +263,34 @@ class Game:
         return super().__getattribute__(name)
 
     def __str__(self):
-        str = ''
+        string = ''
 
         # Add board string reps
         for y in range(len(self.board[0])):
             for x in range(len(self.board)):
-                str += self.board[x][y].str_rep + ' '
-            str += '\n'
+                string += self.board[x][y].str_rep + ' '
+            string += '\n'
 
         return str
+
+    def print_move_counts(self):
+        string = ''
+
+        # Add board string reps
+        for y in range(len(self.board[0])):
+            for x in range(len(self.board)):
+                string += str(self.board[x][y].move_count) + ' '
+            string += '\n'
+
+        print(string)
+
+    def print_move_hist(self):
+        string = ''
+
+        # Add board string reps
+        for y in range(len(self.board[0])):
+            for x in range(len(self.board)):
+                string += str(len(self.board[x][y].move_num_history)) + ' '
+            string += '\n'
+
+        print(string)
