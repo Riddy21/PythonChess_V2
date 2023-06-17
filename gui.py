@@ -1,5 +1,5 @@
 import pygame
-import easygui
+import popup
 
 # Set up the colors
 WHITE = (255, 255, 255)
@@ -120,6 +120,22 @@ class ChessboardGUI:
         self.api.handle_move(col, row)
         #self.api.make_move(position)
 
+    def prompt_checkmate(self, game_state):
+        if 'mate' in game_state:
+            ans = popup.askyesno(title="Checkmate!",
+                                 message="Checkmate!\nWould you like to quit?")
+            self.api.undo_move()
+            return not ans
+        return True
+
+    def prompt_promo(self, game_state):
+        if 'promo' in game_state:
+            ans = popup.askchoice(options=['Queen', 'Rook', 'Knight', 'Bishop'],
+                                  default='Queen')
+            print(ans)
+            self.api.make_pawn_promo(ans)
+
+
     def orient(self, coords):
         if self.ai:
             return coords
@@ -133,58 +149,54 @@ class ChessboardGUI:
         # Main game loop
         running = True
 
-        while running:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    running = False
-                elif event.type == pygame.MOUSEBUTTONDOWN:
-                    # Get the position of the mouse click
-                    pos = pygame.mouse.get_pos()
+        try:
+            while running:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        running = False
+                    elif event.type == pygame.MOUSEBUTTONDOWN:
+                        # Get the position of the mouse click
+                        pos = pygame.mouse.get_pos()
 
-                    self.handle_click(pos)
+                        self.handle_click(pos)
 
-                elif event.type == pygame.KEYDOWN:
-                    # Ctrl-Z was pressed
-                    if event.key == pygame.K_z and \
-                            (pygame.key.get_mods() & pygame.KMOD_CTRL or \
-                             pygame.key.get_mods() & pygame.KMOD_META):
-                        # One player undo twice
-                        if self.ai:
+                    elif event.type == pygame.KEYDOWN:
+                        # Ctrl-Z was pressed
+                        if event.key == pygame.K_z and \
+                                (pygame.key.get_mods() & pygame.KMOD_CTRL or \
+                                 pygame.key.get_mods() & pygame.KMOD_META):
+                            # One player undo twice
+                            if self.ai:
+                                self.api.undo_move()
+
                             self.api.undo_move()
 
-                        self.api.undo_move()
+                # Draw the chess board
+                self.draw_board()
 
-            game_state = self.api.get_game_state()
+                # If in check, draw the error highlights
+                self.draw_check_highlight(self.api.game_state)
 
-            # Draw the chess board
-            self.draw_board()
+                # Draw the pieces
+                self.draw_pieces(self.api.get_chess_board_string_array())
 
-            # If in check, draw the error highlights
-            self.draw_check_highlight(game_state)
+                # Draw markers for next moves
+                self.draw_poss_moves(self.api.get_current_poss_moves())
 
-            # Draw the pieces
-            self.draw_pieces(self.api.get_chess_board_string_array())
+                # Update the display
+                pygame.display.flip()
 
-            # Draw markers for next moves
-            self.draw_poss_moves(self.api.get_current_poss_moves())
+                running = self.prompt_checkmate(self.api.game_state)
 
-            # TODO: If in check, show Popup using TKinter
-            if 'checkmate' in game_state:
-                response = easygui.ynbox("Checkmate", "Checkmate! Do you want to quit?", ('Yes', 'No'))
-                if response:
-                    running = False
+                self.prompt_promo(self.api.game_state)
 
+                # Have AI do move if ai is enabled
+                if self.ai and self.api.turn == self.ai.color:
+                    self.ai.make_move()
 
+        except KeyboardInterrupt:
+            self.quit()
 
-            # Have AI do move if ai is enabled
-            if self.ai and self.api.turn == self.ai.color:
-                self.ai.make_move()
-
-
-            # Update the display
-            pygame.display.flip()
-
+    def quit(self):
         # Quit the game
         pygame.quit()
-
-#ChessboardGUI(None).run()

@@ -37,7 +37,7 @@ class Ai:
 
         # chose the move to make
         # FIXME: This is a placeholder
-        move = random.sample(playable_moves, 1)[0]
-
-        self.game.full_move(*move)
+        if playable_moves:
+            move = random.sample(playable_moves, 1)[0]
+            self.game.full_move(*move)
 

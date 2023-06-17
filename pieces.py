@@ -696,7 +696,6 @@ class King(_Piece):
 
         if scan_mode or not self.isin_check(x, y, probe_game):
             # White Piece
-            # FIXME: If castle is possible and you don't, error occurs
             if getattr(board[x][y], 'colour') == 'white':
                 # The king must be at starting position with 0 move count
                 if x == 4 and y == 7 and getattr(board[x][y], 'move_count') == 0:
@@ -865,6 +864,8 @@ class King(_Piece):
     # MUST BE IN THE TURN THAT YOU ARE CHECKING
     def isin_check(self, king_x, king_y, game):
         # switches turn into the opponent's turn to check
+        pre_scan_mode = game.scan_mode
+        game.scan_mode = True
         game.switch_turn()
         # Loop through all pieces on the board
         for y in range(8):
@@ -878,10 +879,12 @@ class King(_Piece):
                     # if the move will hit the king
                     if king_x == opx and king_y == opy:
                         game.switch_turn()
+                        game.scan_mode = pre_scan_mode
                         # Save the move in a list
                         return True
         # switches turn back
         game.switch_turn()
+        game.scan_mode = pre_scan_mode
         return False
 
     # Check for whether castle move was made

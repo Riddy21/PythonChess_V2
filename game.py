@@ -32,12 +32,12 @@ class Game:
         # scan mode to stop recursive loop of checking check and checkmate
         self.scan_mode = scan_mode
 
-        self.pawn_promo = False
-
         # TODO: Add functionality to set board from savefile
         # if board was not loaded by passing a parameter, set the board
         if not self.board:
             self.set_board()
+
+        self.game_state = self.get_game_state()
 
 
     # TODO: set board as a specific config
@@ -87,6 +87,9 @@ class Game:
             self.turn = 'black'
         else:
             self.turn = 'white'
+
+        if not self.scan_mode:
+            self.game_state = self.get_game_state()
 
     # Function to make complete move from to-coordinates and from-coordinates
     def full_move(self, frox, froy, tox, toy):
@@ -191,6 +194,7 @@ class Game:
         if self.moves[-1].pawn_promo == 'ready':
             if not self.scan_mode:
                 print('Pawn Promotion is valid')
+                self.game_state = '%s pawn promo' % self.turn
         else:
             self.switch_turn()
 
@@ -218,7 +222,6 @@ class Game:
                     # If the piece is the king
                     if getattr(self.board[x][y], 'str_rep') == 'k' or getattr(self.board[x][y], 'str_rep') == 'K':
                         # Test if it is in check
-                        print('1.', self.turn)
                         in_check = self.board[x][y].isin_check(x, y, self)
                     # Try to move it and if there are no more moves
                     if self.get_next_poss_moves(x, y):
@@ -226,7 +229,6 @@ class Game:
                         can_move = True
 
         sys.stdout = sys.__stdout__
-
 
         if not can_move:
             if in_check:
