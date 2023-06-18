@@ -910,4 +910,4 @@ class Blank(_Piece):
         super().__init__(0, 'none', 'Assets/Blank.png', '-', 0, [], None)
     def increment_move_count(self, inc):
         print('Trying to increment a blank piece')
-        #raise RuntimeError
+        raise RuntimeError

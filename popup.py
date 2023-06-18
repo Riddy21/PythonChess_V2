@@ -34,9 +34,6 @@ def _make_promo_popup(options=[], default=None):
         value[0] = text
         popup.quit()
 
-    # Disable the board
-    # FIXME: This line doesn't work
-    #self.window.disable()
     # Make popup window
     popup = tk.Tk()
 
