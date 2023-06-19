@@ -120,13 +120,13 @@ class ChessboardGUI:
         self.api.handle_move(col, row)
         #self.api.make_move(position)
 
-    def prompt_checkmate(self, game_state):
+    def prompt_checkmate_quit(self, game_state):
         if 'mate' in game_state:
             ans = popup.askyesno(title="Checkmate!",
                                  message="Checkmate!\nWould you like to quit?")
             self.api.undo_move()
-            return not ans
-        return True
+            return ans
+        return False
 
     def prompt_promo(self, game_state):
         if 'promo' in game_state:
@@ -158,18 +158,20 @@ class ChessboardGUI:
                         # Get the position of the mouse click
                         pos = pygame.mouse.get_pos()
 
-                        self.handle_click(pos)
+                        if self.api.turn != self.ai.color:
+                            self.handle_click(pos)
 
                     elif event.type == pygame.KEYDOWN:
                         # Ctrl-Z was pressed
                         if event.key == pygame.K_z and \
                                 (pygame.key.get_mods() & pygame.KMOD_CTRL or \
                                  pygame.key.get_mods() & pygame.KMOD_META):
-                            # One player undo twice
-                            if self.ai:
-                                self.api.undo_move()
+                            if self.api.turn != self.ai.color:
+                                # One player undo twice
+                                if self.ai:
+                                    self.api.undo_move()
 
-                            self.api.undo_move()
+                                self.api.undo_move()
 
                 # Draw the chess board
                 self.draw_board()
@@ -186,7 +188,8 @@ class ChessboardGUI:
                 # Update the display
                 pygame.display.flip()
 
-                running = self.prompt_checkmate(self.api.game_state)
+                if self.prompt_checkmate_quit(self.api.game_state):
+                    running = False
 
                 self.prompt_promo(self.api.game_state)
 
