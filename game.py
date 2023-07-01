@@ -213,14 +213,17 @@ class Game:
         in_check = False
 
         # in opponent's turn currently
+        num_pieces = 0
 
         # loops through all pieces on the board
         for y in range(len(self.board[0])):
             for x in range(len(self.board)):
                 # If the piece iterated on is piece of the next turn
-                if getattr(self.board[x][y], 'colour') == self.turn:
+                if self.board[x][y].colour != 'none':
+                    num_pieces += 1
+                if self.board[x][y].colour == self.turn:
                     # If the piece is the king
-                    if getattr(self.board[x][y], 'str_rep') == 'k' or getattr(self.board[x][y], 'str_rep') == 'K':
+                    if self.board[x][y].str_rep == 'k' or self.board[x][y].str_rep == 'K':
                         # Test if it is in check
                         in_check = self.board[x][y].isin_check(x, y, self)
                     # Try to move it and if there are no more moves
@@ -229,6 +232,10 @@ class Game:
                         can_move = True
 
         sys.stdout = sys.__stdout__
+
+        # If there's only 2 kings left
+        if num_pieces <= 2:
+            return 'stalemate'
 
         if not can_move:
             if in_check:
@@ -247,7 +254,7 @@ class Game:
         coords = set()
         for y in range(len(self.board[0])):
             for x in range(len(self.board)):
-                if getattr(self.board[x][y], 'str_rep') == piece_str:
+                if self.board[x][y].str_rep == piece_str:
                     coords.add((x,y))
         return coords
 

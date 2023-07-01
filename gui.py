@@ -124,10 +124,15 @@ class ChessboardGUI:
         self.api.handle_move(col, row)
         #self.api.make_move(position)
 
-    def prompt_checkmate_quit(self, game_state):
-        if 'mate' in game_state:
+    def prompt_mate_quit(self, game_state):
+        if 'checkmate' in game_state:
             ans = popup.askyesno(title="Checkmate!",
-                                 message="Checkmate!\nWould you like to quit?")
+                                 message="Checkmate! %s wins!\nWould you like to quit?" % self.get_prev_player().color)
+            self.api.undo_move()
+            return ans
+        elif 'stalemate' in game_state:
+            ans = popup.askyesno(title="Stalemate!",
+                                 message="Stalemate!\nWould you like to quit?")
             self.api.undo_move()
             return ans
         return False
@@ -137,6 +142,12 @@ class ChessboardGUI:
             return self.p1
         else:
             return self.p2
+
+    def get_prev_player(self):
+        if self.api.turn == self.p1.color:
+            return self.p2
+        else:
+            return self.p1
 
     def prompt_promo(self, game_state):
         # If it's the AI's turn and it is the COMPUTER
@@ -202,7 +213,7 @@ class ChessboardGUI:
                 # Update the display
                 pygame.display.flip()
 
-                if self.prompt_checkmate_quit(self.api.game_state):
+                if self.prompt_mate_quit(self.api.game_state):
                     running = False
 
                 self.prompt_promo(self.api.game_state)
