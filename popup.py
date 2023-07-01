@@ -24,10 +24,7 @@ def draw_popup(popup, **kwargs):
 
     return q.get()
 
-def askyesno(**kwargs):
-    return draw_popup(messagebox.askyesno, **kwargs)
-
-def _make_promo_popup(options=[], default=None):
+def _make_choice_popup(title, message, options=[], default=None):
     value = [default]
     def on_click(text, value):
         popup.destroy()
@@ -38,12 +35,12 @@ def _make_promo_popup(options=[], default=None):
     popup = tk.Tk()
 
     # configure and style
-    popup.title("Promotion")
+    popup.title(title)
     width = popup.winfo_screenwidth()
     height = popup.winfo_screenheight()
     popup.geometry("315x50+%d+%d" % (width/2-315/2, height/2-50/2))
     popup.resizable(0, 0)
-    tk.Label(popup, text='Choose Piece').grid(row=1, columnspan=2, column=1)
+    tk.Label(popup, text=message).grid(row=1, columnspan=2, column=1)
     for i, text in enumerate(options):
         # Command is partial because needs to be current i
         button = tk.Button(popup, padx=17, text=text, command=partial(on_click, text, value))
@@ -53,6 +50,9 @@ def _make_promo_popup(options=[], default=None):
 
     return value[0]
 
-def askchoice(**kwargs):    # Makes a popup frame for paw promotion
+def askchoice(**kwargs):
+    return draw_popup(_make_choice_popup, **kwargs)
 
-    return draw_popup(_make_promo_popup, **kwargs)
+def askyesno(**kwargs):
+    return draw_popup(messagebox.askyesno, **kwargs)
+

@@ -7,7 +7,7 @@ from gui import ChessboardGUI
 
 board = [[Blank()] * 8 for i in range(8)]
 board[3][0] = King('black')
-board[0][7] = Rook('white')
+board[0][6] = Pawn('black')
 board[4][7] = King('white')
 
 game = Game(board=board)

@@ -1,5 +1,6 @@
 import pygame
 import popup
+from player import *
 
 # Set up the colors
 WHITE = (255, 255, 255)
@@ -10,9 +11,12 @@ GREY = (200, 200, 200)
 RED = (255, 200, 200)
 
 class ChessboardGUI:
-    def __init__(self, api, ai=None):
+    def __init__(self, api, p1, p2):
+        if p1.color == p2.color:
+            raise RuntimeError("Player colors cannot be the same")
         self.api = api
-        self.ai = ai
+        self.p1 = p1
+        self.p2 = p2
 
         # Initialize Pygame
         pygame.init()
@@ -128,16 +132,26 @@ class ChessboardGUI:
             return ans
         return False
 
+    def get_current_player(self):
+        if self.api.turn == self.p1.color:
+            return self.p1
+        else:
+            return self.p2
+
     def prompt_promo(self, game_state):
+        # If it's the AI's turn and it is the COMPUTER
+        if self.get_current_player().type == Player.COMPUTER:
+            return
         if 'promo' in game_state:
-            ans = popup.askchoice(options=['Queen', 'Rook', 'Knight', 'Bishop'],
+            ans = popup.askchoice(title="Promotion",
+                                  message="Choose Piece",
+                                  options=['Queen', 'Rook', 'Knight', 'Bishop'],
                                   default='Queen')
-            print(ans)
             self.api.make_pawn_promo(ans)
 
 
     def orient(self, coords):
-        if self.ai:
+        if self.get_current_player().type == Player.COMPUTER:
             return coords
         
         if self.api.turn == 'white':
@@ -158,7 +172,7 @@ class ChessboardGUI:
                         # Get the position of the mouse click
                         pos = pygame.mouse.get_pos()
 
-                        if self.api.turn != self.ai.color:
+                        if self.get_current_player().type == Player.HUMAN:
                             self.handle_click(pos)
 
                     elif event.type == pygame.KEYDOWN:
@@ -166,9 +180,9 @@ class ChessboardGUI:
                         if event.key == pygame.K_z and \
                                 (pygame.key.get_mods() & pygame.KMOD_CTRL or \
                                  pygame.key.get_mods() & pygame.KMOD_META):
-                            if self.api.turn != self.ai.color:
+                            if self.get_current_player().type == Player.HUMAN:
                                 # One player undo twice
-                                if self.ai:
+                                if Player.COMPUTER in (self.p1.type, self.p2.type):
                                     self.api.undo_move()
 
                                 self.api.undo_move()
@@ -194,8 +208,8 @@ class ChessboardGUI:
                 self.prompt_promo(self.api.game_state)
 
                 # Have AI do move if ai is enabled
-                if self.ai and self.api.turn == self.ai.color:
-                    self.ai.make_move()
+                if self.get_current_player().type == Player.COMPUTER:
+                        self.get_current_player().make_move()
 
         except KeyboardInterrupt:
             self.quit()

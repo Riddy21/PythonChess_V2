@@ -2,12 +2,14 @@ import threading
 import random
 from time import sleep
 
-# Ai class that can analyse a game and take control of a specific color
-class Ai:
-    def __init__(self, game, color):
-        # Needs a game to control and a color to control
+class Player:
+    HUMAN = 'human'
+    COMPUTER = 'computer'
+    def __init__(self, game, color, type):
+        super().__init__()
         self.game = game
         self.color = color
+        self.type = type
 
     def start(self):
         def threaded_start():
@@ -20,6 +22,22 @@ class Ai:
         start_thread.start()
 
         return start_thread
+
+
+    def make_move(self):
+        raise TypeError("Cannot make move on Player class")
+        
+
+
+class Human(Player):
+    def __init__(self, game, color):
+        super().__init__(game, color, Player.HUMAN)
+
+
+# Ai class that can analyse a game and take control of a specific color
+class Computer(Player):
+    def __init__(self, game, color):
+        super().__init__(game, color, Player.COMPUTER)
 
     def make_move(self):
         # get all playable pieces
@@ -37,6 +55,9 @@ class Ai:
 
         # chose the move to make
         # FIXME: This is a placeholder
+        print(self.game.game_state)
+        if self.game.game_state == '%s pawn promo' % self.color:
+            self.game.make_pawn_promo('Queen')
         if playable_moves:
             move = random.sample(playable_moves, 1)[0]
             self.game.full_move(*move)
