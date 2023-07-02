@@ -32,7 +32,7 @@ class Computer(Player):
 
     def start(self):
         def threaded_start():
-            while self.running:
+            while self.running and 'mate' not in self.game.game_state:
                 if self.game.turn != self.color:
                     self.game.switch_turn_event.wait()
                 else:
@@ -62,7 +62,6 @@ class Computer(Player):
 
         # chose the move to make
         # FIXME: This is a placeholder
-        print(self.game.game_state)
         LOCK.acquire()
         if playable_moves:
             move = random.sample(playable_moves, 1)[0]

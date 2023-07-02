@@ -1,20 +1,27 @@
 from game import Game
-from ai import Ai
-from time import sleep
 from pieces import *
 from gui import ChessboardGUI
+from player import Computer, Human
 
 
-board = [[Blank()] * 8 for i in range(8)]
-board[3][0] = King('black')
-board[0][6] = Pawn('black')
-board[4][7] = King('white')
+#board = [[Blank()] * 8 for i in range(8)]
+#board[3][0] = King('black')
+#board[0][6] = Pawn('black')
+#board[4][7] = King('white')
 
-game = Game(board=board)
-ai = Ai(game=game, color='black')
-gui = ChessboardGUI(game, ai)
+for i in range(10):
+    print("------ game %s ------" % i+1)
+    game = Game()
+    ai1 = Computer(game=game, color='black')
+    ai2 = Computer(game=game, color='white')
+    thread1 = ai1.start()
+    thread2 = ai2.start()
 
-gui.run()
+    thread1.join()
+    thread2.join()
+#gui = ChessboardGUI(game, ai)
+
+#gui.run()
 
 
 
