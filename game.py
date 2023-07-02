@@ -2,22 +2,22 @@ from typing import Any
 import sys, os
 from pieces import Blank, Bishop, King, Knight, Rook, Pawn, Queen
 from move import Move
+from threading import Event, Lock
+from copy import deepcopy
 
 
 # Game class initiated when the game board is displayed
 class Game:
-    def __init__(self, turn='white', board=None, moves=None, captured_white=None, captured_black=None, scan_mode=False):
+    def __init__(self, turn='white', board=None, moves=None, captured_white=None, captured_black=None, scan_mode=False, prev_game_state='normal'):
         if captured_black is None:
             captured_black = []
         if captured_white is None:
             captured_white = []
         if moves is None:
             moves = []
-        if board is None:
-            board = []
 
         # 2D array of pieces to represent board
-        self.board = board
+        self.board = deepcopy(board)
 
         # captured Pieces
         self.captured_white = captured_white
@@ -28,6 +28,7 @@ class Game:
 
         # string representing the turn colour of the game
         self.turn = turn
+        self.switch_turn_event = Event()
 
         # scan mode to stop recursive loop of checking check and checkmate
         self.scan_mode = scan_mode
@@ -37,7 +38,7 @@ class Game:
         if not self.board:
             self.set_board()
 
-        self.game_state = self.get_game_state()
+        self.game_state = prev_game_state
 
 
     # TODO: set board as a specific config
@@ -87,6 +88,10 @@ class Game:
             self.turn = 'black'
         else:
             self.turn = 'white'
+
+        # Set multiprocessing event
+        self.switch_turn_event.set()
+        self.switch_turn_event.clear()
 
         if not self.scan_mode:
             self.game_state = self.get_game_state()

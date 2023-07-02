@@ -2,6 +2,8 @@ import threading
 import random
 from time import sleep
 
+LOCK = threading.Lock()
+
 class Player:
     HUMAN = 'human'
     COMPUTER = 'computer'
@@ -11,33 +13,38 @@ class Player:
         self.color = color
         self.type = type
 
-    def start(self):
-        def threaded_start():
-            while 'mate' not in self.game.get_game_state():
-                # TODO: Change this to event based later
-                sleep(1)
-                if self.game.turn == self.color:
-                    self.make_move()
-        start_thread = threading.Thread(target=threaded_start)
-        start_thread.start()
-
-        return start_thread
-
-
-    def make_move(self):
-        raise TypeError("Cannot make move on Player class")
-        
-
 
 class Human(Player):
     def __init__(self, game, color):
         super().__init__(game, color, Player.HUMAN)
+
+    def handle_move(self, col, row):
+        LOCK.acquire()
+        self.game.handle_move(col, row)
+        LOCK.release()
 
 
 # Ai class that can analyse a game and take control of a specific color
 class Computer(Player):
     def __init__(self, game, color):
         super().__init__(game, color, Player.COMPUTER)
+        self.running = True
+
+    def start(self):
+        def threaded_start():
+            while self.running:
+                if self.game.turn != self.color:
+                    self.game.switch_turn_event.wait()
+                else:
+                    self.make_move()
+        start_thread = threading.Thread(target=threaded_start)
+        start_thread.start()
+
+        return start_thread
+
+    def quit(self):
+        self.running = False
+
 
     def make_move(self):
         # get all playable pieces
@@ -56,9 +63,11 @@ class Computer(Player):
         # chose the move to make
         # FIXME: This is a placeholder
         print(self.game.game_state)
-        if self.game.game_state == '%s pawn promo' % self.color:
-            self.game.make_pawn_promo('Queen')
+        LOCK.acquire()
         if playable_moves:
             move = random.sample(playable_moves, 1)[0]
             self.game.full_move(*move)
+        if self.game.game_state == '%s pawn promo' % self.color:
+            self.game.make_pawn_promo('Queen')
+        LOCK.release()
 

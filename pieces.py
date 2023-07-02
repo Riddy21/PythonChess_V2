@@ -193,7 +193,7 @@ class Pawn(_Piece):
                 poss_moves.append([x, y + i])
                 i += 1
 
-            # TODO: ONLY WHEN SCAN MODE AND KING CAN BE CAPTURED
+            # NOTE: ONLY WHEN SCAN MODE AND KING CAN BE CAPTURED
             # Sideways Capture, ** if in scan mode, side captures count even if there is no piece currently there
             if x < 7 and y < 7 and getattr(board[x + 1][y + 1], 'colour') == 'white':
                 poss_moves.append([x + 1, y + 1])
@@ -227,7 +227,7 @@ class Pawn(_Piece):
                 poss_moves.append([x, y - i])
                 i += 1
 
-            # TODO: ONLY WHEN SCAN MODE AND KING CAN BE CAPTURED
+            # NOTE: ONLY WHEN SCAN MODE AND KING CAN BE CAPTURED
             # Sideways Capture
             if x < 7 and y >= 0 and getattr(board[x + 1][y - 1], 'colour') == 'black':
                 poss_moves.append([x + 1, y - 1])
@@ -862,29 +862,26 @@ class King(_Piece):
 
     # Checks if itself is in check move from is in
     # MUST BE IN THE TURN THAT YOU ARE CHECKING
-    def isin_check(self, king_x, king_y, game):
+    def isin_check(self, king_x, king_y, curr_game):
         # switches turn into the opponent's turn to check
-        pre_scan_mode = game.scan_mode
-        game.scan_mode = True
-        game.switch_turn()
+        if curr_game.turn == 'black':
+            probe_game = game.Game(turn='white', board=curr_game.board, scan_mode=True, prev_game_state=curr_game.game_state)
+        else:
+            probe_game = game.Game(turn='black', board=curr_game.board, scan_mode=True, prev_game_state=curr_game.game_state)
         # Loop through all pieces on the board
         for y in range(8):
             for x in range(8):
                 # Advance each opponent piece and save possible moves
-                op_moves = game.get_next_poss_moves(x, y)
+                op_moves = probe_game.get_next_poss_moves(x, y)
 
                 # loop through all possible moves
                 for op_move in op_moves:
                     opx, opy = op_move
                     # if the move will hit the king
                     if king_x == opx and king_y == opy:
-                        game.switch_turn()
-                        game.scan_mode = pre_scan_mode
                         # Save the move in a list
                         return True
         # switches turn back
-        game.switch_turn()
-        game.scan_mode = pre_scan_mode
         return False
 
     # Check for whether castle move was made

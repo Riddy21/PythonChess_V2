@@ -111,7 +111,7 @@ class ChessboardGUI:
             width, height = piece_image.get_size()
             self.window.blit(piece_image, (x+(self.SQUARE_SIZE- width)/2, y+(self.SQUARE_SIZE-height)/2))
 
-    def handle_click(self, pos):
+    def handle_click(self, pos, player):
         # Calculate the clicked square
         col = pos[0] // self.SQUARE_SIZE
         row = pos[1] // self.SQUARE_SIZE
@@ -121,7 +121,7 @@ class ChessboardGUI:
 
         # Call the API method to interact with the chessboard
         col, row = self.orient((col, row))
-        self.api.handle_move(col, row)
+        player.handle_move(col, row)
         #self.api.make_move(position)
 
     def prompt_mate_quit(self, game_state):
@@ -176,6 +176,7 @@ class ChessboardGUI:
 
         try:
             while running:
+                current_player = self.get_current_player()
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         running = False
@@ -183,15 +184,15 @@ class ChessboardGUI:
                         # Get the position of the mouse click
                         pos = pygame.mouse.get_pos()
 
-                        if self.get_current_player().type == Player.HUMAN:
-                            self.handle_click(pos)
+                        if current_player.type == Player.HUMAN:
+                            self.handle_click(pos, current_player)
 
                     elif event.type == pygame.KEYDOWN:
                         # Ctrl-Z was pressed
                         if event.key == pygame.K_z and \
                                 (pygame.key.get_mods() & pygame.KMOD_CTRL or \
                                  pygame.key.get_mods() & pygame.KMOD_META):
-                            if self.get_current_player().type == Player.HUMAN:
+                            if current_player.type == Player.HUMAN:
                                 # One player undo twice
                                 if Player.COMPUTER in (self.p1.type, self.p2.type):
                                     self.api.undo_move()
@@ -219,12 +220,17 @@ class ChessboardGUI:
                 self.prompt_promo(self.api.game_state)
 
                 # Have AI do move if ai is enabled
-                if self.get_current_player().type == Player.COMPUTER:
-                        self.get_current_player().make_move()
+                #if self.get_current_player().type == Player.COMPUTER:
+                #        self.get_current_player().make_move()
 
         except KeyboardInterrupt:
-            self.quit()
+            pass
+        self.quit()
 
     def quit(self):
         # Quit the game
         pygame.quit()
+        if self.p1.type == Player.COMPUTER:
+            self.p1.quit()
+        if self.p2.type == Player.COMPUTER:
+            self.p2.quit()
