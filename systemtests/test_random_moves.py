@@ -30,12 +30,17 @@ class TestGame(unittest.TestCase):
                 game = Game()
                 ai1 = Computer(game=game, color='black')
                 ai2 = Computer(game=game, color='white')
-                ai1.start()
-                ai2.start()
+                thread1 = ai1.start()
+                thread2 = ai2.start()
             
                 self.quit_on_mate(game, ai1, ai2)
+                self.assertFalse(thread1.is_alive())
+                self.assertFalse(thread2.is_alive())
         except Exception as e:
             ai1.quit()
             ai2.quit()
             game.quit()
             raise e
+
+
+        

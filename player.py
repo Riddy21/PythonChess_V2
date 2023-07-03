@@ -49,6 +49,7 @@ class Computer(Player):
         self.running = False
         # Iterate one more to make sure that all threads stop
         self.game.switch_turn_event.set()
+        sleep(0.5)
         self.game.switch_turn_event.clear()
 
 
