@@ -308,3 +308,9 @@ class Game:
             string += '\n'
 
         print(string)
+
+    def quit(self):
+        # TODO: Delete instances of all objects
+        self.switch_turn_event.set()
+        self.switch_turn_event.clear()
+        return

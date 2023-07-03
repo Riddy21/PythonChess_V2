@@ -32,11 +32,14 @@ class Computer(Player):
 
     def start(self):
         def threaded_start():
-            while self.running and 'mate' not in self.game.game_state:
+            while self.running:
                 if self.game.turn != self.color:
                     self.game.switch_turn_event.wait()
                 else:
                     self.make_move()
+            print('Quitting player')
+            exit()
+
         start_thread = threading.Thread(target=threaded_start)
         start_thread.start()
 
@@ -44,6 +47,9 @@ class Computer(Player):
 
     def quit(self):
         self.running = False
+        # Iterate one more to make sure that all threads stop
+        self.game.switch_turn_event.set()
+        self.game.switch_turn_event.clear()
 
 
     def make_move(self):
@@ -60,13 +66,20 @@ class Computer(Player):
             for move in moves:
                 playable_moves.add((*piece, *move))
 
+        # Don't do anything on checkmate or stalemate
+        if 'mate' in self.game.game_state:
+            sleep(0.1)
+            return
+
+        # TODO: This is a placeholder
         # chose the move to make
-        # FIXME: This is a placeholder
+        # NOTE: Lock to make sure game only accessed by one at a time
         LOCK.acquire()
         if playable_moves:
             move = random.sample(playable_moves, 1)[0]
             self.game.full_move(*move)
         if self.game.game_state == '%s pawn promo' % self.color:
             self.game.make_pawn_promo('Queen')
+
         LOCK.release()
 

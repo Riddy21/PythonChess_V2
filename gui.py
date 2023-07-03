@@ -129,10 +129,12 @@ class ChessboardGUI:
             ans = popup.askyesno(title="Checkmate!",
                                  message="Checkmate! %s wins!\nWould you like to quit?" % self.get_prev_player().color)
             self.api.undo_move()
+            self.api.undo_move()
             return ans
         elif 'stalemate' in game_state:
             ans = popup.askyesno(title="Stalemate!",
                                  message="Stalemate!\nWould you like to quit?")
+            self.api.undo_move()
             self.api.undo_move()
             return ans
         return False
@@ -234,3 +236,4 @@ class ChessboardGUI:
             self.p1.quit()
         if self.p2.type == Player.COMPUTER:
             self.p2.quit()
+        self.api.quit()
