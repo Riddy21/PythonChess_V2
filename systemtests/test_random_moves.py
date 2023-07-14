@@ -21,6 +21,7 @@ class TestGame(unittest.TestCase):
         ai1.quit()
         ai2.quit()
         game.quit()
+        sleep(0.5)
 
 
     def test_random(self):

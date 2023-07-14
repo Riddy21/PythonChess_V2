@@ -309,8 +309,13 @@ class Game:
 
         print(string)
 
-    def quit(self):
-        # TODO: Delete instances of all objects
+    def resume_game(self):
+        """Helps clear the AIs from game object"""
         self.switch_turn_event.set()
         self.switch_turn_event.clear()
+
+    def quit(self):
+        """Exits the game"""
+        self.resume_game()
+        del self
         return

@@ -128,16 +128,18 @@ class ChessboardGUI:
         if 'checkmate' in game_state:
             ans = popup.askyesno(title="Checkmate!",
                                  message="Checkmate! %s wins!\nWould you like to quit?" % self.get_prev_player().color)
-            self.api.undo_move()
-            self.api.undo_move()
-            return ans
         elif 'stalemate' in game_state:
             ans = popup.askyesno(title="Stalemate!",
                                  message="Stalemate!\nWould you like to quit?")
-            self.api.undo_move()
-            self.api.undo_move()
+        else:
+            ans = False
             return ans
-        return False
+
+        if not ans:
+            self.api.undo_move()
+            self.api.undo_move()
+            self.api.resume_game()
+        return ans
 
     def get_current_player(self):
         if self.api.turn == self.p1.color:

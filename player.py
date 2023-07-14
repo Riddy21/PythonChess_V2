@@ -48,9 +48,7 @@ class Computer(Player):
     def quit(self):
         self.running = False
         # Iterate one more to make sure that all threads stop
-        self.game.switch_turn_event.set()
-        sleep(0.5)
-        self.game.switch_turn_event.clear()
+        self.game.resume_game()
 
 
     def make_move(self):
@@ -62,14 +60,13 @@ class Computer(Player):
         # FIXME: Check will cause "no more moves"
         for piece in playable_pieces:
             moves = self.game.get_next_poss_moves(*piece)
-            #print(self.game.board[piece[0]][piece[1]])
-            #print(moves)
             for move in moves:
                 playable_moves.add((*piece, *move))
 
         # Don't do anything on checkmate or stalemate
         if 'mate' in self.game.game_state:
-            sleep(0.1)
+            # Pause
+            self.game.switch_turn_event.wait()
             return
 
         # TODO: This is a placeholder

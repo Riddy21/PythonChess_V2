@@ -5,6 +5,9 @@ class TestGame(unittest.TestCase):
     def setUp(self):
         self.game = Game()
 
+    def tearDown(self):
+        self.game.quit()
+
     def test_switch_turn(self):
         print(self.game.turn)
         self.game.switch_turn()
