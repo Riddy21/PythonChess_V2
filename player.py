@@ -13,6 +13,12 @@ class Player:
         self.color = color
         self.type = type
 
+    def undo_move(self, num=1):
+        LOCK.acquire()
+        for i in range(num):
+            self.game.undo_move()
+        LOCK.release()
+
 
 class Human(Player):
     def __init__(self, game, color):
@@ -47,8 +53,8 @@ class Computer(Player):
 
     def quit(self):
         self.running = False
-        # Iterate one more to make sure that all threads stop
-        self.game.resume_game()
+        # Make sure to alert all players
+        self.game.alert_players()
 
 
     def make_move(self):

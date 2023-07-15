@@ -43,5 +43,7 @@ class TestGame(unittest.TestCase):
             game.quit()
             raise e
 
+    # FIXME: Write test for stalemate and checkmate undo
+
 
         

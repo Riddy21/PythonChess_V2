@@ -83,15 +83,18 @@ class Game:
 
     # Function to switch turns
     def switch_turn(self):
+        self.switch_turn_quiet()
 
+        # Set multiprocessing event
+        self.alert_players()
+
+
+    # switch turns without notifying players
+    def switch_turn_quiet(self):
         if self.turn == 'white':
             self.turn = 'black'
         else:
             self.turn = 'white'
-
-        # Set multiprocessing event
-        self.switch_turn_event.set()
-        self.switch_turn_event.clear()
 
         if not self.scan_mode:
             self.game_state = self.get_game_state()
@@ -309,13 +312,13 @@ class Game:
 
         print(string)
 
-    def resume_game(self):
-        """Helps clear the AIs from game object"""
+    def alert_players(self):
+        """Notify players that move can be made"""
         self.switch_turn_event.set()
         self.switch_turn_event.clear()
 
     def quit(self):
         """Exits the game"""
-        self.resume_game()
+        self.alert_players()
         del self
         return

@@ -76,6 +76,7 @@ class ChessboardGUI:
             print('Error: more than one king')
             return
         for col, row in coords:
+            col, row = self.orient((col, row))
             self.draw_highlight(col, row)
 
     # draw the pieces from the game object
@@ -136,9 +137,7 @@ class ChessboardGUI:
             return ans
 
         if not ans:
-            self.api.undo_move()
-            self.api.undo_move()
-            self.api.resume_game()
+            self.get_current_player().undo_move(2)
         return ans
 
     def get_current_player(self):
@@ -166,8 +165,17 @@ class ChessboardGUI:
 
 
     def orient(self, coords):
-        if self.get_current_player().type == Player.COMPUTER:
+        if self.get_current_player().type == Player.COMPUTER and\
+                self.get_prev_player().type == Player.COMPUTER:
             return coords
+
+        if self.get_current_player().type == Player.COMPUTER and\
+                self.api.turn == 'black':
+            return coords
+
+        if self.get_current_player().type == Player.COMPUTER and\
+                self.api.turn == 'white':
+            return 7-coords[0], 7-coords[1]
         
         if self.api.turn == 'white':
             return coords
@@ -197,11 +205,11 @@ class ChessboardGUI:
                                 (pygame.key.get_mods() & pygame.KMOD_CTRL or \
                                  pygame.key.get_mods() & pygame.KMOD_META):
                             if current_player.type == Player.HUMAN:
-                                # One player undo twice
                                 if Player.COMPUTER in (self.p1.type, self.p2.type):
-                                    self.api.undo_move()
+                                    self.get_current_player().undo_move(2)
+                                else:
+                                    self.get_current_player().undo_move(1)
 
-                                self.api.undo_move()
 
                 # Draw the chess board
                 self.draw_board()
