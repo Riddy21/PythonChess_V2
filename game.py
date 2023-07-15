@@ -2,43 +2,44 @@ from typing import Any
 import sys, os
 from pieces import Blank, Bishop, King, Knight, Rook, Pawn, Queen
 from move import Move
+from threading import Event, Lock
+from copy import deepcopy
 
 
 # Game class initiated when the game board is displayed
 class Game:
-    def __init__(self, turn='white', board=None, moves=None, captured_white=None, captured_black=None, scan_mode=False):
+    def __init__(self, turn='white', board=None, moves=None, captured_white=None, captured_black=None, scan_mode=False, prev_game_state='normal'):
         if captured_black is None:
             captured_black = []
         if captured_white is None:
             captured_white = []
         if moves is None:
             moves = []
-        if board is None:
-            board = []
 
         # 2D array of pieces to represent board
-        self.board = board
+        self.board = deepcopy(board)
 
         # captured Pieces
         self.captured_white = captured_white
         self.captured_black = captured_black
 
         # stack of all old moves and current move
-        # TODO: Make the list as a max undo of a certain length
         self.moves = moves
 
         # string representing the turn colour of the game
         self.turn = turn
+        self.switch_turn_event = Event()
 
         # scan mode to stop recursive loop of checking check and checkmate
         self.scan_mode = scan_mode
-
-        self.pawn_promo = False
 
         # TODO: Add functionality to set board from savefile
         # if board was not loaded by passing a parameter, set the board
         if not self.board:
             self.set_board()
+
+        self.game_state = prev_game_state
+
 
     # TODO: set board as a specific config
     def set_board(self):
@@ -82,11 +83,21 @@ class Game:
 
     # Function to switch turns
     def switch_turn(self):
-        # FIXME: raise an event for each turn switch
+        self.switch_turn_quiet()
+
+        # Set multiprocessing event
+        self.alert_players()
+
+
+    # switch turns without notifying players
+    def switch_turn_quiet(self):
         if self.turn == 'white':
             self.turn = 'black'
         else:
             self.turn = 'white'
+
+        if not self.scan_mode:
+            self.game_state = self.get_game_state()
 
     # Function to make complete move from to-coordinates and from-coordinates
     def full_move(self, frox, froy, tox, toy):
@@ -150,10 +161,11 @@ class Game:
 
     # Function to return possible moves for the piece entered without making the move
     def get_next_poss_moves(self, x, y):
-        poss_moves = Move.get_poss_moves(self.board, self.turn, x, y, len(self.moves), scan_mode=True,
+        poss_moves = Move.get_poss_moves(self.board, self.turn, x, y, len(self.moves), scan_mode=self.scan_mode,
                                          look_ahead=True)
 
         return poss_moves
+
 
     # Faster way to access current poss moves without recalculating all poss moves
     def get_current_poss_moves(self):
@@ -190,6 +202,7 @@ class Game:
         if self.moves[-1].pawn_promo == 'ready':
             if not self.scan_mode:
                 print('Pawn Promotion is valid')
+                self.game_state = '%s pawn promo' % self.turn
         else:
             self.switch_turn()
 
@@ -208,14 +221,17 @@ class Game:
         in_check = False
 
         # in opponent's turn currently
+        num_pieces = 0
 
         # loops through all pieces on the board
         for y in range(len(self.board[0])):
             for x in range(len(self.board)):
                 # If the piece iterated on is piece of the next turn
-                if getattr(self.board[x][y], 'colour') == self.turn:
+                if self.board[x][y].colour != 'none':
+                    num_pieces += 1
+                if self.board[x][y].colour == self.turn:
                     # If the piece is the king
-                    if getattr(self.board[x][y], 'str_rep') == 'k' or getattr(self.board[x][y], 'str_rep') == 'K':
+                    if self.board[x][y].str_rep == 'k' or self.board[x][y].str_rep == 'K':
                         # Test if it is in check
                         in_check = self.board[x][y].isin_check(x, y, self)
                     # Try to move it and if there are no more moves
@@ -223,8 +239,11 @@ class Game:
                         # set can move to true and break out
                         can_move = True
 
-        # Restore print statements
         sys.stdout = sys.__stdout__
+
+        # If there's only 2 kings left
+        if num_pieces <= 2:
+            return 'stalemate'
 
         if not can_move:
             if in_check:
@@ -237,6 +256,15 @@ class Game:
 
         else:
             return 'normal'
+
+    # Get the coordinates of that type of piece
+    def get_piece_coords(self, piece_str):
+        coords = set()
+        for y in range(len(self.board[0])):
+            for x in range(len(self.board)):
+                if self.board[x][y].str_rep == piece_str:
+                    coords.add((x,y))
+        return coords
 
     # Convert chess coords to int coords
     def get_chess_coords(self, col, row):
@@ -252,12 +280,45 @@ class Game:
         return super().__getattribute__(name)
 
     def __str__(self):
-        str = ''
+        string = ''
 
         # Add board string reps
         for y in range(len(self.board[0])):
             for x in range(len(self.board)):
-                str += self.board[x][y].str_rep + ' '
-            str += '\n'
+                string += self.board[x][y].str_rep + ' '
+            string += '\n'
 
         return str
+
+    def print_move_counts(self):
+        string = ''
+
+        # Add board string reps
+        for y in range(len(self.board[0])):
+            for x in range(len(self.board)):
+                string += str(self.board[x][y].move_count) + ' '
+            string += '\n'
+
+        print(string)
+
+    def print_move_hist(self):
+        string = ''
+
+        # Add board string reps
+        for y in range(len(self.board[0])):
+            for x in range(len(self.board)):
+                string += str(len(self.board[x][y].move_num_history)) + ' '
+            string += '\n'
+
+        print(string)
+
+    def alert_players(self):
+        """Notify players that move can be made"""
+        self.switch_turn_event.set()
+        self.switch_turn_event.clear()
+
+    def quit(self):
+        """Exits the game"""
+        self.alert_players()
+        del self
+        return

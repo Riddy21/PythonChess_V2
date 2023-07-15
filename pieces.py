@@ -193,11 +193,11 @@ class Pawn(_Piece):
                 poss_moves.append([x, y + i])
                 i += 1
 
-            # TODO: ONLY WHEN SCAN MODE AND KING CAN BE CAPTURED
+            # NOTE: ONLY WHEN SCAN MODE AND KING CAN BE CAPTURED
             # Sideways Capture, ** if in scan mode, side captures count even if there is no piece currently there
-            if x < 7 and y <= 7 and getattr(board[x + 1][y + 1], 'colour') == 'white':
+            if x < 7 and y < 7 and getattr(board[x + 1][y + 1], 'colour') == 'white':
                 poss_moves.append([x + 1, y + 1])
-            if x > 0 and y <= 7 and getattr(board[x - 1][y + 1], 'colour') == 'white':
+            if x > 0 and y < 7 and getattr(board[x - 1][y + 1], 'colour') == 'white':
                 poss_moves.append([x - 1, y + 1])
 
         # white moves
@@ -227,7 +227,7 @@ class Pawn(_Piece):
                 poss_moves.append([x, y - i])
                 i += 1
 
-            # TODO: ONLY WHEN SCAN MODE AND KING CAN BE CAPTURED
+            # NOTE: ONLY WHEN SCAN MODE AND KING CAN BE CAPTURED
             # Sideways Capture
             if x < 7 and y >= 0 and getattr(board[x + 1][y - 1], 'colour') == 'black':
                 poss_moves.append([x + 1, y - 1])
@@ -709,6 +709,9 @@ class King(_Piece):
                             poss_moves.append([2, 7])
                             # add left castle to self
                             self.left_castle = 2, 7
+                else:
+                    # Reset once castle is not valid
+                    self.left_castle = -1, -1
 
                 if x == 4 and y == 7 and getattr(board[x][y], 'move_count') == 0:
                     # The rook on the right must be at starting position with 0 move count
@@ -720,6 +723,9 @@ class King(_Piece):
                             poss_moves.append([6, 7])
                             # add right castle to self
                             self.right_castle = 6, 7
+                else:
+                    # Reset once castle is not valid
+                    self.right_castle = -1, -1
             # Black Piece
             if getattr(board[x][y], 'colour') == 'black':
                 # The king must be at starting position with 0 move count
@@ -734,6 +740,9 @@ class King(_Piece):
                             poss_moves.append([2, 0])
                             # add left castle to self
                             self.left_castle = 2, 0
+                else:
+                    # Reset once castle is not valid
+                    self.left_castle = -1, -1
 
                 if x == 4 and y == 0 and getattr(board[x][y], 'move_count') == 0:
                     # The rook on the right must be at starting position with 0 move count
@@ -745,6 +754,9 @@ class King(_Piece):
                             poss_moves.append([6, 0])
                             # add right castle to self
                             self.right_castle = 6, 0
+                else:
+                    # Reset once castle is not valid
+                    self.right_castle = -1, -1
 
         # only do this line if not scanning opponent for check to avoid getting stuck in recursive loop
         if not scan_mode:
@@ -850,25 +862,26 @@ class King(_Piece):
 
     # Checks if itself is in check move from is in
     # MUST BE IN THE TURN THAT YOU ARE CHECKING
-    def isin_check(self, king_x, king_y, game):
+    def isin_check(self, king_x, king_y, curr_game):
         # switches turn into the opponent's turn to check
-        game.switch_turn()
+        if curr_game.turn == 'black':
+            probe_game = game.Game(turn='white', board=curr_game.board, scan_mode=True, prev_game_state=curr_game.game_state)
+        else:
+            probe_game = game.Game(turn='black', board=curr_game.board, scan_mode=True, prev_game_state=curr_game.game_state)
         # Loop through all pieces on the board
         for y in range(8):
             for x in range(8):
                 # Advance each opponent piece and save possible moves
-                op_moves = game.get_next_poss_moves(x, y)
+                op_moves = probe_game.get_next_poss_moves(x, y)
 
                 # loop through all possible moves
                 for op_move in op_moves:
                     opx, opy = op_move
                     # if the move will hit the king
                     if king_x == opx and king_y == opy:
-                        game.switch_turn()
                         # Save the move in a list
                         return True
         # switches turn back
-        game.switch_turn()
         return False
 
     # Check for whether castle move was made
@@ -891,4 +904,7 @@ class King(_Piece):
 
 class Blank(_Piece):
     def __init__(self):
-        super().__init__(0, 'none', 'Assets/Blank.png', '-', None, None, None)
+        super().__init__(0, 'none', 'Assets/Blank.png', '-', 0, [], None)
+    def increment_move_count(self, inc):
+        print('Trying to increment a blank piece')
+        raise RuntimeError
