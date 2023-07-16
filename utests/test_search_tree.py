@@ -25,5 +25,5 @@ class TestSearchTree(unittest.TestCase):
 
     def test_populate(self):
         self.tree.populate(depth=2)
-        print(self.tree.root)
+        self.assertEqual(self.tree.num_moves, 420)
 

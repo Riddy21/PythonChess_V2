@@ -13,7 +13,7 @@ class SearchTreeNode(object):
     def __str__(self):
         out = str(self.move) + '\n'
         for child in self.children:
-            out += str(child).replace('\n', '\n    ')
+            out += str(child).replace('\n', '\n    ')[:-4]
         return out
 
 class SearchTreeRoot(SearchTreeNode):
@@ -25,7 +25,7 @@ class SearchTreeRoot(SearchTreeNode):
         # FIXME: Still fixing the print
         out = 'ROOT\n'
         for child in self.children:
-            out += str(child).replace('\n', '\n    ')
+            out += str(child).replace('\n', '\n    ')[:-4]
         return out
         
 
@@ -34,6 +34,7 @@ class SearchTree(object):
     def __init__(self, game):
         self.root = SearchTreeRoot()
         self.game = game
+        self.num_moves = 0
 
     def populate(self, depth=5):
         """Populates the game tree with moves to a certain depth"""
@@ -59,6 +60,7 @@ class SearchTree(object):
             self._populate_node_recursive(child, new_game, layers_to_go-1)
             # Add child to the node
             node.add_child(child)
+            self.num_moves += 1
 
     @staticmethod
     def _get_all_moves(game):
