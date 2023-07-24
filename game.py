@@ -42,7 +42,7 @@ class Game:
 
 
     # TODO: set board as a specific config
-    def set_board(self):
+    def set_board(self, config_file=None):
         # Create blank board
         self.board = [[Blank()] * 8 for i in range(8)]
         # set board by updating self.board
