@@ -9,9 +9,9 @@ class TestGame(unittest.TestCase):
         self.game.quit()
 
     def test_switch_turn(self):
-        print(self.game.turn)
+        self.assertEqual(self.game.turn, 'white')
         self.game.switch_turn()
-        print(self.game.turn)
+        self.assertEqual(self.game.turn, 'black')
 
 if __name__ == '__main__':
     unittest.main()

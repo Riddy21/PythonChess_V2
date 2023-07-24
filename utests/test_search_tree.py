@@ -1,6 +1,7 @@
 import unittest
 from search_tree import SearchTree
 from game import Game
+from timeit import default_timer as timer
 
 class TestSearchTree(unittest.TestCase):
     def setUp(self):
@@ -24,6 +25,12 @@ class TestSearchTree(unittest.TestCase):
         self.assertEqual(moves, starting_moves)
 
     def test_populate(self):
+        start = timer()
         self.tree.populate(depth=2)
-        self.assertEqual(self.tree.num_moves, 420)
+        end = timer()
+
+        length = end - start
+        self.assertEqual(self.tree.num_nodes, 420)
+        self.assertEqual(self.tree.num_leaves, 400)
+        self.assertLess(length, 5)
 

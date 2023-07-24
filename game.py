@@ -288,7 +288,7 @@ class Game:
                 string += self.board[x][y].str_rep + ' '
             string += '\n'
 
-        return str
+        return string
 
     def print_move_counts(self):
         string = ''

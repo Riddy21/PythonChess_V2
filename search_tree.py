@@ -34,7 +34,8 @@ class SearchTree(object):
     def __init__(self, game):
         self.root = SearchTreeRoot()
         self.game = game
-        self.num_moves = 0
+        self.num_nodes = 0
+        self.num_leaves = 0
 
     def populate(self, depth=5):
         """Populates the game tree with moves to a certain depth"""
@@ -42,6 +43,7 @@ class SearchTree(object):
     
     def _populate_node_recursive(self, node, game, layers_to_go):
         if layers_to_go == 0:
+            self.num_leaves += 1
             return
         # Get the moves from the current game
         moves = self._get_all_moves(game)
@@ -60,7 +62,7 @@ class SearchTree(object):
             self._populate_node_recursive(child, new_game, layers_to_go-1)
             # Add child to the node
             node.add_child(child)
-            self.num_moves += 1
+            self.num_nodes += 1
 
     @staticmethod
     def _get_all_moves(game):
