@@ -9,11 +9,19 @@ class TestGame(unittest.TestCase):
         self.game.quit()
 
     def test_set_board(self):
+        # Setup the board to the right config
         self.game.set_board('Presets/check.txt')
-        golden = ''.join(open('Presets/check.txt').readlines())
+
+        file = open('Presets/check.txt')
+        golden = ''.join(file.readlines())
+        file.close()
+
         self.assertEqual(str(self.game), golden)
 
     def test_switch_turn(self):
+        # Set the board to check
+        self.game.set_board('Presets/check.txt')
+
         self.assertEqual(self.game.turn, 'white')
         self.game.switch_turn()
         self.assertEqual(self.game.turn, 'black')

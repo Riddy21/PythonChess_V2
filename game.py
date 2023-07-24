@@ -1,10 +1,10 @@
 from typing import Any
 import sys, os
-from pieces import Blank, Bishop, King, Knight, Rook, Pawn, Queen
+from pieces import Blank, Rook, Knight, Bishop, Queen, Pawn, King
 from move import Move
 from threading import Event, Lock
 from copy import deepcopy
-
+from settings import *
 
 # Game class initiated when the game board is displayed
 class Game:
@@ -42,7 +42,7 @@ class Game:
 
 
     # TODO: set board as a specific config
-    def set_board(self, config_file=None):
+    def set_board(self, config_file=DEFAULT_BOARD_PRESET_PATH):
         # Create blank board
         self.board = [[Blank()] * 8 for i in range(8)]
         # set board by updating self.board

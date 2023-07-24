@@ -2,6 +2,9 @@ from typing import Any
 import uuid
 import game
 
+class PieceCreationException(Exception):
+    """Exception for handling piece creation"""
+    pass
 
 # TODO: Make a piece with move count and move history set to 0 and one with inserting a piece with a history
 # Abstract Piece Class
@@ -908,3 +911,31 @@ class Blank(_Piece):
     def increment_move_count(self, inc):
         print('Trying to increment a blank piece')
         raise RuntimeError
+
+class PieceFactory():
+    PIECE_MAPPING = {
+            'r' : Rook,
+            'n' : Knight,
+            'b' : Bishop,
+            'q' : Queen,
+            'k' : King,
+            'p' : Pawn,
+            '-' : Blank,
+            }
+
+    @staticmethod
+    def get_piece(str_rep):
+        # Error checking
+        if str_rep.lower() not in self.PIECE_MAPPING:
+            raise PieceCreationException('Error: invalid string for piece creation: %s' % str_rep)
+
+        if str_rep.is_upper():
+            color == 'white'
+        else:
+            color == 'black'
+
+        piece_type = str_rep.lower()
+
+        return self.PIECE_MAPPING[piece_type](color)
+
+
