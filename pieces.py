@@ -775,9 +775,9 @@ class King(_Piece):
         # ** NOT USING DEEP COPY TO SAVE MEM AND SPEED
         from game import Game
         if self.colour == 'white':
-            probe_game = game.Game(turn='black', board=board, scan_mode=True)
+            probe_game = Game(turn='black', board=board, scan_mode=True)
         else:
-            probe_game = game.Game(turn='white', board=board, scan_mode=True)
+            probe_game = Game(turn='white', board=board, scan_mode=True)
 
         bad_moves = []
 
@@ -871,9 +871,9 @@ class King(_Piece):
         # switches turn into the opponent's turn to check
         from game import Game
         if curr_game.turn == 'black':
-            probe_game = game.Game(turn='white', board=curr_game.board, scan_mode=True, prev_game_state=curr_game.game_state)
+            probe_game = Game(turn='white', board=curr_game.board, scan_mode=True, prev_game_state=curr_game.game_state)
         else:
-            probe_game = game.Game(turn='black', board=curr_game.board, scan_mode=True, prev_game_state=curr_game.game_state)
+            probe_game = Game(turn='black', board=curr_game.board, scan_mode=True, prev_game_state=curr_game.game_state)
         # Loop through all pieces on the board
         for y in range(8):
             for x in range(8):
