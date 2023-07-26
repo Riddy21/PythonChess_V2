@@ -1,6 +1,5 @@
 from typing import Any
 import uuid
-import game
 
 class PieceCreationException(Exception):
     """Exception for handling piece creation"""
@@ -59,11 +58,12 @@ class _Piece():
 
     # Private: Limits possible moves based on check cases
     def chk_limit_moves(self, board, myx, myy, poss_moves):
+        from game import Game
         # Make a copy of the current game using the board and turn
         if self.colour == 'white':
-            probe_game = game.Game(turn='white', board=board, scan_mode=True)
+            probe_game = Game(turn='white', board=board, scan_mode=True)
         else:
-            probe_game = game.Game(turn='black', board=board, scan_mode=True)
+            probe_game = Game(turn='black', board=board, scan_mode=True)
 
         bad_moves = []
 
@@ -695,7 +695,8 @@ class King(_Piece):
 
         # If in check can't castle
         if not scan_mode:
-            probe_game = game.Game(turn=self.colour, board=board, scan_mode=True)
+            from game import Game
+            probe_game = Game(turn=self.colour, board=board, scan_mode=True)
 
         if scan_mode or not self.isin_check(x, y, probe_game):
             # White Piece
@@ -772,6 +773,7 @@ class King(_Piece):
     def chk_limit_moves(self, board, myx, myy, poss_moves):
         # Make a copy of the current game using the board and turn
         # ** NOT USING DEEP COPY TO SAVE MEM AND SPEED
+        from game import Game
         if self.colour == 'white':
             probe_game = game.Game(turn='black', board=board, scan_mode=True)
         else:
@@ -867,6 +869,7 @@ class King(_Piece):
     # MUST BE IN THE TURN THAT YOU ARE CHECKING
     def isin_check(self, king_x, king_y, curr_game):
         # switches turn into the opponent's turn to check
+        from game import Game
         if curr_game.turn == 'black':
             probe_game = game.Game(turn='white', board=curr_game.board, scan_mode=True, prev_game_state=curr_game.game_state)
         else:
@@ -923,16 +926,16 @@ class PieceFactory():
             '-' : Blank,
             }
 
-    @staticmethod
-    def get_piece(str_rep):
+    @classmethod
+    def get_piece(self, str_rep):
         # Error checking
         if str_rep.lower() not in self.PIECE_MAPPING:
             raise PieceCreationException('Error: invalid string for piece creation: %s' % str_rep)
 
-        if str_rep.is_upper():
-            color == 'white'
+        if str_rep.isupper():
+            color = 'white'
         else:
-            color == 'black'
+            color = 'black'
 
         piece_type = str_rep.lower()
 

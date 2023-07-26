@@ -7,7 +7,8 @@ class TestPieceFactory(unittest.TestCase):
 
     def test_get_piece(self):
         piece = self.factory.get_piece('n')
-        self.assertEqual(Knight('black'), piece)
+        self.assertEqual(Knight, type(piece))
+        self.assertEqual('black', piece.colour)
 
 class TestPawn(unittest.TestCase):
     def setUp(self):
