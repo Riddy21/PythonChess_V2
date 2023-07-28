@@ -909,7 +909,7 @@ class King(_Piece):
 
 
 class Blank(_Piece):
-    def __init__(self):
+    def __init__(self, color=None):
         super().__init__(0, 'none', 'Assets/Blank.png', '-', 0, [], None)
     def increment_move_count(self, inc):
         print('Trying to increment a blank piece')
@@ -930,7 +930,7 @@ class PieceFactory():
     def get_piece(self, str_rep):
         # Error checking
         if str_rep.lower() not in self.PIECE_MAPPING:
-            raise PieceCreationException('Error: invalid string for piece creation: %s' % str_rep)
+            raise PieceCreationException('Error: invalid string for piece creation: \'%s\'' % str_rep)
 
         if str_rep.isupper():
             color = 'white'

@@ -1,6 +1,6 @@
 from typing import Any
 import sys, os
-from pieces import Blank, Rook, Knight, Bishop, Queen, Pawn, King
+from pieces import *
 from move import Move
 from threading import Event, Lock
 from copy import deepcopy
@@ -33,53 +33,41 @@ class Game:
         # scan mode to stop recursive loop of checking check and checkmate
         self.scan_mode = scan_mode
 
+        self.game_state = prev_game_state
         # TODO: Add functionality to set board from savefile
         # if board was not loaded by passing a parameter, set the board
         if not self.board:
             self.set_board()
 
-        self.game_state = prev_game_state
 
+    @staticmethod
+    def get_board_from_config_file(config_file):
+        """Reads the config file and returns the board object"""
+        file = open(config_file)
+        board = [[None] * BOARD_HEIGHT for i in range(BOARD_WIDTH)]
+        try:
+            for row, line in enumerate(file):
+                # Clear new line
+                line = line.replace('\n', '')
+                pieces = line.split(' ')
+
+                for col, piece in enumerate(pieces):
+                    board[col][row] = PieceFactory.get_piece(piece)
+        except (IndexError, PieceCreationException):
+            raise IOError("Config file %s is in the wrong format" % config_file)
+
+        if row != BOARD_HEIGHT-1 or col != BOARD_WIDTH-1:
+            raise IOError("Config file %s is in the wrong format" % config_file)
+        file.close()
+
+        return board
 
     # TODO: set board as a specific config
     def set_board(self, config_file=DEFAULT_BOARD_PRESET_PATH):
         # Create blank board
-        self.board = [[Blank()] * 8 for i in range(8)]
-        # set board by updating self.board
-        self.board[0][0] = Rook('black')
-        self.board[7][0] = Rook('black')
-        self.board[1][0] = Knight('black')
-        self.board[6][0] = Knight('black')
-        self.board[2][0] = Bishop('black')
-        self.board[5][0] = Bishop('black')
-        self.board[3][0] = Queen('black')
-        self.board[4][0] = King('black')
-        self.board[0][1] = Pawn('black')
-        self.board[1][1] = Pawn('black')
-        self.board[2][1] = Pawn('black')
-        self.board[3][1] = Pawn('black')
-        self.board[4][1] = Pawn('black')
-        self.board[5][1] = Pawn('black')
-        self.board[6][1] = Pawn('black')
-        self.board[7][1] = Pawn('black')
-        self.board[0][7] = Rook('white')
-        self.board[7][7] = Rook('white')
-        self.board[1][7] = Knight('white')
-        self.board[6][7] = Knight('white')
-        self.board[2][7] = Bishop('white')
-        self.board[5][7] = Bishop('white')
-        self.board[3][7] = Queen('white')
-        self.board[4][7] = King('white')
-        self.board[0][6] = Pawn('white')
-        self.board[1][6] = Pawn('white')
-        self.board[2][6] = Pawn('white')
-        self.board[3][6] = Pawn('white')
-        self.board[4][6] = Pawn('white')
-        self.board[5][6] = Pawn('white')
-        self.board[6][6] = Pawn('white')
-        self.board[7][6] = Pawn('white')
-
-        # TODO: set according to config
+        self.board = self.get_board_from_config_file(config_file)
+        if not self.scan_mode:
+            self.game_state = self.get_game_state()
 
     # Function to switch turns
     def switch_turn(self):
@@ -87,7 +75,6 @@ class Game:
 
         # Set multiprocessing event
         self.alert_players()
-
 
     # switch turns without notifying players
     def switch_turn_quiet(self):
@@ -238,6 +225,8 @@ class Game:
                     if self.get_next_poss_moves(x, y):
                         # set can move to true and break out
                         can_move = True
+
+        # FIXME: Add pawn promo check
 
         sys.stdout = sys.__stdout__
 
