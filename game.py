@@ -6,6 +6,16 @@ from threading import Event, Lock
 from copy import deepcopy
 from settings import *
 
+# NOTE: Next things to do
+
+# TODO: Move get poss moves down to a solver engine that is only passed a game board and turn
+# TODO: Move get game state down to a solver engine that is only passed a game board
+# TODO: Move chk_limit_moves from pieces to the solver engine level to ensure no recursion happens
+# TODO: Change game board to an object
+# TODO: Add a dict of pieces to the game board so that it's easier to access and faster
+# TODO: Change pieces to singletons that are referenced in the board
+# TODO: Only use boards instead of games as nodes in search tree
+
 # Game class initiated when the game board is displayed
 class Game:
     def __init__(self, turn='white', board=None, moves=None, captured_white=None, captured_black=None, scan_mode=False, prev_game_state='normal'):
