@@ -17,24 +17,24 @@ class TestGame(unittest.TestCase):
 
     def test_set_board(self):
         # Setup the board to the right config
-        self.game.set_board('presets/check.txt')
+        self.game.set_board('Presets/check.txt')
 
         self.assertEqual(type(self.game.board[7][3]), Queen)
         self.assertEqual(type(self.game.board[5][2]), Pawn)
 
     def test_get_board_from_config_file(self):
-        board = self.game.get_board_from_config_file('presets/check.txt')
+        board = self.game.get_board_from_config_file('Presets/check.txt')
 
         self.assertEqual(type(board[7][3]), Queen)
         self.assertEqual(type(board[5][2]), Pawn)
 
         # invalid test
         with self.assertRaises(IOError) as context:
-            self.game.get_board_from_config_file('./presets/invalid.txt')
+            self.game.get_board_from_config_file('./Presets/invalid.txt')
 
     def test_switch_turn(self):
         # Set the board to check
-        self.game.set_board('presets/check.txt')
+        self.game.set_board('Presets/check.txt')
 
         self.assertEqual(self.game.turn, 'white')
         self.game.switch_turn()
@@ -42,7 +42,7 @@ class TestGame(unittest.TestCase):
 
     def test_get_game_state(self):
         # Set the board to check
-        self.game.set_board('presets/check.txt')
+        self.game.set_board('Presets/check.txt')
 
         self.assertEqual(self.game.game_state, 'black check')
         self.game.switch_turn()
@@ -51,8 +51,8 @@ class TestGame(unittest.TestCase):
 
     def test_full_move(self):
         # Set the board to check
-        self.game.set_board('presets/check.txt')
-        golden = Game.get_board_from_config_file('presets/check.txt')
+        self.game.set_board('Presets/check.txt')
+        golden = Game.get_board_from_config_file('Presets/check.txt')
         # Black move
         self.game.switch_turn()
 
@@ -73,7 +73,7 @@ class TestGame(unittest.TestCase):
 
     def test_make_pawn_promo(self):
         # Set the board to check
-        self.game.set_board('presets/promo.txt')
+        self.game.set_board('Presets/promo.txt')
 
         self.assertEqual(self.game.game_state, 'white pawn promo')
 
