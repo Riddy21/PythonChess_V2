@@ -76,8 +76,7 @@ class Game:
     def set_board(self, config_file=DEFAULT_BOARD_PRESET_PATH):
         # Create blank board
         self.board = self.get_board_from_config_file(config_file)
-        if not self.scan_mode:
-            self.game_state = self.get_game_state()
+        self.update_game_state()
 
     # Function to switch turns
     def switch_turn(self):
@@ -93,8 +92,7 @@ class Game:
         else:
             self.turn = 'white'
 
-        if not self.scan_mode:
-            self.game_state = self.get_game_state()
+        self.update_game_state()
 
     # Function to make complete move from to-coordinates and from-coordinates
     def full_move(self, frox, froy, tox, toy):
@@ -186,6 +184,8 @@ class Game:
         if self.moves[-1].make_move(self.board, x, y) == -1:
             return -1
 
+        # FIXME One the get_game_state is stateless, you can update game state here
+
         # Append captured pieces to the correct captured list
         captured_piece = getattr(self.moves[-1], 'captured')
         if captured_piece == 'None':
@@ -199,18 +199,29 @@ class Game:
         if self.moves[-1].pawn_promo == 'ready':
             if not self.scan_mode:
                 print('Pawn Promotion is valid')
-                self.game_state = '%s pawn promo' % self.turn
+                # Update the state of the game so that the pawn promotion is registered
+            # FIXME: make this a side process that happens every time the board changes
+            self.update_game_state()
         else:
             self.switch_turn()
 
-    # Gets the the state of the game
-    # white check
-    # white checkmate
-    # black check
-    # black checkmate
-    # stalemate
-    # MUST BE IN THE TURN OF THE SIDE YOU'RE CHECKING
+    def update_game_state(self):
+        if not self.scan_mode:
+            self.game_state = self.get_game_state()
+
+    # FIXME: remove dependency on turn you are checking and enable it to be stateless
     def get_game_state(self):
+        """
+        Gets the the state of the game
+        white pawn promo
+        white check
+        white checkmate
+        white pawn promo
+        black check
+        black checkmate
+        stalemate
+        MUST BE IN THE TURN OF THE SIDE YOU'RE CHECKING
+        """
         # Disable print statements
         sys.stdout = open(os.devnull, 'w')
 
@@ -223,6 +234,13 @@ class Game:
         # loops through all pieces on the board
         for y in range(len(self.board[0])):
             for x in range(len(self.board)):
+                # pawn promo check
+                if y == 0 and self.board[x][y].str_rep == 'P':
+                    return 'white pawn promo'
+
+                if y == BOARD_HEIGHT - 1 and self.board[x][y].str_rep == 'p':
+                    return 'black pawn promo'
+
                 # If the piece iterated on is piece of the next turn
                 if self.board[x][y].colour != 'none':
                     num_pieces += 1

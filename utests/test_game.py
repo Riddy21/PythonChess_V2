@@ -37,10 +37,17 @@ class TestGame(unittest.TestCase):
         self.game.set_board('presets/check.txt')
 
         self.assertEqual(self.game.turn, 'white')
-        self.assertEqual(self.game.game_state, 'normal')
         self.game.switch_turn()
         self.assertEqual(self.game.turn, 'black')
+
+    def test_get_game_state(self):
+        # Set the board to check
+        self.game.set_board('presets/check.txt')
+
         self.assertEqual(self.game.game_state, 'black check')
+        self.game.switch_turn()
+        self.assertEqual(self.game.game_state, 'black check')
+
 
     def test_full_move(self):
         # Set the board to check
@@ -70,8 +77,7 @@ class TestGame(unittest.TestCase):
 
         self.assertEqual(self.game.game_state, 'white pawn promo')
 
-
-
+        # Make promotion
 
 if __name__ == '__main__':
     unittest.main()
