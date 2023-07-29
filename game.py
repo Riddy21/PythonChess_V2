@@ -16,6 +16,19 @@ from settings import *
 # TODO: Change pieces to singletons that are referenced in the board
 # TODO: Only use boards instead of games as nodes in search tree
 
+class GameInternalError(Exception):
+    """
+    This exception is thrown when an internal error occurs
+    """
+    pass
+
+class GameUserError(Exception):
+    """
+    This exception is raised when the user of the API provides
+    incorrect input
+    """
+    pass
+
 # Game class initiated when the game board is displayed
 class Game:
     def __init__(self, turn='white', board=None, moves=None, captured_white=None, captured_black=None, scan_mode=False, prev_game_state='normal'):
@@ -64,10 +77,11 @@ class Game:
                 for col, piece in enumerate(pieces):
                     board[col][row] = PieceFactory.get_piece(piece)
         except (IndexError, PieceCreationException):
-            raise IOError("Config file %s is in the wrong format" % config_file)
+            raise GameUserError("Config file %s is in the wrong format" % config_file)\
+                    from None
 
         if row != BOARD_HEIGHT-1 or col != BOARD_WIDTH-1:
-            raise IOError("Config file %s is in the wrong format" % config_file)
+            raise GameUserError("Config file %s is in the wrong format" % config_file)
         file.close()
 
         return board
@@ -78,12 +92,31 @@ class Game:
         self.board = self.get_board_from_config_file(config_file)
         self.update_game_state()
 
+    def export_board(self, filename):
+        """
+        Saves the current board in a file
+        """
+        if os.path.isfile(filename):
+            print('Warning, overwriting %s' % filename)
+        file = open(filename, 'w')
+        file.write(self.__str__())
+        file.close()
+
     # Function to switch turns
     def switch_turn(self):
         self.switch_turn_quiet()
 
         # Set multiprocessing event
         self.alert_players()
+
+    def set_turn(self, turn):
+        """Sets turn to the color specified"""
+        if self.turn in ('white', 'black'):
+            self.turn = turn
+        else:
+            raise GameUserError("Not a valid turn setting")
+
+        self.update_game_state()
 
     # switch turns without notifying players
     def switch_turn_quiet(self):
@@ -104,8 +137,14 @@ class Game:
     # Function to change pawn promotion piece
     def make_pawn_promo(self, promo_type):
         # if the pawn promotion goes through, switch turns
-        if self.moves[-1].make_pawn_promo(promo_type, self.board) != -1:
-            self.switch_turn()
+        try:
+            if self.moves[-1].make_pawn_promo(promo_type, self.board) != -1:
+                self.switch_turn()
+            else:
+                raise GameUserError("Pawn promo failed")
+        except IndexError:
+            raise GameInternalError("There are no moves in the stack") from None
+        # TODO: turn return -1 to a try catch
 
     # Function to undo a move and remove it from the move list
     def undo_move(self):
@@ -174,7 +213,8 @@ class Game:
         for y in range(len(self.board[0])):
             for x in range(len(self.board)):
                 if self.board[x][y].colour == self.turn:
-                    playable.add((x, y))
+                    if self.get_next_poss_moves(x, y):
+                        playable.add((x, y))
         return playable
 
 
@@ -254,8 +294,6 @@ class Game:
                         # set can move to true and break out
                         can_move = True
 
-        # FIXME: Add pawn promo check
-
         sys.stdout = sys.__stdout__
 
         # If there's only 2 kings left
@@ -303,8 +341,7 @@ class Game:
         for y in range(len(self.board[0])):
             for x in range(len(self.board)):
                 string += self.board[x][y].str_rep + ' '
-            string += '\n'
-
+            string = string[:-1] + '\n'
         return string
 
     def print_move_counts(self):

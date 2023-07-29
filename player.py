@@ -1,4 +1,4 @@
-import threading
+from parallel_util import *
 import random
 from time import sleep
 
@@ -36,20 +36,15 @@ class Computer(Player):
         super().__init__(game, color, Player.COMPUTER)
         self.running = True
 
+    @run_in_thread
     def start(self):
-        def threaded_start():
-            while self.running:
-                if self.game.turn != self.color:
-                    self.game.switch_turn_event.wait()
-                else:
-                    self.make_move()
-            print('Quitting player')
-            exit()
-
-        start_thread = threading.Thread(target=threaded_start)
-        start_thread.start()
-
-        return start_thread
+        while self.running:
+            if self.game.turn != self.color:
+                self.game.switch_turn_event.wait()
+            else:
+                self.make_move()
+        print('Quitting player')
+        exit()
 
     def quit(self):
         self.running = False

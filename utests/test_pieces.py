@@ -19,12 +19,15 @@ class TestPieceFactory(unittest.TestCase):
         self.assertEqual(Blank, type(piece))
         self.assertEqual('none', piece.colour)
 
+        with self.assertRaises(PieceCreationException) as context:
+            piece = PieceFactory.get_piece(' ')
+
 class TestPawn(unittest.TestCase):
     def setUp(self):
         self.piece = Pawn('white')
 
     def test_placeholder(self):
-        print("hello world")
+        pass
 
 if __name__ == '__main__':
     unittest.main()
