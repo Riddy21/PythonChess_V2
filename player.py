@@ -14,10 +14,10 @@ class Player:
         self.type = type
 
     def undo_move(self, num=1):
-        LOCK.acquire()
         for i in range(num):
+            LOCK.acquire()
             self.game.undo_move()
-        LOCK.release()
+            LOCK.release()
 
 
 class Human(Player):

@@ -1,6 +1,8 @@
 import unittest
 from game import *
+from parallel_util import *
 from pieces import Queen, Pawn
+from time import sleep
 
 class TestGame(unittest.TestCase):
     def setUp(self):
@@ -184,6 +186,18 @@ class TestGame(unittest.TestCase):
 
         golden = {(7, 3)}
         self.assertEqual(golden, self.game.get_piece_coords('Q'))
+
+    def test_alert_players(self):
+        @run_in_thread
+        def alert_player():
+            sleep(1)
+            self.game.alert_players()
+            
+        alert_player()
+        success = self.game.switch_turn_event.wait(5)
+
+        self.assertTrue(success)
+
 
 if __name__ == '__main__':
     unittest.main()

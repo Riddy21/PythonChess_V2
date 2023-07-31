@@ -1,4 +1,7 @@
-all: clean test
+all: clean test play
+
+play: main.py
+	python3 main.py
 
 test: unittest systemtest
 
