@@ -1,6 +1,8 @@
 import threading
 import multiprocessing
 
+LOCK = threading.Lock()
+
 def run_in_thread(func):
     def wrapper(*args, **kwargs):
         thread = threading.Thread(target=func, args=args, kwargs=kwargs)
@@ -14,3 +16,11 @@ def run_in_process(func):
         process.start()
         return process
     return wrapper
+
+def run_synchronously(func):
+    def wrapper(*args, **kwargs):
+        LOCK.acquire()
+        func(*args, **kwargs)
+        LOCK.release()
+    return wrapper
+

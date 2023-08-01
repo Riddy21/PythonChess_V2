@@ -250,8 +250,10 @@ class ChessboardGUI:
     def quit(self):
         # Quit the game
         pygame.quit()
-        if self.p1.type == Player.COMPUTER:
-            self.p1.quit()
-        if self.p2.type == Player.COMPUTER:
-            self.p2.quit()
-        self.api.quit()
+        # only when non-interactive mode
+        if self.interactive:
+            if self.p1.type == Player.COMPUTER:
+                self.p1.quit()
+            if self.p2.type == Player.COMPUTER:
+                self.p2.quit()
+            self.api.quit()
