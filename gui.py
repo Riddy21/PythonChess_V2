@@ -1,6 +1,7 @@
 import pygame
 import popup
 from player import *
+from parallel_util import run_in_thread
 
 # Set up the colors
 WHITE = (255, 255, 255)
@@ -11,12 +12,15 @@ GREY = (200, 200, 200)
 RED = (255, 200, 200)
 
 class ChessboardGUI:
-    def __init__(self, api, p1, p2):
+    def __init__(self, api, p1, p2, interactive=True):
         if p1.color == p2.color:
             raise RuntimeError("Player colors cannot be the same")
         self.api = api
         self.p1 = p1
         self.p2 = p2
+
+        # If popups and user prompts are to be created
+        self.interactive=interactive
 
         # Initialize Pygame
         pygame.init()
@@ -182,6 +186,7 @@ class ChessboardGUI:
         elif self.api.turn == 'black':
             return 7-coords[0], 7-coords[1]
 
+    @run_in_thread
     def run(self):
         # Main game loop
         running = True
@@ -193,22 +198,24 @@ class ChessboardGUI:
                     if event.type == pygame.QUIT:
                         running = False
                     elif event.type == pygame.MOUSEBUTTONDOWN:
-                        # Get the position of the mouse click
-                        pos = pygame.mouse.get_pos()
+                        if self.interactive:
+                            # Get the position of the mouse click
+                            pos = pygame.mouse.get_pos()
 
-                        if current_player.type == Player.HUMAN:
-                            self.handle_click(pos, current_player)
+                            if current_player.type == Player.HUMAN:
+                                self.handle_click(pos, current_player)
 
                     elif event.type == pygame.KEYDOWN:
                         # Ctrl-Z was pressed
                         if event.key == pygame.K_z and \
                                 (pygame.key.get_mods() & pygame.KMOD_CTRL or \
                                  pygame.key.get_mods() & pygame.KMOD_META):
-                            if current_player.type == Player.HUMAN:
-                                if Player.COMPUTER in (self.p1.type, self.p2.type):
-                                    self.get_current_player().undo_move(2)
-                                else:
-                                    self.get_current_player().undo_move(1)
+                            if self.interactive:
+                                if current_player.type == Player.HUMAN:
+                                    if Player.COMPUTER in (self.p1.type, self.p2.type):
+                                        self.get_current_player().undo_move(2)
+                                    else:
+                                        self.get_current_player().undo_move(1)
 
 
                 # Draw the chess board
@@ -226,10 +233,11 @@ class ChessboardGUI:
                 # Update the display
                 pygame.display.flip()
 
-                if self.prompt_mate_quit(self.api.game_state):
-                    running = False
+                if self.interactive:
+                    if self.prompt_mate_quit(self.api.game_state):
+                        running = False
 
-                self.prompt_promo(self.api.game_state)
+                    self.prompt_promo(self.api.game_state)
 
                 # Have AI do move if ai is enabled
                 #if self.get_current_player().type == Player.COMPUTER:

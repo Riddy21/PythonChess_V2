@@ -2,27 +2,33 @@ from game import Game
 from player import Computer, Human
 import unittest
 from time import sleep
-import threading
+from parallel_util import run_in_thread
 
-class TestGame(unittest.TestCase):
+class TestRandomGame(unittest.TestCase):
+    def setUp(self):
+        self.failed = False
+
     @staticmethod
     def quit_on_mate(game, ai1, ai2):
+        @run_in_thread
         def is_mate():
-            for i in range(500):
-                if 'mate' not in game.game_state:
-                    sleep(0.5)
-                else:
-                    return
+            try:
+                for i in range(500):
+                    if 'mate' not in game.game_state:
+                        sleep(0.5)
+                    else:
+                        return
+            except Exception:
+                pass
+            self.failed = True
             raise RuntimeError('Timeout: Game did not end')
 
-        thread = threading.Thread(target=is_mate)
-        thread.start()
+        thread = is_mate()
         thread.join()
         ai1.quit()
         ai2.quit()
         game.quit()
         sleep(0.5)
-
 
     def test_random(self):
         try:
@@ -37,6 +43,7 @@ class TestGame(unittest.TestCase):
                 self.quit_on_mate(game, ai1, ai2)
                 self.assertFalse(thread1.is_alive())
                 self.assertFalse(thread2.is_alive())
+                self.assertFalse(self.failed)
         except Exception as e:
             ai1.quit()
             ai2.quit()

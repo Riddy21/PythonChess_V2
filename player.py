@@ -60,7 +60,9 @@ class Computer(Player):
         playable_moves = set()
         # FIXME: Check will cause "no more moves"
         for piece in playable_pieces:
+            LOCK.acquire()
             moves = self.game.get_next_poss_moves(*piece)
+            LOCK.release()
             for move in moves:
                 playable_moves.add((*piece, *move))
 
