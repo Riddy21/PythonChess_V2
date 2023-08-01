@@ -15,6 +15,12 @@ from settings import *
 # TODO: Add a dict of pieces to the game board so that it's easier to access and faster
 # TODO: Change pieces to singletons that are referenced in the board
 # TODO: Only use boards instead of games as nodes in search tree
+# TODO: Make a lock decorator to lock the functions that need locking
+#       get_next_poss_moves
+#       undo_move
+#       *move*
+#       pawn_promo
+#       anything that modifies game state
 
 class GameInternalError(Exception):
     """
