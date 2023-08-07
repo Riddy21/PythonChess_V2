@@ -22,6 +22,14 @@ class TestPieceFactory(unittest.TestCase):
         with self.assertRaises(PieceCreationException) as context:
             piece = PieceFactory.get_piece(' ')
 
+class TestColor(unittest.TestCase):
+    def test_color(self):
+        self.assertEqual(Color['white'], Color.WHITE)
+
+class TestPieceLibrary(unittest.TestCase):
+    def setUp(self):
+        self.library = PieceLibrary()
+
 class TestPawn(unittest.TestCase):
     def setUp(self):
         self.piece = Pawn('white')

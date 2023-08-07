@@ -1,9 +1,21 @@
 from typing import Any
 import uuid
+from enum import Enum
+from settings import *
 
 class PieceCreationException(Exception):
     """Exception for handling piece creation"""
     pass
+
+class Color(Enum):
+    WHITE = 'white'
+    BLACK = 'black'
+    NONE = 'none'
+    def __str__(self):
+        return self.value
+
+    def __getattr__(self, val):
+        return super().__getattribute__(val.upper())
 
 # TODO: Make a piece with move count and move history set to 0 and one with inserting a piece with a history
 # Abstract Piece Class
@@ -148,19 +160,19 @@ class Pawn(_Piece):
     def __init__(self, colour, move_count=0, move_hist=None, piece_id=uuid.uuid4()):
         if move_hist is None:
             move_hist = []
-        if colour == 'white':
+        if str(colour) == 'white':
             image = 'Assets/Chess_tile_pl.png'
-            str = 'P'
-        elif colour == 'black':
+            string = 'P'
+        elif str(colour) == 'black':
             image = 'Assets/Chess_tile_pd.png'
-            str = 'p'
+            string = 'p'
         else:
             print("colour typo")
             image = 'not set'
-            str = 'error'
+            string = 'error'
 
         # Makes a piece with set values and images
-        super().__init__(1, colour, image, str, move_count, move_hist, piece_id)
+        super().__init__(1, colour, image, string, move_count, move_hist, piece_id)
 
         # Make variable to store where enpassants are, set default as empty list
         self.enpassant_pos = []
@@ -293,19 +305,19 @@ class Rook(_Piece):
     def __init__(self, colour, move_count=0, move_hist=None, piece_id=uuid.uuid4()):
         if move_hist is None:
             move_hist = []
-        if colour == 'white':
+        if str(colour) == 'white':
             image = 'Assets/Chess_tile_rl.png'
-            str = 'R'
-        elif colour == 'black':
+            string = 'R'
+        elif str(colour) == 'black':
             image = 'Assets/Chess_tile_rd.png'
-            str = 'r'
+            string = 'r'
         else:
             print("colour typo")
             image = 'not set'
-            str = 'error'
+            string = 'error'
 
         # Makes a piece with set values and images
-        super().__init__(5, colour, image, str, move_count, move_hist, piece_id)
+        super().__init__(5, colour, image, string, move_count, move_hist, piece_id)
 
     # Returns possible moves this piece can make
     def get_moves(self, x, y, board, scan_mode=False):
@@ -365,19 +377,19 @@ class Knight(_Piece):
     def __init__(self, colour, move_count=0, move_hist=None, piece_id=uuid.uuid4()):
         if move_hist is None:
             move_hist = []
-        if colour == 'white':
+        if str(colour) == 'white':
             image = 'Assets/Chess_tile_nl.png'
-            str = 'N'
-        elif colour == 'black':
+            string = 'N'
+        elif str(colour) == 'black':
             image = 'Assets/Chess_tile_nd.png'
-            str = 'n'
+            string = 'n'
         else:
             print("colour typo")
             image = 'not set'
-            str = 'error'
+            string = 'error'
 
         # Makes a piece with set values and images
-        super().__init__(3, colour, image, str, move_count, move_hist, piece_id)
+        super().__init__(3, colour, image, string, move_count, move_hist, piece_id)
 
     # Returns possible moves this piece can make
     def get_moves(self, x, y, board, scan_mode=False):
@@ -431,19 +443,19 @@ class Bishop(_Piece):
     def __init__(self, colour, move_count=0, move_hist=None, piece_id=uuid.uuid4()):
         if move_hist is None:
             move_hist = []
-        if colour == 'white':
+        if str(colour) == 'white':
             image = 'Assets/Chess_tile_bl.png'
-            str = 'B'
-        elif colour == 'black':
+            string = 'B'
+        elif str(colour) == 'black':
             image = 'Assets/Chess_tile_bd.png'
-            str = 'b'
+            string = 'b'
         else:
             print("colour typo")
             image = 'not set'
-            str = 'error'
+            string = 'error'
 
         # Makes a piece with set values and images
-        super().__init__(1, colour, image, str, move_count, move_hist, piece_id)
+        super().__init__(1, colour, image, string, move_count, move_hist, piece_id)
 
     def get_moves(self, x, y, board, scan_mode=False):
         poss_moves = []
@@ -503,19 +515,19 @@ class Queen(_Piece):
     def __init__(self, colour, move_count=0, move_hist=None, piece_id=uuid.uuid4()):
         if move_hist is None:
             move_hist = []
-        if colour == 'white':
+        if str(colour) == 'white':
             image = 'Assets/Chess_tile_ql.png'
-            str = 'Q'
-        elif colour == 'black':
+            string = 'Q'
+        elif str(colour) == 'black':
             image = 'Assets/Chess_tile_qd.png'
-            str = 'q'
+            string = 'q'
         else:
             print("colour typo")
             image = 'not set'
-            str = 'error'
+            string = 'error'
 
         # Makes a piece with set values and images
-        super().__init__(9, colour, image, str, move_count, move_hist, piece_id)
+        super().__init__(9, colour, image, string, move_count, move_hist, piece_id)
 
     def get_moves(self, x, y, board, scan_mode=False):
         poss_moves = []
@@ -619,19 +631,19 @@ class King(_Piece):
     def __init__(self, colour, move_count=0, move_hist=None, piece_id=uuid.uuid4()):
         if move_hist is None:
             move_hist = []
-        if colour == 'white':
+        if str(colour) == 'white':
             image = 'Assets/Chess_tile_kl.png'
-            str = 'K'
-        elif colour == 'black':
+            string = 'K'
+        elif str(colour) == 'black':
             image = 'Assets/Chess_tile_kd.png'
-            str = 'k'
+            string = 'k'
         else:
             print("colour typo")
             image = 'not set'
-            str = 'error'
+            string = 'error'
 
         # Makes a piece with set values and images
-        super().__init__(100000000, colour, image, str, move_count, move_hist,
+        super().__init__(100000000, colour, image, string, move_count, move_hist,
                          piece_id)  # TODO: make value max int value
 
         # Parameter for storing castle coordinates if castle move is possible
@@ -925,6 +937,53 @@ class PieceFactory():
             'p' : Pawn,
             '-' : Blank,
             }
+
+    @classmethod
+    def get_piece(self, str_rep):
+        # Error checking
+        if str_rep.lower() not in self.PIECE_MAPPING:
+            raise PieceCreationException('Error: invalid string for piece creation: \'%s\'' % str_rep)
+
+        if str_rep.isupper():
+            color = 'white'
+        else:
+            color = 'black'
+
+        piece_type = str_rep.lower()
+
+        return self.PIECE_MAPPING[piece_type](color)
+
+class PieceLibrary(object):
+    """
+    Class the holds a copy of all the pieces
+    """
+    PIECE_MAPPING = {
+            'r' : Rook,
+            'n' : Knight,
+            'b' : Bishop,
+            'q' : Queen,
+            'k' : King,
+            'p' : Pawn,
+            '-' : Blank,
+            }
+    def __init__(self, colors=PLAYABLE_COLORS):
+        """
+        Constructor
+        """
+        self.colors = colors
+        self.library = dict()
+
+        # Populate library
+        self._populate_library(self.library, self.colors)
+
+    def _populate_library(self, library, colors):
+        """
+        Create a copy of each piece in each color
+        """
+        for piece, obj in self.PIECE_MAPPING.items():
+            for color in colors:
+                self.library[piece][color]
+        
 
     @classmethod
     def get_piece(self, str_rep):
