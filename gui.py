@@ -186,7 +186,6 @@ class ChessboardGUI:
         elif self.api.turn == 'black':
             return 7-coords[0], 7-coords[1]
 
-    @run_in_thread
     def run(self):
         # Main game loop
         running = True
@@ -201,7 +200,6 @@ class ChessboardGUI:
                         if self.interactive:
                             # Get the position of the mouse click
                             pos = pygame.mouse.get_pos()
-
                             if current_player.type == Player.HUMAN:
                                 self.handle_click(pos, current_player)
 
@@ -216,6 +214,15 @@ class ChessboardGUI:
                                         self.get_current_player().undo_move(2)
                                     else:
                                         self.get_current_player().undo_move(1)
+                        # Save if Ctrl-S is pressed
+                        if event.key == pygame.K_s and \
+                                (pygame.key.get_mods() & pygame.KMOD_CTRL or \
+                                 pygame.key.get_mods() & pygame.KMOD_META):
+
+                            import datetime
+                            filename = str(datetime.datetime.now()).replace(' ', '-')+".txt"
+                            self.api.export_board(filename)
+                            print('Game saved in "%s"!' % filename)
 
 
                 # Draw the chess board

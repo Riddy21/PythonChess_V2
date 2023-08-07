@@ -198,6 +198,63 @@ class TestGame(unittest.TestCase):
 
         self.assertTrue(success)
 
+    def test_castle(self):
+        self.game.set_board('Presets/ready_to_castle.txt')
+
+        # Do castle
+        self.game.full_move(4, 7, 6, 7)
+
+        done_castle = self.game.get_board_from_config_file("Presets/done_castle.txt")
+
+        # make sure castle is done
+        self.compare_boards(self.game.board, done_castle)
+
+        # Try castling again after undoing
+        self.game.undo_move()
+
+        moves = self.game.get_next_poss_moves(4, 7)
+        self.assertEqual(moves, [[5, 7], [4, 6], [6, 7]])
+
+        #Move it out and back and try castling again
+        self.game.full_move(7, 7, 6, 7)
+        self.game.full_move(7, 1, 7, 2)
+        self.game.full_move(6, 7, 7, 7)
+        self.game.full_move(7, 2, 7, 3)
+
+        # Try castling, ant
+        moves = self.game.get_next_poss_moves(4, 7)
+        self.assertEqual(moves, [[5, 7], [4, 6]])
+
+    def test_enpassante(self):
+        self.game.set_board('Presets/ready_to_enpass.txt')
+        self.game.set_turn('black')
+
+        # Do pawn enpass
+        self.game.full_move(4, 1, 4, 3)
+        self.game.full_move(5, 3, 4, 2)
+
+        done_castle = self.game.get_board_from_config_file("Presets/done_enpass.txt")
+
+        # make sure enpass is done
+        self.compare_boards(self.game.board, done_castle)
+
+        # Try enpass again after undoing
+        self.game.undo_move()
+
+        moves = self.game.get_next_poss_moves(5, 3)
+        self.assertEqual(moves, [[4, 2]])
+
+        self.game.undo_move()
+
+        #Try cancel move possibilities and then try again
+        self.game.full_move(4, 1, 4, 2)
+        self.game.full_move(7, 6, 7, 5)
+        self.game.full_move(4, 2, 4, 3)
+
+        ## Try enpass
+        moves = self.game.get_next_poss_moves(5, 3)
+        self.assertEqual(moves, [])
+
 
 if __name__ == '__main__':
     unittest.main()

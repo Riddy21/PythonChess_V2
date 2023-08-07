@@ -60,11 +60,9 @@ class Game:
         self.scan_mode = scan_mode
 
         self.game_state = prev_game_state
-        # TODO: Add functionality to set board from savefile
         # if board was not loaded by passing a parameter, set the board
         if not self.board:
             self.set_board()
-
 
     @staticmethod
     def get_board_from_config_file(config_file):
@@ -89,7 +87,6 @@ class Game:
 
         return board
 
-    # TODO: set board as a specific config
     def set_board(self, config_file=DEFAULT_BOARD_PRESET_PATH):
         # Create blank board
         self.board = self.get_board_from_config_file(config_file)
