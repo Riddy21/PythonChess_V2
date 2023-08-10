@@ -4,9 +4,6 @@ import uuid
 from enum import Enum
 from settings import *
 
-class PieceCreationException(Exception):
-    """Exception for handling piece creation"""
-    pass
 
 
 # TODO: Make a piece with move count and move history set to 0 and one with inserting a piece with a history
@@ -919,35 +916,14 @@ class Blank(_Piece):
         print('Trying to increment a blank piece')
         raise RuntimeError
 
-class PieceFactory():
-    PIECE_MAPPING = {
-            'r' : Rook,
-            'n' : Knight,
-            'b' : Bishop,
-            'q' : Queen,
-            'k' : King,
-            'p' : Pawn,
-            '-' : Blank,
-            }
-    @classmethod
-    def get_piece(self, str_rep):
-        # Error checking
-        if str_rep.lower() not in self.PIECE_MAPPING:
-            raise PieceCreationException('Error: invalid string for piece creation: \'%s\'' % str_rep)
-
-        if str_rep.isupper():
-            color = 'white'
-        else:
-            color = 'black'
-
-        piece_type = str_rep.lower()
-
-        return self.PIECE_MAPPING[piece_type](color)
-
 class PieceLibrary(object):
     """
     Class the holds a copy of all the pieces
     """
+    class PieceLibraryException(Exception):
+        """Exception for handling piece creation"""
+        pass
+
     PIECE_MAPPING = {
             PIECES.ROOK : Rook,
             PIECES.KNIGHT : Knight,
@@ -978,27 +954,33 @@ class PieceLibrary(object):
         for piece, piece_obj in cls.PIECE_MAPPING.items():
             for color in colors:
                 library[piece][color] = piece_obj(color.value)
-        
-    def get_piece_ref(self, str_rep):
+
+    @classmethod
+    def _get_piece_info(cls, str_rep):
+        """
+        Returns the piece and color information based on the string rep
+        """
         # Get piece by the PIECES str rep, kind of hacky
-        piece = PIECES.get_by_value(str_rep.lower())
+        try:
+            piece = PIECES.get_by_value(str_rep.lower())
+        except KeyError:
+            raise cls.PieceLibraryException("No piece with value %s" % str_rep)
 
         if str_rep.isupper():
             color = COLORS.WHITE
         else:
             color = COLORS.BLACK
+
+        return piece, color
+        
+    def get_piece_ref(self, str_rep):
+        piece, color = self._get_piece_info(str_rep)
 
         return self.library[piece][color]
 
     @classmethod
     def get_piece_copy(cls, str_rep):
-        # Get piece by the PIECES str rep, kind of hacky
-        piece = PIECES.get_by_value(str_rep.lower())
-
-        if str_rep.isupper():
-            color = COLORS.WHITE
-        else:
-            color = COLORS.BLACK
+        piece, color = cls._get_piece_info(str_rep)
 
         return cls.PIECE_MAPPING[piece](color.value)
 

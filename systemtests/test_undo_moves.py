@@ -6,29 +6,44 @@ from utils import *
 import random
 from gui import ChessboardGUI
 
-class TestRandomGame(unittest.TestCase):
+class TestUndoGame(unittest.TestCase):
     def setUp(self):
         self.failed = False
+
+    @staticmethod
+    def quit_on_mate(game, ai1, ai2):
+        @run_in_thread
+        def is_mate():
+            for i in range(500):
+                if 'mate' not in game.game_state:
+                    sleep(0.5)
+                else:
+                    return
+            self.failed = True
+            raise RuntimeError('Timeout: Game did not end')
+
+        thread = is_mate()
+        thread.join()
+        ai1.quit()
+        ai2.quit()
+        game.quit()
+        sleep(0.5)
 
     def test_undo(self):
         @run_in_thread
         def undo_on_mate(game, ai1, ai2, num_undos=5):
             # FIXME: Add function to quit if the players throw an exception using the ai1.failed
-            try:
-                for i in range(1000):
-                    print(game.game_state)
-                    if 'mate' not in game.game_state:
-                        sleep(0.5)
+            for i in range(1000):
+                if 'mate' not in game.game_state:
+                    sleep(0.5)
+                else:
+                    if num_undos > 0:
+                        ai1.undo_move(random.randint(1, 10))
+                        num_undos -= 1
                     else:
-                        print('YO')
-                        if num_undos > 0:
-                            ai1.undo_move(random.randint(1, 10))
-                            num_undos -= 1
-                        else:
-                            return
-            finally:
-                self.failed = True
-                raise RuntimeError('Timeout: Game did not end')
+                        return
+            self.failed = True
+            raise RuntimeError('Timeout: Game did not end')
 
         try:
             # Let game play till stalemate or checkmate
@@ -59,44 +74,43 @@ class TestRandomGame(unittest.TestCase):
             game.quit()
             raise e
 
-    #def test_random_undo(self):
-    #    @run_in_thread
-    #    def random_undo_thread(game, ai1, ai2):
-    #        # FIXME: Add function to quit if the players throw an exception using the ai1.failed
-    #        try:
-    #            for i in range(1000):
-    #                if 'mate' not in game.game_state:
-    #                    sleep(random.random()*20)
-    #                    ai1.undo_move(random.randint(1, 3))
-    #                else:
-    #                    return
-    #        finally:
-    #            self.failed = True
-    #            raise RuntimeError('Timeout: Game did not end')
-    #    try:
-    #        # Let game play till stalemate or checkmate
-    #        game = Game()
-    #        ai1 = Computer(game=game, color='black')
-    #        ai2 = Computer(game=game, color='white')
-    #        gui = ChessboardGUI(game, ai1, ai2, interactive=False)
-    #        #gui.run()
-    #        thread1 = ai1.start()
-    #        thread2 = ai2.start()
-    #        
-    #        thread = random_undo_thread(game, ai1, ai2)
-    #        thread.join()
-    #        ai1.quit()
-    #        ai2.quit()
-    #        game.quit()
-    #        #gui.quit()
-    #        sleep(5)
-    #        self.assertFalse(thread1.is_alive())
-    #        self.assertFalse(thread2.is_alive())
-    #        self.assertFalse(self.failed)
-    #        print("Random undo test is successful")
-    #    except Exception as e:
-    #        ai1.quit()
-    #        ai2.quit()
-    #        #game.quit()
-    #        gui.quit()
-    #        raise e
+    def test_random_undo(self):
+        running = True
+        # Let game play till stalemate or checkmate
+        game = Game()
+        ai1 = Computer(game=game, color='black')
+        ai2 = Computer(game=game, color='white')
+        gui = ChessboardGUI(game, ai1, ai2, interactive=False)
+        @run_in_thread
+        def random_undo_thread():
+            # FIXME: Add function to quit if the players throw an exception using the ai1.failed
+            for i in range(30):
+                if running == False:
+                    return
+                elif 'mate' not in game.game_state:
+                    sleep(random.random()*20)
+                    ai1.undo_move(random.randint(1, 3))
+                else:
+                    return
+            self.failed = True
+            raise RuntimeError('Timeout: Game did not end')
+        try:
+            #gui.run()
+            thread1 = ai1.start()
+            thread2 = ai2.start()
+            
+            thread = random_undo_thread()
+
+            self.quit_on_mate(game, ai1, ai2)
+            running = False
+            thread.join()
+            self.assertFalse(thread1.is_alive())
+            self.assertFalse(thread2.is_alive())
+            self.assertFalse(self.failed)
+            print("Random undo test is successful")
+        except Exception as e:
+            ai1.quit()
+            ai2.quit()
+            game.quit()
+            #gui.quit()
+            raise e

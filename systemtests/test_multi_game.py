@@ -4,7 +4,7 @@ import unittest
 from time import sleep
 from utils import run_in_thread
 
-class TestRandomGame(unittest.TestCase):
+class TestMultiGame(unittest.TestCase):
     def setUp(self):
         self.failed = False
 
@@ -12,14 +12,11 @@ class TestRandomGame(unittest.TestCase):
     def quit_on_mate(game, ai1, ai2):
         @run_in_thread
         def is_mate():
-            try:
-                for i in range(500):
-                    if 'mate' not in game.game_state:
-                        sleep(0.5)
-                    else:
-                        return
-            except Exception:
-                pass
+            for i in range(500):
+                if 'mate' not in game.game_state:
+                    sleep(0.5)
+                else:
+                    return
             self.failed = True
             raise RuntimeError('Timeout: Game did not end')
 
@@ -30,9 +27,9 @@ class TestRandomGame(unittest.TestCase):
         game.quit()
         sleep(0.5)
 
-    def test_random(self):
+    def test_multi(self):
         try:
-            for i in range(2):
+            for i in range(3):
                 print("------ game %d ------" % (i+1))
                 game = Game()
                 ai1 = Computer(game=game, color='black')
@@ -49,8 +46,3 @@ class TestRandomGame(unittest.TestCase):
             ai2.quit()
             game.quit()
             raise e
-
-    # FIXME: Write test for stalemate and checkmate undo
-
-
-        

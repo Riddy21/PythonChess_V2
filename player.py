@@ -3,8 +3,6 @@ import threading
 import random
 from time import sleep
 
-LOCK = threading.Lock()
-
 # FIXME: Make a variable to tell if the thread failed
 
 class Player:
@@ -51,8 +49,14 @@ class Computer(Player):
         # Make sure to alert all players
         self.game.alert_players()
 
-    @run_synchronously
     def make_move(self):
+        # Don't do anything on checkmate or stalemate
+        if 'mate' in self.game.game_state:
+            # Pause
+            self.game.switch_turn_event.wait()
+            return
+
+        LOCK.acquire()
         # get all playable pieces
         playable_pieces = self.game.get_playable_piece_coords()
 
@@ -64,12 +68,6 @@ class Computer(Player):
             for move in moves:
                 playable_moves.add((*piece, *move))
 
-        # Don't do anything on checkmate or stalemate
-        if 'mate' in self.game.game_state:
-            # Pause
-            self.game.switch_turn_event.wait()
-            LOCK.release()
-            return
 
         # TODO: This is a placeholder
         # chose the move to make
@@ -79,5 +77,5 @@ class Computer(Player):
             self.game.full_move(*move)
         if self.game.game_state == '%s pawn promo' % self.color:
             self.game.make_pawn_promo('Queen')
-
+        LOCK.release()
 

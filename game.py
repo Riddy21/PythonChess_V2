@@ -13,7 +13,10 @@ from settings import *
 # TODO: Move chk_limit_moves from pieces to the solver engine level to ensure no recursion happens
 # TODO: Change game board to an object
 # TODO: Add a dict of pieces to the game board so that it's easier to access and faster
-# TODO: Change pieces to singletons that are referenced in the board
+#   TODO: 1. Use dict of pieces, with coordinates as a property?
+# Change pieces to singletons that are referenced in the board
+#   1. Made piece library to implement this change
+# TODO: Edit Pices to be must more lite weight
 # TODO: Only use boards instead of games as nodes in search tree
 # TODO: Make a lock decorator to lock the functions that need locking
 #       NOTE: Make sure that they don't call each other
