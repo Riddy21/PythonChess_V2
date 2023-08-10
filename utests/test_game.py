@@ -1,6 +1,6 @@
 import unittest
 from game import *
-from parallel_util import *
+from utils import *
 from pieces import Queen, Pawn
 from time import sleep
 

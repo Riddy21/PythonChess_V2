@@ -1,4 +1,5 @@
 from typing import Any
+from collections import defaultdict
 import uuid
 from enum import Enum
 from settings import *
@@ -7,15 +8,6 @@ class PieceCreationException(Exception):
     """Exception for handling piece creation"""
     pass
 
-class Color(Enum):
-    WHITE = 'white'
-    BLACK = 'black'
-    NONE = 'none'
-    def __str__(self):
-        return self.value
-
-    def __getattr__(self, val):
-        return super().__getattribute__(val.upper())
 
 # TODO: Make a piece with move count and move history set to 0 and one with inserting a piece with a history
 # Abstract Piece Class
@@ -919,7 +911,7 @@ class King(_Piece):
         else:
             return -1
 
-
+# TODO: Try take out blank piece
 class Blank(_Piece):
     def __init__(self, color=None):
         super().__init__(0, 'none', 'Assets/Blank.png', '-', 0, [], None)
@@ -937,7 +929,6 @@ class PieceFactory():
             'p' : Pawn,
             '-' : Blank,
             }
-
     @classmethod
     def get_piece(self, str_rep):
         # Error checking
@@ -958,46 +949,56 @@ class PieceLibrary(object):
     Class the holds a copy of all the pieces
     """
     PIECE_MAPPING = {
-            'r' : Rook,
-            'n' : Knight,
-            'b' : Bishop,
-            'q' : Queen,
-            'k' : King,
-            'p' : Pawn,
-            '-' : Blank,
+            PIECES.ROOK : Rook,
+            PIECES.KNIGHT : Knight,
+            PIECES.BISHOP : Bishop,
+            PIECES.QUEEN : Queen,
+            PIECES.KING : King,
+            PIECES.PAWN : Pawn,
+            PIECES.BLANK : Blank,
             }
-    def __init__(self, colors=PLAYABLE_COLORS):
+
+    def __init__(self, colors=COLORS.list_values()):
         """
         Constructor
         """
-        self.colors = colors
-        self.library = dict()
+        color_list = []
+        for color_str in colors:
+            color_list.append(COLORS[color_str.upper()])
 
         # Populate library
-        self._populate_library(self.library, self.colors)
+        self.library = defaultdict(dict)
+        self._populate_library(self.library, color_list)
 
-    def _populate_library(self, library, colors):
+    @classmethod
+    def _populate_library(cls, library, colors):
         """
         Create a copy of each piece in each color
         """
-        for piece, obj in self.PIECE_MAPPING.items():
+        for piece, piece_obj in cls.PIECE_MAPPING.items():
             for color in colors:
-                self.library[piece][color]
+                library[piece][color] = piece_obj(color.value)
         
-
-    @classmethod
-    def get_piece(self, str_rep):
-        # Error checking
-        if str_rep.lower() not in self.PIECE_MAPPING:
-            raise PieceCreationException('Error: invalid string for piece creation: \'%s\'' % str_rep)
+    def get_piece_ref(self, str_rep):
+        # Get piece by the PIECES str rep, kind of hacky
+        piece = PIECES.get_by_value(str_rep.lower())
 
         if str_rep.isupper():
-            color = 'white'
+            color = COLORS.WHITE
         else:
-            color = 'black'
+            color = COLORS.BLACK
 
-        piece_type = str_rep.lower()
+        return self.library[piece][color]
 
-        return self.PIECE_MAPPING[piece_type](color)
+    @classmethod
+    def get_piece_copy(cls, str_rep):
+        # Get piece by the PIECES str rep, kind of hacky
+        piece = PIECES.get_by_value(str_rep.lower())
 
+        if str_rep.isupper():
+            color = COLORS.WHITE
+        else:
+            color = COLORS.BLACK
+
+        return cls.PIECE_MAPPING[piece](color.value)
 

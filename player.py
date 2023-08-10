@@ -1,4 +1,4 @@
-from parallel_util import *
+from utils import *
 import threading
 import random
 from time import sleep
@@ -16,21 +16,18 @@ class Player:
         self.color = color
         self.type = type
 
+    @run_synchronously
     def undo_move(self, num=1):
-        for i in range(num):
-            LOCK.acquire()
-            self.game.undo_move()
-            LOCK.release()
+        self.game.undo_move(num)
 
 
 class Human(Player):
     def __init__(self, game, color):
         super().__init__(game, color, Player.HUMAN)
 
+    @run_synchronously
     def handle_move(self, col, row):
-        LOCK.acquire()
         self.game.handle_move(col, row)
-        LOCK.release()
 
 
 # Ai class that can analyse a game and take control of a specific color
@@ -54,7 +51,7 @@ class Computer(Player):
         # Make sure to alert all players
         self.game.alert_players()
 
-
+    @run_synchronously
     def make_move(self):
         # get all playable pieces
         playable_pieces = self.game.get_playable_piece_coords()
@@ -63,9 +60,7 @@ class Computer(Player):
         playable_moves = set()
         # FIXME: Check will cause "no more moves"
         for piece in playable_pieces:
-            LOCK.acquire()
             moves = self.game.get_next_poss_moves(*piece)
-            LOCK.release()
             for move in moves:
                 playable_moves.add((*piece, *move))
 
@@ -73,6 +68,7 @@ class Computer(Player):
         if 'mate' in self.game.game_state:
             # Pause
             self.game.switch_turn_event.wait()
+            LOCK.release()
             return
 
         # TODO: This is a placeholder
@@ -80,12 +76,8 @@ class Computer(Player):
         # NOTE: Lock to make sure game only accessed by one at a time
         if playable_moves:
             move = random.sample(playable_moves, 1)[0]
-            LOCK.acquire()
             self.game.full_move(*move)
-            LOCK.release()
         if self.game.game_state == '%s pawn promo' % self.color:
-            LOCK.acquire()
             self.game.make_pawn_promo('Queen')
-            LOCK.release()
 
 

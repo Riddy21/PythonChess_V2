@@ -76,7 +76,7 @@ class Game:
                 pieces = line.split(' ')
 
                 for col, piece in enumerate(pieces):
-                    board[col][row] = PieceFactory.get_piece(piece)
+                    board[col][row] = PieceLibrary.get_piece_copy(piece)
         except (IndexError, PieceCreationException):
             raise GameUserError("Config file %s is in the wrong format" % config_file)\
                     from None
@@ -147,18 +147,20 @@ class Game:
         # TODO: turn return -1 to a try catch
 
     # Function to undo a move and remove it from the move list
-    def undo_move(self):
-        # undo move and delete move
-        if len(self.moves) != 0:
-            # if in selection mode
-            if getattr(self.moves[-1], 'move_stage') == 'selected':
-                # exit from selection mode
-                self.moves[-1].deselect_move(self.board)
-                del self.moves[-1]
-            else:
-                self.moves[-1].undo_move(self.board)
-                del self.moves[-1]
-                self.switch_turn()
+    def undo_move(self, num=1):
+        for i in range(num):
+            # undo move and delete move
+            if len(self.moves) != 0:
+                # if in selection mode
+                if getattr(self.moves[-1], 'move_stage') == 'selected':
+                    # exit from selection mode
+                    self.moves[-1].deselect_move(self.board)
+                    del self.moves[-1]
+                else:
+                    self.moves[-1].undo_move(self.board)
+                    del self.moves[-1]
+                    self.switch_turn_quiet() # Make sure no players are alerted
+        self.alert_players()
 
     # Function to check return what move stage we are at and handle move button
     def handle_move(self, x, y):

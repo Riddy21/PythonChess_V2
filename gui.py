@@ -1,7 +1,7 @@
 import pygame
 import popup
 from player import *
-from parallel_util import run_in_thread
+from utils import run_in_thread
 
 # Set up the colors
 WHITE = (255, 255, 255)

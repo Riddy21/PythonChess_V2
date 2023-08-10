@@ -1,5 +1,19 @@
+from enum import Enum
 import threading
 import multiprocessing
+
+class ChessEnum(Enum):
+    @classmethod
+    def list_values(cls):
+        return list(map(lambda c: c.value, cls))
+
+    @classmethod
+    def get_by_value(cls, value):
+        # NOTE: For loop not ideal but fast enough for small enums
+        for member in cls:
+            if member.value == value:
+                return member
+        raise KeyError(f"No member with value {value}")
 
 LOCK = threading.Lock()
 
@@ -23,4 +37,3 @@ def run_synchronously(func):
         func(*args, **kwargs)
         LOCK.release()
     return wrapper
-

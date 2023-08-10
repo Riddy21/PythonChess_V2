@@ -2,7 +2,7 @@ from game import Game
 from player import Computer, Human
 import unittest
 from time import sleep
-from parallel_util import run_in_thread
+from utils import run_in_thread
 
 class TestRandomGame(unittest.TestCase):
     def setUp(self):
