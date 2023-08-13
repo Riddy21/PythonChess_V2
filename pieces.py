@@ -8,7 +8,7 @@ from settings import *
 
 # TODO: Make a piece with move count and move history set to 0 and one with inserting a piece with a history
 # Abstract Piece Class
-class _Piece():
+class _Piece(object):
     def __init__(self, value, colour, image, str_rep, move_count, move_hist, id):
         # initiate variables
         self.value = value
@@ -933,26 +933,23 @@ class PieceLibrary(object):
             PIECES.PAWN : Pawn,
             PIECES.BLANK : Blank,
             }
+    COLOR_LIST = COLORS
 
-    def __init__(self, colors=COLORS.list_values()):
+    def __init__(self):
         """
         Constructor
         """
-        color_list = []
-        for color_str in colors:
-            color_list.append(COLORS[color_str.upper()])
-
         # Populate library
         self.library = defaultdict(dict)
-        self._populate_library(self.library, color_list)
+        self._populate_library(self.library)
 
     @classmethod
-    def _populate_library(cls, library, colors):
+    def _populate_library(cls, library):
         """
         Create a copy of each piece in each color
         """
         for piece, piece_obj in cls.PIECE_MAPPING.items():
-            for color in colors:
+            for color in cls.COLOR_LIST:
                 library[piece][color] = piece_obj(color.value)
 
     @classmethod
@@ -964,23 +961,29 @@ class PieceLibrary(object):
         try:
             piece = PIECES.get_by_value(str_rep.lower())
         except KeyError:
-            raise cls.PieceLibraryException("No piece with value %s" % str_rep)
+            return None, None
 
         if str_rep.isupper():
-            color = COLORS.WHITE
+            color = cls.COLOR_LIST.WHITE
         else:
-            color = COLORS.BLACK
+            color = cls.COLOR_LIST.BLACK
 
         return piece, color
         
     def get_piece_ref(self, str_rep):
         piece, color = self._get_piece_info(str_rep)
 
-        return self.library[piece][color]
+        if piece and color:
+            return self.library[piece][color]
+        else:
+            return None
 
     @classmethod
     def get_piece_copy(cls, str_rep):
         piece, color = cls._get_piece_info(str_rep)
 
-        return cls.PIECE_MAPPING[piece](color.value)
+        if piece and color:
+            return cls.PIECE_MAPPING[piece](color.value)
+        else:
+            return None
 
