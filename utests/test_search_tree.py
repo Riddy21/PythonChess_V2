@@ -34,3 +34,6 @@ class TestSearchTree(unittest.TestCase):
         self.assertEqual(self.tree.num_leaves, 400)
         self.assertLess(length, 5)
 
+if __name__ == '__main__':
+    unittest.main()
+

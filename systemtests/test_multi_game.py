@@ -24,7 +24,7 @@ class TestMultiGame(unittest.TestCase):
         ai1.quit()
         ai2.quit()
         game.quit()
-        sleep(0.5)
+        sleep(1)
 
     def test_multi(self):
         try:
@@ -45,3 +45,6 @@ class TestMultiGame(unittest.TestCase):
             ai2.quit()
             game.quit()
             raise e
+
+if __name__ == '__main__':
+    unittest.main()

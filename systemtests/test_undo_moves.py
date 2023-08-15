@@ -4,7 +4,7 @@ import unittest
 from time import sleep
 from utils import *
 import random
-from gui import ChessboardGUI
+#from gui import ChessboardGUI
 
 class TestUndoGame(unittest.TestCase):
     def setUp(self):
@@ -80,7 +80,7 @@ class TestUndoGame(unittest.TestCase):
         game = Game()
         ai1 = Computer(game=game, color='black')
         ai2 = Computer(game=game, color='white')
-        gui = ChessboardGUI(game, ai1, ai2, interactive=False)
+        #gui = ChessboardGUI(game, ai1, ai2, interactive=False)
         @run_in_thread
         def random_undo_thread():
             # FIXME: Add function to quit if the players throw an exception using the ai1.failed
@@ -114,3 +114,6 @@ class TestUndoGame(unittest.TestCase):
             game.quit()
             #gui.quit()
             raise e
+
+if __name__ == '__main__':
+    unittest.main()
