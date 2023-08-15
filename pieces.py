@@ -961,7 +961,7 @@ class PieceLibrary(object):
         try:
             piece = PIECES.get_by_value(str_rep.lower())
         except KeyError:
-            return None, None
+            raise cls.PieceLibraryException('Could not find piece with value %s' % str_rep)
 
         if str_rep.isupper():
             color = cls.COLOR_LIST.WHITE

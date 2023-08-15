@@ -16,14 +16,14 @@ class TestBoard(unittest.TestCase):
         golden = file.read()
 
         # make sure the file and the object is the same
-        self.assertEqual(board.__str__(), golden)
+        self.assertEqual(str(board), golden)
 
         file.close()
 
     def test_copyable(self):
         board = BoardManager.get_board_from_file('Presets/check.txt')
         # Test if you can make a deep copy without problems
-        new_board = board.copy()
+        new_board = BoardManager.copy_board(board)
         # Add a move to one of them
         board[0, 0].num_moves += 1
 
@@ -36,3 +36,6 @@ class TestBoard(unittest.TestCase):
                         new_board[0, 0].piece)
         self.assertNotEqual(board[0, 0].num_moves, \
                         new_board[0, 0].num_moves)
+
+if __name__ == '__main__':
+    unittest.main()

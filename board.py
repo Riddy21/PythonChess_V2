@@ -20,7 +20,7 @@ class BoardManager(object):
             """Print function Override"""
             return BoardManager.get_board_str(self)
 
-    class Piece(object):
+    class BoardPiece(object):
         """
         Object representing a tile on the board
         """
@@ -30,7 +30,7 @@ class BoardManager(object):
             self.num_moves = num_moves
 
         def copy(self):
-            return BoardManager.Piece(self.piece, self.num_moves)
+            return BoardManager.BoardPiece(self.piece, self.num_moves)
 
         def __str__(self):
             return str((self.piece.str_rep, self.num_moves))
@@ -64,7 +64,7 @@ class BoardManager(object):
                     continue
 
                 if piece_ref:
-                    board[col, row] = cls.Piece(piece_ref)
+                    board[col, row] = cls.BoardPiece(piece_ref)
 
         if row != BOARD_HEIGHT-1 or col != BOARD_WIDTH-1:
             raise IndexError("Config file %s not in the right format" % config_file)
@@ -98,7 +98,7 @@ class BoardManager(object):
         return string
 
     @staticmethod
-    def get_move_counts_str(board):
+    def get_move_counts_str(board): # pragma: no cover
         """Return a board layout of the num moves"""
         string = ''
 
