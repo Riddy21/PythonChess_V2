@@ -20,7 +20,7 @@ class BoardManager(object):
             """Print function Override"""
             return BoardManager.get_board_str(self)
 
-    class BoardPiece(object):
+    class Square(object):
         """
         Object representing a tile on the board
         """
@@ -30,7 +30,7 @@ class BoardManager(object):
             self.num_moves = num_moves
 
         def copy(self):
-            return BoardManager.BoardPiece(self.piece, self.num_moves)
+            return BoardManager.Square(self.piece, self.num_moves)
 
         def __str__(self):
             return str((self.piece.str_rep, self.num_moves))
@@ -56,18 +56,14 @@ class BoardManager(object):
             for col, piece in enumerate(pieces):
                 # Do error checking
                 if row > BOARD_HEIGHT-1 or col > BOARD_WIDTH-1:
-                    raise IndexError("Config file %s not in the right format" % config_file)
+                    raise IOError("Config file %s not in the right format" % config_file)
                 piece_ref = cls.PIECE_LIBRARY.get_piece_ref(piece)
 
-                #FIXME: temporary fix for blank pieces being included for compatability
-                if type(piece_ref) == Blank:
-                    continue
-
                 if piece_ref:
-                    board[col, row] = cls.BoardPiece(piece_ref)
+                    board[col, row] = cls.Square(piece_ref)
 
         if row != BOARD_HEIGHT-1 or col != BOARD_WIDTH-1:
-            raise IndexError("Config file %s not in the right format" % config_file)
+            raise IOError("Config file %s not in the right format" % config_file)
         file.close()
 
     @classmethod

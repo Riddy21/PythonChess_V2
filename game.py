@@ -4,6 +4,7 @@ from pieces import *
 from move import Move
 from threading import Event, Lock
 from copy import deepcopy
+from board import BoardManager
 from settings import *
 
 # NOTE: Next things to do
@@ -70,25 +71,8 @@ class Game:
     @staticmethod
     def get_board_from_config_file(config_file):
         """Reads the config file and returns the board object"""
-        file = open(config_file)
-        board = [[None] * BOARD_HEIGHT for i in range(BOARD_WIDTH)]
-        try:
-            for row, line in enumerate(file):
-                # Clear new line
-                line = line.replace('\n', '')
-                pieces = line.split(' ')
+        return BoardManager.get_board_from_file(config_file)
 
-                for col, piece in enumerate(pieces):
-                    board[col][row] = PieceLibrary.get_piece_copy(piece)
-        except (IndexError, PieceCreationException):
-            raise GameUserError("Config file %s is in the wrong format" % config_file)\
-                    from None
-
-        if row != BOARD_HEIGHT-1 or col != BOARD_WIDTH-1:
-            raise GameUserError("Config file %s is in the wrong format" % config_file)
-        file.close()
-
-        return board
 
     def set_board(self, config_file=DEFAULT_BOARD_PRESET_PATH):
         # Create blank board
@@ -173,7 +157,7 @@ class Game:
             self.move_from(x, y)
         else:
             # if the player selects a different piece to move
-            if getattr(self.board[x][y], 'colour') == self.turn:
+            if getattr(self.board[x, y].piece, 'colour') == self.turn:
                 # Removes move_id from piece and deletes move
                 self.moves[-1].deselect_move(self.board)
                 del self.moves[-1]
@@ -215,11 +199,10 @@ class Game:
     # get the coordinates of the pieces that are playable on that turn
     def get_playable_piece_coords(self):
         playable = set()
-        for y in range(len(self.board[0])):
-            for x in range(len(self.board)):
-                if self.board[x][y].colour == self.turn:
-                    if self.get_next_poss_moves(x, y):
-                        playable.add((x, y))
+        for (x, y), square in self.board.items():
+            if square.piece.colour == self.turn:
+                if self.get_next_poss_moves(x, y):
+                    playable.add((x, y))
         return playable
 
 
@@ -277,27 +260,27 @@ class Game:
         num_pieces = 0
 
         # loops through all pieces on the board
-        for y in range(len(self.board[0])):
-            for x in range(len(self.board)):
-                # pawn promo check
-                if y == 0 and self.board[x][y].str_rep == 'P':
-                    return 'white pawn promo'
+        for (x, y), item in self.board.items():
+            piece = item.piece
+            # pawn promo check
+            if y == 0 and piece.str_rep == 'P':
+                return 'white pawn promo'
 
-                if y == BOARD_HEIGHT - 1 and self.board[x][y].str_rep == 'p':
-                    return 'black pawn promo'
+            if y == BOARD_HEIGHT - 1 and piece.str_rep == 'p':
+                return 'black pawn promo'
 
-                # If the piece iterated on is piece of the next turn
-                if self.board[x][y].colour != 'none':
-                    num_pieces += 1
-                if self.board[x][y].colour == self.turn:
-                    # If the piece is the king
-                    if self.board[x][y].str_rep == 'k' or self.board[x][y].str_rep == 'K':
-                        # Test if it is in check
-                        in_check = self.board[x][y].isin_check(x, y, self)
-                    # Try to move it and if there are no more moves
-                    if self.get_next_poss_moves(x, y):
-                        # set can move to true and break out
-                        can_move = True
+            # If the piece iterated on is piece of the next turn
+            if piece.colour != 'none':
+                num_pieces += 1
+            if piece.colour == self.turn:
+                # If the piece is the king
+                if piece.str_rep == 'k' or piece.str_rep == 'K':
+                    # Test if it is in check
+                    in_check = piece.isin_check(x, y, self)
+                # Try to move it and if there are no more moves
+                if self.get_next_poss_moves(x, y):
+                    # set can move to true and break out
+                    can_move = True
 
         sys.stdout = sys.__stdout__
 
@@ -320,10 +303,9 @@ class Game:
     # Get the coordinates of that type of piece
     def get_piece_coords(self, piece_str):
         coords = set()
-        for y in range(len(self.board[0])):
-            for x in range(len(self.board)):
-                if self.board[x][y].str_rep == piece_str:
-                    coords.add((x,y))
+        for (x, y), square in self.board.items():
+            if square.piece.str_rep == piece_str:
+                coords.add((x,y))
         return coords
 
     # Convert chess coords to int coords
@@ -332,7 +314,7 @@ class Game:
 
     # Static: Converts Object board to string board
     def get_chess_board_string_array(self):
-        return [[self.board[x][y].str_rep for x in range(8)] for y in range(8)]
+        return [[self.board[x, y].piece.str_rep for x in range(8)] for y in range(8)]
 
     # TODO: Static: Converts String board to Object board
 
@@ -340,14 +322,7 @@ class Game:
         return super().__getattribute__(name)
 
     def __str__(self):
-        string = ''
-
-        # Add board string reps
-        for y in range(len(self.board[0])):
-            for x in range(len(self.board)):
-                string += self.board[x][y].str_rep + ' '
-            string = string[:-1] + '\n'
-        return string
+        return self.board.__str__()
 
     def print_move_counts(self):
         string = ''

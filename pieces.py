@@ -27,10 +27,10 @@ class _Piece(object):
         # make sure its not checking its self
         if tox != frox or toy != froy:
             # Same colour pieces
-            if getattr(board[tox][toy], 'colour') == getattr(board[frox][froy], 'colour'):
+            if getattr(board[tox, toy].piece, 'colour') == getattr(board[frox, froy].piece, 'colour'):
                 return 'self obstructed'
             # opponent pieces
-            elif getattr(board[tox][toy], 'colour') != 'none':
+            elif getattr(board[tox, toy].piece, 'colour') != 'none':
                 return 'opponent obstructed'
             else:
                 return 'unobstructed'
@@ -76,12 +76,12 @@ class _Piece(object):
         # Find personal king
         for y in range(8):
             for x in range(8):
-                if self.colour == 'white' and getattr(board[x][y], 'str_rep') == 'K':
+                if self.colour == 'white' and getattr(board[x, y].piece, 'str_rep') == 'K':
                     king_x = x
                     king_y = y
                     is_king = True
                     break
-                elif self.colour == 'black' and getattr(board[x][y], 'str_rep') == 'k':
+                elif self.colour == 'black' and getattr(board[x, y].piece, 'str_rep') == 'k':
                     king_x = x
                     king_y = y
                     is_king = True
@@ -104,7 +104,7 @@ class _Piece(object):
             # switch turn to king's turn
             probe_game.switch_turn()
             # Checks if king is in check
-            if board[king_x][king_y].isin_check(king_x, king_y, probe_game):
+            if board[king_x, king_y].piece.isin_check(king_x, king_y, probe_game):
                 bad_moves.append([my_move[0], my_move[1]])
 
             # switches back
@@ -171,14 +171,14 @@ class Pawn(_Piece):
         poss_moves = []
 
         # Black moves
-        if getattr(board[x][y], 'colour') == 'black':
+        if getattr(board[x, y].piece, 'colour') == 'black':
             i = 1
 
             # Do Move detection
             while i <= 2 and y + i <= 7:
                 piece_detect = self._piece_detect(x, y, x, y + i, board)
                 # piece in front blocks move
-                if getattr(board[x][y + i], 'colour') == 'white':
+                if getattr(board[x, y + i].piece, 'colour') == 'white':
                     break
 
                 # basic
@@ -199,20 +199,20 @@ class Pawn(_Piece):
 
             # NOTE: ONLY WHEN SCAN MODE AND KING CAN BE CAPTURED
             # Sideways Capture, ** if in scan mode, side captures count even if there is no piece currently there
-            if x < 7 and y < 7 and getattr(board[x + 1][y + 1], 'colour') == 'white':
+            if x < 7 and y < 7 and getattr(board[x + 1, y + 1].piece, 'colour') == 'white':
                 poss_moves.append([x + 1, y + 1])
-            if x > 0 and y < 7 and getattr(board[x - 1][y + 1], 'colour') == 'white':
+            if x > 0 and y < 7 and getattr(board[x - 1, y + 1].piece, 'colour') == 'white':
                 poss_moves.append([x - 1, y + 1])
 
         # white moves
-        elif getattr(board[x][y], 'colour') == 'white':
+        elif getattr(board[x, y].piece, 'colour') == 'white':
             i = 1
 
             while i <= 2 and y - i >= 0:
                 piece_detect = self._piece_detect(x, y, x, y - i, board)
 
                 # piece in front blocks move
-                if getattr(board[x][y - i], 'colour') == 'black':
+                if getattr(board[x, y - i].piece, 'colour') == 'black':
                     break
 
                 # basic
@@ -233,38 +233,38 @@ class Pawn(_Piece):
 
             # NOTE: ONLY WHEN SCAN MODE AND KING CAN BE CAPTURED
             # Sideways Capture
-            if x < 7 and y >= 0 and getattr(board[x + 1][y - 1], 'colour') == 'black':
+            if x < 7 and y >= 0 and getattr(board[x + 1, y - 1].piece, 'colour') == 'black':
                 poss_moves.append([x + 1, y - 1])
-            if x > 0 and y >= 0 and getattr(board[x - 1][y - 1], 'colour') == 'black':
+            if x > 0 and y >= 0 and getattr(board[x - 1, y - 1].piece, 'colour') == 'black':
                 poss_moves.append([x - 1, y - 1])
 
         # enPassante
         if self.colour == 'white' and y == 3:
-            if (x + 1 in range(8)) and getattr(board[x + 1][y], 'colour') == 'black' and \
-                    getattr(board[x + 1][y], 'move_count') == 1 and \
-                    getattr(board[x + 1][y], 'move_num_history')[-1] == (self.move_num_history[-1] - 1):
+            if (x + 1 in range(8)) and getattr(board[x + 1, y].piece, 'colour') == 'black' and \
+                    getattr(board[x + 1, y].piece, 'move_count') == 1 and \
+                    getattr(board[x + 1, y].piece, 'move_num_history')[-1] == (self.move_num_history[-1] - 1):
                 if self._piece_detect(x, y, x + 1, y - 1, board) == 'opponent obstructed' or \
                         self._piece_detect(x, y, x + 1, y - 1, board) == 'unobstructed':
                     poss_moves.append([x + 1, y - 1])
                     self.enpassant_pos.append([x + 1, y - 1])
-            if (x - 1 in range(8)) and getattr(board[x - 1][y], 'colour') == 'black' and \
-                    getattr(board[x - 1][y], 'move_count') == 1 and \
-                    getattr(board[x - 1][y], 'move_num_history')[-1] == (self.move_num_history[-1] - 1):
+            if (x - 1 in range(8)) and getattr(board[x - 1, y].piece, 'colour') == 'black' and \
+                    getattr(board[x - 1, y].piece, 'move_count') == 1 and \
+                    getattr(board[x - 1, y].piece, 'move_num_history')[-1] == (self.move_num_history[-1] - 1):
                 if self._piece_detect(x, y, x - 1, y - 1, board) == 'opponent obstructed' or \
                         self._piece_detect(x, y, x - 1, y - 1, board) == 'unobstructed':
                     poss_moves.append([x - 1, y - 1])
                     self.enpassant_pos.append([x - 1, y - 1])
         elif self.colour == 'black' and y == 4:
-            if (x + 1 in range(8)) and getattr(board[x + 1][y], 'colour') == 'white' and \
-                    getattr(board[x + 1][y], 'move_count') == 1 and \
-                    getattr(board[x + 1][y], 'move_num_history')[-1] == (self.move_num_history[-1] - 1):
+            if (x + 1 in range(8)) and getattr(board[x + 1, y].piece, 'colour') == 'white' and \
+                    getattr(board[x + 1, y].piece, 'move_count') == 1 and \
+                    getattr(board[x + 1, y].piece, 'move_num_history')[-1] == (self.move_num_history[-1] - 1):
                 if self._piece_detect(x, y, x + 1, y + 1, board) == 'opponent obstructed' or \
                         self._piece_detect(x, y, x + 1, y + 1, board) == 'unobstructed':
                     poss_moves.append([x + 1, y + 1])
                     self.enpassant_pos.append([x + 1, y + 1])
-            if (x - 1 in range(8)) and getattr(board[x - 1][y], 'colour') == 'white' and \
-                    getattr(board[x - 1][y], 'move_count') == 1 and \
-                    getattr(board[x - 1][y], 'move_num_history')[-1] == (self.move_num_history[-1] - 1):
+            if (x - 1 in range(8)) and getattr(board[x - 1, y].piece, 'colour') == 'white' and \
+                    getattr(board[x - 1, y].piece, 'move_count') == 1 and \
+                    getattr(board[x - 1, y].piece, 'move_num_history')[-1] == (self.move_num_history[-1] - 1):
                 if self._piece_detect(x, y, x - 1, y + 1, board) == 'opponent obstructed' or \
                         self._piece_detect(x, y, x - 1, y + 1, board) == 'unobstructed':
                     poss_moves.append([x - 1, y + 1])
@@ -701,15 +701,15 @@ class King(_Piece):
 
         if scan_mode or not self.isin_check(x, y, probe_game):
             # White Piece
-            if getattr(board[x][y], 'colour') == 'white':
+            if getattr(board[x, y].piece, 'colour') == 'white':
                 # The king must be at starting position with 0 move count
-                if x == 4 and y == 7 and getattr(board[x][y], 'move_count') == 0:
+                if x == 4 and y == 7 and getattr(board[x, y].piece, 'move_count') == 0:
                     # The rook on the left must be at starting position with 0 move count
-                    if getattr(board[0][7], 'str_rep') == 'R' and getattr(board[0][7], 'move_count') == 0:
+                    if getattr(board[0, 7].piece, 'str_rep') == 'R' and getattr(board[0, 7].piece, 'move_count') == 0:
                         # there must not be anything blocking the path
-                        if getattr(board[1][7], 'str_rep') == '-' and \
-                                getattr(board[2][7], 'str_rep') == '-' and \
-                                getattr(board[3][7], 'str_rep') == '-':
+                        if getattr(board[1, 7].piece, 'str_rep') == '-' and \
+                                getattr(board[2, 7].piece, 'str_rep') == '-' and \
+                                getattr(board[3, 7].piece, 'str_rep') == '-':
                             # append move to possible moves
                             poss_moves.append([2, 7])
                             # add left castle to self
@@ -718,12 +718,12 @@ class King(_Piece):
                     # Reset once castle is not valid
                     self.left_castle = -1, -1
 
-                if x == 4 and y == 7 and getattr(board[x][y], 'move_count') == 0:
+                if x == 4 and y == 7 and getattr(board[x, y].piece, 'move_count') == 0:
                     # The rook on the right must be at starting position with 0 move count
-                    if getattr(board[7][7], 'str_rep') == 'R' and getattr(board[7][7], 'move_count') == 0:
+                    if getattr(board[7, 7].piece, 'str_rep') == 'R' and getattr(board[7, 7].piece, 'move_count') == 0:
                         # there must not be anything blocking the path
-                        if getattr(board[5][7], 'str_rep') == '-' and \
-                                getattr(board[6][7], 'str_rep') == '-':
+                        if getattr(board[5, 7].piece, 'str_rep') == '-' and \
+                                getattr(board[6, 7].piece, 'str_rep') == '-':
                             # append move to possible moves
                             poss_moves.append([6, 7])
                             # add right castle to self
@@ -732,15 +732,15 @@ class King(_Piece):
                     # Reset once castle is not valid
                     self.right_castle = -1, -1
             # Black Piece
-            if getattr(board[x][y], 'colour') == 'black':
+            if getattr(board[x, y].piece, 'colour') == 'black':
                 # The king must be at starting position with 0 move count
-                if x == 4 and y == 0 and getattr(board[x][y], 'move_count') == 0:
+                if x == 4 and y == 0 and getattr(board[x, y].piece, 'move_count') == 0:
                     # The rook on the left must be at starting position with 0 move count
-                    if getattr(board[0][0], 'str_rep') == 'r' and getattr(board[0][0], 'move_count') == 0:
+                    if getattr(board[0, 0].piece, 'str_rep') == 'r' and getattr(board[0, 0].piece, 'move_count') == 0:
                         # there must not be anything blocking the path
-                        if getattr(board[1][0], 'str_rep') == '-' and \
-                                getattr(board[2][0], 'str_rep') == '-' and \
-                                getattr(board[3][0], 'str_rep') == '-':
+                        if getattr(board[1, 0].piece, 'str_rep') == '-' and \
+                                getattr(board[2, 0].piece, 'str_rep') == '-' and \
+                                getattr(board[3, 0].piece, 'str_rep') == '-':
                             # append move to possible moves
                             poss_moves.append([2, 0])
                             # add left castle to self
@@ -749,12 +749,12 @@ class King(_Piece):
                     # Reset once castle is not valid
                     self.left_castle = -1, -1
 
-                if x == 4 and y == 0 and getattr(board[x][y], 'move_count') == 0:
+                if x == 4 and y == 0 and getattr(board[x, y].piece, 'move_count') == 0:
                     # The rook on the right must be at starting position with 0 move count
-                    if getattr(board[7][0], 'str_rep') == 'r' and getattr(board[7][0], 'move_count') == 0:
+                    if getattr(board[7, 0].piece, 'str_rep') == 'r' and getattr(board[7, 0].piece, 'move_count') == 0:
                         # there must not be anything blocking the path
-                        if getattr(board[5][0], 'str_rep') == '-' and \
-                                getattr(board[6][0], 'str_rep') == '-':
+                        if getattr(board[5, 0].piece, 'str_rep') == '-' and \
+                                getattr(board[6, 0].piece, 'str_rep') == '-':
                             # append move to possible moves
                             poss_moves.append([6, 0])
                             # add right castle to self
@@ -794,7 +794,7 @@ class King(_Piece):
 
                 # If the piece is a pawn, add the left and right capture into op_moves
                 # and remove the move in front of the pawn
-                if probe_game.turn == 'black' and getattr(board[x][y], 'str_rep') == 'p':
+                if probe_game.turn == 'black' and getattr(board[x, y].piece, 'str_rep') == 'p':
                     if x < 7 and y <= 7:
                         op_moves.append([x + 1, y + 1])
                     if x > 0 and y <= 7:
@@ -805,7 +805,7 @@ class King(_Piece):
                             op_moves.remove([x, y + 2])
                         except ValueError:
                             pass
-                elif probe_game.turn == 'white' and getattr(board[x][y], 'str_rep') == 'P':
+                elif probe_game.turn == 'white' and getattr(board[x, y].piece, 'str_rep') == 'P':
                     if x < 7 and y >= 0:
                         op_moves.append([x + 1, y - 1])
                     if x > 0 and y >= 0:
@@ -835,7 +835,7 @@ class King(_Piece):
                 x = myx + i
                 y = myy + j
                 # If there is a piece of the opposite colour
-                if (x in range(8)) and (y in range(8)) and getattr(board[x][y], 'colour') != self.colour:
+                if (x in range(8)) and (y in range(8)) and getattr(board[x, y].piece, 'colour') != self.colour:
                     # Try the move
                     probe_game.full_move(myx, myy, x, y)
 
