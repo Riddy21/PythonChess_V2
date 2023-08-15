@@ -26,6 +26,6 @@ test_%: systemtests/test_%.py
 	python3 -m coverage run -a -m unittest $<
 
 coverage:
-	coverage html
+	python3 -m coverage html
 	open htmlcov/index.html
 
