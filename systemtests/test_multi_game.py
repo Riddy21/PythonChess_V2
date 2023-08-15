@@ -8,8 +8,7 @@ class TestMultiGame(unittest.TestCase):
     def setUp(self):
         self.failed = False
 
-    @staticmethod
-    def quit_on_mate(game, ai1, ai2):
+    def quit_on_mate(self, game, ai1, ai2):
         @run_in_thread
         def is_mate():
             for i in range(500):

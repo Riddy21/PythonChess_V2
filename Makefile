@@ -23,7 +23,7 @@ test_%: utests/test_%.py
 	python3 -m coverage run -a -m unittest $<
 
 test_%: systemtests/test_%.py
-	python3 -n coverage run -a -m unittest $<
+	python3 -m coverage run -a -m unittest $<
 
 coverage:
 	coverage html
