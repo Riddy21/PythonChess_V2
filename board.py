@@ -57,7 +57,8 @@ class BoardManager(object):
                 # Do error checking
                 if row > BOARD_HEIGHT-1 or col > BOARD_WIDTH-1:
                     raise IOError("Config file %s not in the right format" % config_file)
-                piece_ref = cls.PIECE_LIBRARY.get_piece_ref(piece)
+                # FIXME: This needs to change for memory efficiency when switching over to new API
+                piece_ref = cls.PIECE_LIBRARY.get_piece_copy(piece)
 
                 if piece_ref:
                     board[col, row] = cls.Square(piece_ref)

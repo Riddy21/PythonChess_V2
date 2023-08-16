@@ -155,7 +155,7 @@ class Move():
                 self.captured = board[tox, toy - 1].piece
                 board[tox, toy - 1].piece = Blank()
             else:
-                self.captured = board[tox, toy + 1]
+                self.captured = board[tox, toy + 1].piece
                 board[tox, toy + 1].piece = Blank()
             board[tox, toy].piece, board[frox, froy].piece = board[frox, froy].piece, board[tox, toy].piece
 

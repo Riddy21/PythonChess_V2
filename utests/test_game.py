@@ -232,17 +232,11 @@ class TestGame(unittest.TestCase):
         self.game.set_board('Presets/ready_to_enpass.txt')
         self.game.set_turn('black')
 
-        print(self.game.board)
         # Do pawn enpass
-        print('move 1')
         self.game.full_move(4, 1, 4, 3)
-        print('move 2')
         self.game.full_move(5, 3, 4, 2)
 
         done_enpass = self.game.get_board_from_config_file("Presets/done_enpass.txt")
-
-        print(self.game.board)
-        print(done_enpass)
 
         # make sure enpass is done
         self.compare_boards(self.game.board, done_enpass)
