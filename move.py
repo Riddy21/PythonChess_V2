@@ -273,7 +273,6 @@ class Move():
 
         # Check if valid move on highlights
         if not self.is_valid_move(x, y):
-            print('yo')
             return -1
 
         frox, froy = self.move_from

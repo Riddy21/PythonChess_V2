@@ -233,9 +233,9 @@ class Pawn(_Piece):
 
             # NOTE: ONLY WHEN SCAN MODE AND KING CAN BE CAPTURED
             # Sideways Capture
-            if x < 7 and y >= 0 and getattr(board[x + 1, y - 1].piece, 'colour') == 'black':
+            if x < 7 and y > 0 and getattr(board[x + 1, y - 1].piece, 'colour') == 'black':
                 poss_moves.append([x + 1, y - 1])
-            if x > 0 and y >= 0 and getattr(board[x - 1, y - 1].piece, 'colour') == 'black':
+            if x > 0 and y > 0 and getattr(board[x - 1, y - 1].piece, 'colour') == 'black':
                 poss_moves.append([x - 1, y - 1])
 
         # enPassante

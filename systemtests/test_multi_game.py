@@ -11,7 +11,7 @@ class TestMultiGame(unittest.TestCase):
     def quit_on_mate(self, game, ai1, ai2):
         @run_in_thread
         def is_mate():
-            for i in range(500):
+            for i in range(1000):
                 if 'mate' not in game.game_state:
                     sleep(0.5)
                 else:

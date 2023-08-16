@@ -10,11 +10,10 @@ class TestUndoGame(unittest.TestCase):
     def setUp(self):
         self.failed = False
 
-    @staticmethod
-    def quit_on_mate(game, ai1, ai2):
+    def quit_on_mate(self, game, ai1, ai2):
         @run_in_thread
         def is_mate():
-            for i in range(500):
+            for i in range(1000):
                 if 'mate' not in game.game_state:
                     sleep(0.5)
                 else:

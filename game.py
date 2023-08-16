@@ -282,6 +282,7 @@ class Game:
                     # set can move to true and break out
                     can_move = True
 
+        sys.stdout.close()
         sys.stdout = sys.__stdout__
 
         # If there's only 2 kings left
