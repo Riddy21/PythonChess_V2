@@ -2,6 +2,7 @@ import pygame
 import popup
 from player import *
 from utils import run_in_thread
+from settings import *
 
 # Set up the colors
 WHITE = (255, 255, 255)
@@ -32,29 +33,27 @@ class ChessboardGUI:
         pygame.display.set_caption("Pygame Chessboard")
 
         # Define the size of each square
-        self.SQUARE_SIZE = self.WIDTH // 8
+        self.SQUARE_SIZE = self.WIDTH // BOARD_WIDTH
 
-        # Load the chess piece images
         self.piece_images = {
-            "-": pygame.image.load("./Assets/Blank.png"),
-            "r": pygame.image.load("./Assets/Chess_tile_rd.png"),
-            "n": pygame.image.load("./Assets/Chess_tile_nd.png"),
-            "b": pygame.image.load("./Assets/Chess_tile_bd.png"),
-            "q": pygame.image.load("./Assets/Chess_tile_qd.png"),
-            "k": pygame.image.load("./Assets/Chess_tile_kd.png"),
-            "p": pygame.image.load("./Assets/Chess_tile_pd.png"),
-            "R": pygame.image.load("./Assets/Chess_tile_rl.png"),
-            "N": pygame.image.load("./Assets/Chess_tile_nl.png"),
-            "Q": pygame.image.load("./Assets/Chess_tile_ql.png"),
-            "B": pygame.image.load("./Assets/Chess_tile_bl.png"),
-            "K": pygame.image.load("./Assets/Chess_tile_kl.png"),
-            "P": pygame.image.load("./Assets/Chess_tile_pl.png"),
-        }
+                "r": pygame.image.load("./Assets/Chess_tile_rd.png"),
+                "n": pygame.image.load("./Assets/Chess_tile_nd.png"),
+                "b": pygame.image.load("./Assets/Chess_tile_bd.png"),
+                "q": pygame.image.load("./Assets/Chess_tile_qd.png"),
+                "k": pygame.image.load("./Assets/Chess_tile_kd.png"),
+                "p": pygame.image.load("./Assets/Chess_tile_pd.png"),
+                "R": pygame.image.load("./Assets/Chess_tile_rl.png"),
+                "N": pygame.image.load("./Assets/Chess_tile_nl.png"),
+                "Q": pygame.image.load("./Assets/Chess_tile_ql.png"),
+                "B": pygame.image.load("./Assets/Chess_tile_bl.png"),
+                "K": pygame.image.load("./Assets/Chess_tile_kl.png"),
+                "P": pygame.image.load("./Assets/Chess_tile_pl.png"),
+                }
 
     def draw_board(self):
         # Clear the window
-        for row in range(8):
-            for col in range(8):
+        for row in range(BOARD_HEIGHT):
+            for col in range(BOARD_WIDTH):
                 color = GREEN if (row%2 == 1 and col%2 == 0) or (row%2 == 0 and col%2 == 1)else TAN
                 col, row = self.orient((col, row))
                 x = col * self.SQUARE_SIZE
@@ -89,8 +88,8 @@ class ChessboardGUI:
         chessboard_state = self.api.get_chess_board_string_array()
 
         # Draw the chess pieces
-        for row in range(8):
-            for col in range(8):
+        for row in range(BOARD_HEIGHT):
+            for col in range(BOARD_WIDTH):
                 piece = chessboard_state[row][col]
                 self.draw_piece(piece, col, row)
 

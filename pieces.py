@@ -953,13 +953,13 @@ class PieceLibrary(object):
                 library[piece][color] = piece_obj(color.value)
 
     @classmethod
-    def _get_piece_info(cls, str_rep):
+    def get_piece_and_color_by_str_rep(cls, str_rep):
         """
         Returns the piece and color information based on the string rep
         """
         # Get piece by the PIECES str rep, kind of hacky
         try:
-            piece = PIECES.get_by_value(str_rep.lower())
+            piece = PIECES.get_by_str_rep(str_rep.lower())
         except KeyError:
             raise cls.PieceLibraryException('Could not find piece with value %s' % str_rep)
 
@@ -970,18 +970,14 @@ class PieceLibrary(object):
 
         return piece, color
         
-    def get_piece_ref(self, str_rep):
-        piece, color = self._get_piece_info(str_rep)
-
+    def get_piece_ref(self, piece, color):
         if piece and color:
             return self.library[piece][color]
         else:
             return None
 
     @classmethod
-    def get_piece_copy(cls, str_rep):
-        piece, color = cls._get_piece_info(str_rep)
-
+    def get_piece_copy(cls, piece, color):
         if piece and color:
             return cls.PIECE_MAPPING[piece](color.value)
         else:

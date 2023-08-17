@@ -53,12 +53,13 @@ class BoardManager(object):
             pieces = line.split(' ')
             
             # Get the piece
-            for col, piece in enumerate(pieces):
+            for col, piece_str in enumerate(pieces):
                 # Do error checking
                 if row > BOARD_HEIGHT-1 or col > BOARD_WIDTH-1:
                     raise IOError("Config file %s not in the right format" % config_file)
                 # FIXME: This needs to change for memory efficiency when switching over to new API
-                piece_ref = cls.PIECE_LIBRARY.get_piece_copy(piece)
+                piece, color = cls.PIECE_LIBRARY.get_piece_and_color_by_str_rep(piece_str)
+                piece_ref = cls.PIECE_LIBRARY.get_piece_copy(piece, color)
 
                 if piece_ref:
                     board[col, row] = cls.Square(piece_ref)
