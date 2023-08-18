@@ -16,12 +16,12 @@ class TestPieceLibrary(unittest.TestCase):
         piece_enum, color = self.library.get_piece_and_color_by_str_rep('R')
         piece = self.library.get_piece_ref(piece_enum, color)
         self.assertEqual(type(piece), Rook)
-        self.assertEqual(piece.colour, 'white')
+        self.assertEqual(piece.color, 'white')
 
         piece_enum, color = self.library.get_piece_and_color_by_str_rep('q')
         piece = self.library.get_piece_ref(piece_enum, color)
         self.assertEqual(type(piece), Queen)
-        self.assertEqual(piece.colour, 'black')
+        self.assertEqual(piece.color, 'black')
 
         with self.assertRaises(PieceLibrary.PieceLibraryException):
             self.library.get_piece_and_color_by_str_rep('c')
@@ -35,22 +35,22 @@ class TestPieceLibrary(unittest.TestCase):
         piece_enum, color = self.library.get_piece_and_color_by_str_rep('n')
         piece = self.library.get_piece_copy(piece_enum, color)
         self.assertEqual(Knight, type(piece))
-        self.assertEqual('black', piece.colour)
+        self.assertEqual('black', piece.color)
 
         piece_enum, color = self.library.get_piece_and_color_by_str_rep('r')
         piece = self.library.get_piece_copy(piece_enum, color)
         self.assertEqual(Rook, type(piece))
-        self.assertEqual('black', piece.colour)
+        self.assertEqual('black', piece.color)
 
         piece_enum, color = self.library.get_piece_and_color_by_str_rep('Q')
         piece = self.library.get_piece_copy(piece_enum, color)
         self.assertEqual(Queen, type(piece))
-        self.assertEqual('white', piece.colour)
+        self.assertEqual('white', piece.color)
 
         piece_enum, color = self.library.get_piece_and_color_by_str_rep('-')
         piece = self.library.get_piece_copy(piece_enum, color)
         self.assertEqual(Blank, type(piece))
-        self.assertEqual('none', piece.colour)
+        self.assertEqual('none', piece.color)
 
         with self.assertRaises(PieceLibrary.PieceLibraryException) as context:
             self.library.get_piece_and_color_by_str_rep(' ')
