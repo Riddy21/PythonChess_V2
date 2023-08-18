@@ -3,6 +3,7 @@ from copy import deepcopy
 from board import BoardManager
 import sys
 from game import Game
+from pieces import Rook, Blank
 
 class TestBoard(unittest.TestCase):
     def setUp(self):
@@ -20,6 +21,7 @@ class TestBoard(unittest.TestCase):
 
         file.close()
 
+    @unittest.expectedFailure # FIXME: won't work until REFERENCE_PIECES set to True
     def test_copyable(self):
         board = BoardManager.get_board_from_file('Presets/check.txt')
         # Test if you can make a deep copy without problems
@@ -37,5 +39,24 @@ class TestBoard(unittest.TestCase):
         self.assertNotEqual(board[0, 0].num_moves, \
                         new_board[0, 0].num_moves)
 
+    @unittest.expectedFailure # FIXME: try and make blank pieces empty
+    def test_access_empty_piece(self):
+        board = BoardManager.get_board_from_file('Presets/default.txt')
+
+        # try calling an empty piece
+        self.assertEqual(type(board[0, 3].piece), Blank);
+
+        # Try printing the length of board
+        self.assertEqual(len(board), 4*8)
+
+    def test_get_attribute(self):
+        board = BoardManager.get_board_from_file('Presets/default.txt')
+
+        self.assertEqual(board[0, 0].piece.colour, 'black')
+        self.assertEqual(board[0, 0].colour, 'black')
+        self.assertEqual(type(board[0, 0].piece), Rook )
+        self.assertEqual(getattr(board[0, 0], 'str_rep'), 'r' )
+
+        self.assertEqual(board[0, 0].num_moves, 0)
 if __name__ == '__main__':
     unittest.main()

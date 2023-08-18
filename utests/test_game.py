@@ -124,8 +124,10 @@ class TestGame(unittest.TestCase):
             os.remove(test_out_file)
         self.game.export_board(test_out_file)
 
-        test_file = open('utests/export_test/test.txt').readlines()
-        gold_file = open('utests/export_test/golden.txt').readlines()
+        with open('utests/export_test/test.txt') as f:
+            test_file = f.readlines()
+        with open('utests/export_test/golden.txt') as f:
+            gold_file = f.readlines()
 
         self.assertEqual(test_file, gold_file)
 

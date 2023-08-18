@@ -13,13 +13,8 @@ class _Piece(object):
         # initiate variables
         self.value = value
         self.colour = colour
-        self.image = image
         self.str_rep = str_rep
-        self.id = id
         self.move_count = move_count
-
-        # A list of all the move ids this piece made a move
-        self.move_num_history = move_hist
 
     # detects if pieces are blocking the way of other pieces
     @staticmethod
@@ -34,12 +29,6 @@ class _Piece(object):
                 return 'opponent obstructed'
             else:
                 return 'unobstructed'
-
-    def add_move(self, move_id):
-        self.move_num_history.append(move_id)
-
-    def delete_move(self):
-        self.move_num_history.pop(-1)
 
     def increment_move_count(self, inc):
         self.move_count += inc
@@ -138,10 +127,8 @@ class _Piece(object):
     def __str__(self):
         str = '\n    colour: %s\n' \
               '    str_rep: %s\n' \
-              '    id: %s\n' \
               '    move count: %s\n' \
-              '    move history: %s' \
-              % (self.colour, self.str_rep, self.id, self.move_count, self.move_num_history)
+              % (self.colour, self.str_rep, self.move_count)
         return str
 
 
@@ -241,30 +228,26 @@ class Pawn(_Piece):
         # enPassante
         if self.colour == 'white' and y == 3:
             if (x + 1 in range(8)) and getattr(board[x + 1, y].piece, 'colour') == 'black' and \
-                    getattr(board[x + 1, y].piece, 'move_count') == 1 and \
-                    getattr(board[x + 1, y].piece, 'move_num_history')[-1] == (self.move_num_history[-1] - 1):
+                    getattr(board[x + 1, y].piece, 'move_count') == 1:
                 if self._piece_detect(x, y, x + 1, y - 1, board) == 'opponent obstructed' or \
                         self._piece_detect(x, y, x + 1, y - 1, board) == 'unobstructed':
                     poss_moves.append([x + 1, y - 1])
                     self.enpassant_pos.append([x + 1, y - 1])
             if (x - 1 in range(8)) and getattr(board[x - 1, y].piece, 'colour') == 'black' and \
-                    getattr(board[x - 1, y].piece, 'move_count') == 1 and \
-                    getattr(board[x - 1, y].piece, 'move_num_history')[-1] == (self.move_num_history[-1] - 1):
+                    getattr(board[x - 1, y].piece, 'move_count') == 1:
                 if self._piece_detect(x, y, x - 1, y - 1, board) == 'opponent obstructed' or \
                         self._piece_detect(x, y, x - 1, y - 1, board) == 'unobstructed':
                     poss_moves.append([x - 1, y - 1])
                     self.enpassant_pos.append([x - 1, y - 1])
         elif self.colour == 'black' and y == 4:
             if (x + 1 in range(8)) and getattr(board[x + 1, y].piece, 'colour') == 'white' and \
-                    getattr(board[x + 1, y].piece, 'move_count') == 1 and \
-                    getattr(board[x + 1, y].piece, 'move_num_history')[-1] == (self.move_num_history[-1] - 1):
+                    getattr(board[x + 1, y].piece, 'move_count') == 1:
                 if self._piece_detect(x, y, x + 1, y + 1, board) == 'opponent obstructed' or \
                         self._piece_detect(x, y, x + 1, y + 1, board) == 'unobstructed':
                     poss_moves.append([x + 1, y + 1])
                     self.enpassant_pos.append([x + 1, y + 1])
             if (x - 1 in range(8)) and getattr(board[x - 1, y].piece, 'colour') == 'white' and \
-                    getattr(board[x - 1, y].piece, 'move_count') == 1 and \
-                    getattr(board[x - 1, y].piece, 'move_num_history')[-1] == (self.move_num_history[-1] - 1):
+                    getattr(board[x - 1, y].piece, 'move_count') == 1:
                 if self._piece_detect(x, y, x - 1, y + 1, board) == 'opponent obstructed' or \
                         self._piece_detect(x, y, x - 1, y + 1, board) == 'unobstructed':
                     poss_moves.append([x - 1, y + 1])

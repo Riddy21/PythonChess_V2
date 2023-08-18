@@ -6,6 +6,8 @@ DEFAULT_BOARD_PRESET_PATH = "Presets/default.txt"
 BOARD_HEIGHT = 8
 BOARD_WIDTH = 8
 
+# Make pieces references instead of copies
+REFERENCE_PIECES = False
 
 class COLORS(ChessEnum):
     WHITE = 'white'
@@ -62,7 +64,6 @@ class PIECES(ChessEnum):
            }
     BLANK = {
            'str_rep' : '-',
-           'asset'   : pygame.image.load("./Assets/Blank.png")
            }
 
 

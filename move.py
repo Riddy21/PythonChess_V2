@@ -1,10 +1,12 @@
 from typing import Any
 import copy
 from pieces import Blank, Queen, Bishop, Rook, Knight, Pawn
-
+from enum import Enum
 
 # Class to record moves and change game board
-class Move():
+class Move(object):
+    """Class for moving pieces on the board"""
+
     # init
     def __init__(self, board, x, y, id_number, poss_moves, scan_mode=False):
         # Board was not included to save a bit on memory
@@ -48,7 +50,6 @@ class Move():
             # Add move_id to piece being moved (must be changed before get_moves)
             # only is added if its proper valid move and append move stays true
             # When only will append when the function is not looking ahead to the next move
-            board[x, y].piece.add_move(move_number)
 
             # Get the possible moves
             poss_moves = board[x, y].piece.get_moves(x, y, board, scan_mode=scan_mode)
@@ -59,11 +60,8 @@ class Move():
                     print("No more moves")
 
                 # Remove move num hist
-                board[x, y].piece.delete_move()
                 return []
 
-            if look_ahead:
-                board[x, y].piece.delete_move()
             # Return the proper poss_moves
             return poss_moves
         if not scan_mode:
@@ -73,7 +71,6 @@ class Move():
     # Removes move_id from piece being moved in case of reselection
     def deselect_move(self, board):
         frox, froy = self.move_from[0], self.move_from[1]
-        board[frox, froy].piece.delete_move()
 
     # Makes a pawn promotion by creating and replacing an old piece
     def make_pawn_promo(self, piece_type, board):
@@ -166,7 +163,6 @@ class Move():
                 # add move count to rook
                 board[0, froy].piece.increment_move_count(1)
                 # add move id to rook
-                board[0, froy].piece.add_move(self.move_number)
                 board[tox, toy].piece, board[frox, froy].piece = board[frox, froy].piece, board[tox, toy].piece
                 board[0, froy].piece, board[3, froy].piece = board[3, froy].piece, board[0, froy].piece
             else:
@@ -179,7 +175,6 @@ class Move():
                 # add move count to rook
                 board[7, froy].piece.increment_move_count(1)
                 # add move id to rook
-                board[7, froy].piece.add_move(self.move_number)
                 board[tox, toy].piece, board[frox, froy].piece = board[frox, froy].piece, board[tox, toy].piece
                 board[7, froy].piece, board[5, froy].piece = board[5, froy].piece, board[7, froy].piece
             else:
@@ -222,7 +217,6 @@ class Move():
 
         # revert move piece's move count and move history
         board[tox, toy].piece.increment_move_count(-1)
-        board[tox, toy].piece.delete_move()
 
         # revert move piece back to from location by switching to and from
         board[tox, toy].piece, board[frox, froy].piece = board[frox, froy].piece, board[tox, toy].piece
@@ -232,7 +226,6 @@ class Move():
             # delete rook move id and decrement move count
             if getattr(board[3, toy].piece,'str_rep') != '-':
                 board[3, toy].piece.increment_move_count(-1)
-                board[3, toy].piece.delete_move()
                 # revert rook back to location
                 board[0, toy].piece, board[3, toy].piece = board[3, toy].piece, board[0, toy].piece
 
@@ -241,7 +234,6 @@ class Move():
             # delete rook move id and decrement move count
             if getattr(board[5, toy].piece, 'str_rep') != '-':
                 board[5, toy].piece.increment_move_count(-1)
-                board[5, toy].piece.delete_move()
                 # revert rook back to location
                 board[7, toy].piece, board[5, toy].piece = board[5, toy].piece, board[7, toy].piece
 

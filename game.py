@@ -46,10 +46,6 @@ class Game:
         if moves is None:
             moves = []
 
-        # 2D array of pieces to represent board
-        # FIXME: Change deepcopy board to board.copy()
-        self.board = deepcopy(board)
-
         # captured Pieces
         self.captured_white = captured_white
         self.captured_black = captured_black
@@ -65,9 +61,13 @@ class Game:
         self.scan_mode = scan_mode
 
         self.game_state = prev_game_state
+
         # if board was not loaded by passing a parameter, set the board
-        if not self.board:
+        if not board:
             self.set_board()
+        else:
+            self.board = board.copy()
+
 
     @staticmethod
     def get_board_from_config_file(config_file):
@@ -265,9 +265,13 @@ class Game:
             piece = item.piece
             # pawn promo check
             if y == 0 and piece.str_rep == 'P':
+                sys.stdout.close()
+                sys.stdout = sys.__stdout__
                 return 'white pawn promo'
 
             if y == BOARD_HEIGHT - 1 and piece.str_rep == 'p':
+                sys.stdout.close()
+                sys.stdout = sys.__stdout__
                 return 'black pawn promo'
 
             # If the piece iterated on is piece of the next turn
