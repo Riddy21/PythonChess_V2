@@ -254,7 +254,7 @@ class Game:
         MUST BE IN THE TURN OF THE SIDE YOU'RE CHECKING
         """
         # Disable print statements
-        sys.stdout = open(os.devnull, 'w')
+        sys.stdout = None
 
         can_move = False
         in_check = False
@@ -267,12 +267,10 @@ class Game:
             piece = item.piece
             # pawn promo check
             if y == 0 and piece.str_rep == 'P':
-                sys.stdout.close()
                 sys.stdout = sys.__stdout__
                 return 'white pawn promo'
 
             if y == BOARD_HEIGHT - 1 and piece.str_rep == 'p':
-                sys.stdout.close()
                 sys.stdout = sys.__stdout__
                 return 'black pawn promo'
 
@@ -289,7 +287,6 @@ class Game:
                     # set can move to true and break out
                     can_move = True
 
-        sys.stdout.close()
         sys.stdout = sys.__stdout__
 
         # If there's only 2 kings left

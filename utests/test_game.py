@@ -103,6 +103,13 @@ class TestGame(unittest.TestCase):
 
         self.assertEqual(COLORS.BLACK, self.game.turn)
 
+    def test_castle_into_check(self):
+        self.game.set_board('Presets/castle_into_check.txt')
+
+        moves = self.game.get_next_poss_moves(4, 7)
+
+        self.assertEqual([[3, 6], [3, 7]], moves)
+
     def test_undo_move(self):
         # Set the board to check
         self.game.set_board('Presets/check.txt')
