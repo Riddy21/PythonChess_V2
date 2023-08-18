@@ -77,7 +77,7 @@ class Computer(Player):
         if playable_moves:
             move = random.sample(playable_moves, 1)[0]
             self.game.full_move(*move)
-        if self.game.game_state == '%s pawn promo' % self.color:
+        if self.game.game_state == '%s pawn promo' % self.color.value:
             self.game.make_pawn_promo('Queen')
         LOCK.release()
 
