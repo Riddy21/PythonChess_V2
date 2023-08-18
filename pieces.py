@@ -876,7 +876,7 @@ class PieceLibrary(object):
     @classmethod
     def get_piece_copy(cls, piece, color):
         if piece and color:
-            return cls.PIECE_MAPPING[piece](color.value)
+            return cls.PIECE_MAPPING[piece](color)
         else:
             return None
 
