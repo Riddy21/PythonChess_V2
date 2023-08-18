@@ -4,6 +4,7 @@ from pieces import Blank, Queen, Bishop, Rook, Knight, Pawn
 from enum import Enum
 
 # Class to record moves and change game board
+# FIXME: Change each time board.piece() is changed to the actual Square switching spots
 class Move(object):
     """Class for moving pieces on the board"""
 
