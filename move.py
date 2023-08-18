@@ -86,22 +86,18 @@ class Move(object):
         if piece_type == 'Queen':
             new_piece = Queen(colour=self.move_colour,
                               move_count=getattr(board[tox, toy].piece, 'move_count'),
-                              move_hist=getattr(board[tox, toy].piece, 'move_num_history'),
                               piece_id=getattr(board[tox, toy].piece, 'id'))
         elif piece_type == 'Rook':
             new_piece = Rook(colour=self.move_colour,
                              move_count=getattr(board[tox, toy].piece, 'move_count'),
-                             move_hist=getattr(board[tox, toy].piece, 'move_num_history'),
                              piece_id=getattr(board[tox, toy].piece, 'id'))
         elif piece_type == 'Knight':
             new_piece = Knight(colour=self.move_colour,
                                move_count=getattr(board[tox, toy].piece, 'move_count'),
-                               move_hist=getattr(board[tox, toy].piece, 'move_num_history'),
                                piece_id=getattr(board[tox, toy].piece, 'id'))
         elif piece_type == 'Bishop':
             new_piece = Bishop(colour=self.move_colour,
                                move_count=getattr(board[tox, toy].piece, 'move_count'),
-                               move_hist=getattr(board[tox, toy].piece, 'move_num_history'),
                                piece_id=getattr(board[tox, toy].piece, 'id'))
         else:
             print("Error, wrong piece choice")
@@ -142,7 +138,7 @@ class Move(object):
         tox, toy = self.move_to
 
         # Add move count to moved piece
-        board[frox, froy].piece.increment_move_count(1)
+        board[frox, froy].num_moves += 1
 
         # Do corresponding move
         if self.move_type == 'enpassant':
@@ -161,7 +157,7 @@ class Move(object):
                 if not self.scan_mode:
                     print('left castle at %d, %d' % (frox, froy))
                 # add move count to rook
-                board[0, froy].piece.increment_move_count(1)
+                board[0, froy].num_moves += 1
                 # add move id to rook
                 board[tox, toy].piece, board[frox, froy].piece = board[frox, froy].piece, board[tox, toy].piece
                 board[0, froy].piece, board[3, froy].piece = board[3, froy].piece, board[0, froy].piece
@@ -173,7 +169,7 @@ class Move(object):
                 if not self.scan_mode:
                     print('right castle at %d, %d' % (frox, froy))
                 # add move count to rook
-                board[7, froy].piece.increment_move_count(1)
+                board[7, froy].num_moves += 1
                 # add move id to rook
                 board[tox, toy].piece, board[frox, froy].piece = board[frox, froy].piece, board[tox, toy].piece
                 board[7, froy].piece, board[5, froy].piece = board[5, froy].piece, board[7, froy].piece
@@ -207,16 +203,14 @@ class Move(object):
             # convert piece back into pawn with all specifications
             pawn_id = getattr(board[tox, toy].piece, 'id')
             pawn_move_count = getattr(board[tox, toy].piece, 'move_count')
-            pawn_move_history = getattr(board[tox, toy].piece, 'move_num_history')
             board[tox, toy].piece = Pawn(
                 colour=self.move_colour,
                 piece_id=pawn_id,
                 move_count=pawn_move_count,
-                move_hist=pawn_move_history
             )
 
         # revert move piece's move count and move history
-        board[tox, toy].piece.increment_move_count(-1)
+        board[tox, toy].num_moves -= 1
 
         # revert move piece back to from location by switching to and from
         board[tox, toy].piece, board[frox, froy].piece = board[frox, froy].piece, board[tox, toy].piece
@@ -225,7 +219,7 @@ class Move(object):
         if self.move_type == 'lcastle':
             # delete rook move id and decrement move count
             if getattr(board[3, toy].piece,'str_rep') != '-':
-                board[3, toy].piece.increment_move_count(-1)
+                board[3, toy].num_moves -= 1
                 # revert rook back to location
                 board[0, toy].piece, board[3, toy].piece = board[3, toy].piece, board[0, toy].piece
 
@@ -233,7 +227,7 @@ class Move(object):
         elif self.move_type == 'rcastle':
             # delete rook move id and decrement move count
             if getattr(board[5, toy].piece, 'str_rep') != '-':
-                board[5, toy].piece.increment_move_count(-1)
+                board[5, toy].num_moves -= 1
                 # revert rook back to location
                 board[7, toy].piece, board[5, toy].piece = board[5, toy].piece, board[7, toy].piece
 

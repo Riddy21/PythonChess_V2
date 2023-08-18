@@ -14,7 +14,6 @@ class _Piece(object):
         self.value = value
         self.colour = colour
         self.str_rep = str_rep
-        self.move_count = move_count
 
     # detects if pieces are blocking the way of other pieces
     @staticmethod
@@ -29,9 +28,6 @@ class _Piece(object):
                 return 'opponent obstructed'
             else:
                 return 'unobstructed'
-
-    def increment_move_count(self, inc):
-        self.move_count += inc
 
     # Base functions that will be overriden when necessary
     def is_castle(self, x, y):
@@ -127,8 +123,7 @@ class _Piece(object):
     def __str__(self):
         str = '\n    colour: %s\n' \
               '    str_rep: %s\n' \
-              '    move count: %s\n' \
-              % (self.colour, self.str_rep, self.move_count)
+              % (self.colour, self.str_rep)
         return str
 
 
@@ -176,7 +171,7 @@ class Pawn(_Piece):
                     break
 
                 # no 2nd move on 2nd turn
-                if self.move_count >= 1:
+                if board[x, y].num_moves >= 1:
                     poss_moves.append([x, y + i])
                     break
 
@@ -210,7 +205,7 @@ class Pawn(_Piece):
                     break
 
                 # no 2nd move on 2nd turn
-                elif self.move_count >= 1:
+                elif board[x, y].num_moves >= 1:
                     poss_moves.append([x, y - i])
                     break
 
@@ -228,26 +223,26 @@ class Pawn(_Piece):
         # enPassante
         if self.colour == 'white' and y == 3:
             if (x + 1 in range(8)) and getattr(board[x + 1, y].piece, 'colour') == 'black' and \
-                    getattr(board[x + 1, y].piece, 'move_count') == 1:
+                    board[x + 1, y].num_moves == 1:
                 if self._piece_detect(x, y, x + 1, y - 1, board) == 'opponent obstructed' or \
                         self._piece_detect(x, y, x + 1, y - 1, board) == 'unobstructed':
                     poss_moves.append([x + 1, y - 1])
                     self.enpassant_pos.append([x + 1, y - 1])
             if (x - 1 in range(8)) and getattr(board[x - 1, y].piece, 'colour') == 'black' and \
-                    getattr(board[x - 1, y].piece, 'move_count') == 1:
+                    board[x - 1, y].num_moves == 1:
                 if self._piece_detect(x, y, x - 1, y - 1, board) == 'opponent obstructed' or \
                         self._piece_detect(x, y, x - 1, y - 1, board) == 'unobstructed':
                     poss_moves.append([x - 1, y - 1])
                     self.enpassant_pos.append([x - 1, y - 1])
         elif self.colour == 'black' and y == 4:
             if (x + 1 in range(8)) and getattr(board[x + 1, y].piece, 'colour') == 'white' and \
-                    getattr(board[x + 1, y].piece, 'move_count') == 1:
+                    board[x + 1, y].num_moves == 1:
                 if self._piece_detect(x, y, x + 1, y + 1, board) == 'opponent obstructed' or \
                         self._piece_detect(x, y, x + 1, y + 1, board) == 'unobstructed':
                     poss_moves.append([x + 1, y + 1])
                     self.enpassant_pos.append([x + 1, y + 1])
             if (x - 1 in range(8)) and getattr(board[x - 1, y].piece, 'colour') == 'white' and \
-                    getattr(board[x - 1, y].piece, 'move_count') == 1:
+                    board[x - 1, y].num_moves == 1:
                 if self._piece_detect(x, y, x - 1, y + 1, board) == 'opponent obstructed' or \
                         self._piece_detect(x, y, x - 1, y + 1, board) == 'unobstructed':
                     poss_moves.append([x - 1, y + 1])
@@ -686,9 +681,9 @@ class King(_Piece):
             # White Piece
             if getattr(board[x, y].piece, 'colour') == 'white':
                 # The king must be at starting position with 0 move count
-                if x == 4 and y == 7 and getattr(board[x, y].piece, 'move_count') == 0:
+                if x == 4 and y == 7 and board[x, y].num_moves == 0:
                     # The rook on the left must be at starting position with 0 move count
-                    if getattr(board[0, 7].piece, 'str_rep') == 'R' and getattr(board[0, 7].piece, 'move_count') == 0:
+                    if getattr(board[0, 7].piece, 'str_rep') == 'R' and board[0, 7].num_moves == 0:
                         # there must not be anything blocking the path
                         if getattr(board[1, 7].piece, 'str_rep') == '-' and \
                                 getattr(board[2, 7].piece, 'str_rep') == '-' and \
@@ -701,9 +696,9 @@ class King(_Piece):
                     # Reset once castle is not valid
                     self.left_castle = -1, -1
 
-                if x == 4 and y == 7 and getattr(board[x, y].piece, 'move_count') == 0:
+                if x == 4 and y == 7 and board[x, y].num_moves == 0:
                     # The rook on the right must be at starting position with 0 move count
-                    if getattr(board[7, 7].piece, 'str_rep') == 'R' and getattr(board[7, 7].piece, 'move_count') == 0:
+                    if getattr(board[7, 7].piece, 'str_rep') == 'R' and board[7, 7].num_moves == 0:
                         # there must not be anything blocking the path
                         if getattr(board[5, 7].piece, 'str_rep') == '-' and \
                                 getattr(board[6, 7].piece, 'str_rep') == '-':
@@ -717,9 +712,9 @@ class King(_Piece):
             # Black Piece
             if getattr(board[x, y].piece, 'colour') == 'black':
                 # The king must be at starting position with 0 move count
-                if x == 4 and y == 0 and getattr(board[x, y].piece, 'move_count') == 0:
+                if x == 4 and y == 0 and board[x, y].num_moves == 0:
                     # The rook on the left must be at starting position with 0 move count
-                    if getattr(board[0, 0].piece, 'str_rep') == 'r' and getattr(board[0, 0].piece, 'move_count') == 0:
+                    if getattr(board[0, 0].piece, 'str_rep') == 'r' and board[0, 0].num_moves == 0:
                         # there must not be anything blocking the path
                         if getattr(board[1, 0].piece, 'str_rep') == '-' and \
                                 getattr(board[2, 0].piece, 'str_rep') == '-' and \
@@ -732,9 +727,9 @@ class King(_Piece):
                     # Reset once castle is not valid
                     self.left_castle = -1, -1
 
-                if x == 4 and y == 0 and getattr(board[x, y].piece, 'move_count') == 0:
+                if x == 4 and y == 0 and board[x, y].num_moves == 0:
                     # The rook on the right must be at starting position with 0 move count
-                    if getattr(board[7, 0].piece, 'str_rep') == 'r' and getattr(board[7, 0].piece, 'move_count') == 0:
+                    if getattr(board[7, 0].piece, 'str_rep') == 'r' and board[7, 0].num_moves == 0:
                         # there must not be anything blocking the path
                         if getattr(board[5, 0].piece, 'str_rep') == '-' and \
                                 getattr(board[6, 0].piece, 'str_rep') == '-':
@@ -895,9 +890,6 @@ class King(_Piece):
 class Blank(_Piece):
     def __init__(self, color=None):
         super().__init__(0, 'none', 'Assets/Blank.png', '-', 0, [], None)
-    def increment_move_count(self, inc):
-        print('Trying to increment a blank piece')
-        raise RuntimeError
 
 class PieceLibrary(object):
     """
