@@ -9,10 +9,10 @@ from settings import *
 # TODO: Make a piece with move count and move history set to 0 and one with inserting a piece with a history
 # Abstract Piece Class
 class _Piece(object):
-    def __init__(self, value, colour, image, str_rep, move_count, move_hist, id):
+    def __init__(self, value, color, str_rep):
         # initiate variables
         self.value = value
-        self.colour = colour
+        self.color = color
         self.str_rep = str_rep
 
     # detects if pieces are blocking the way of other pieces
@@ -21,10 +21,10 @@ class _Piece(object):
         # make sure its not checking its self
         if tox != frox or toy != froy:
             # Same colour pieces
-            if getattr(board[tox, toy].piece, 'colour') == getattr(board[frox, froy].piece, 'colour'):
+            if board[tox, toy].color == board[frox, froy].color:
                 return 'self obstructed'
             # opponent pieces
-            elif getattr(board[tox, toy].piece, 'colour') != 'none':
+            elif board[tox, toy].color != None:
                 return 'opponent obstructed'
             else:
                 return 'unobstructed'
@@ -46,10 +46,7 @@ class _Piece(object):
     def chk_limit_moves(self, board, myx, myy, poss_moves):
         from game import Game
         # Make a copy of the current game using the board and turn
-        if self.colour == 'white':
-            probe_game = Game(turn='white', board=board, scan_mode=True)
-        else:
-            probe_game = Game(turn='black', board=board, scan_mode=True)
+        probe_game = Game(turn=self.color, board=board, scan_mode=True)
 
         bad_moves = []
 
@@ -61,12 +58,12 @@ class _Piece(object):
         # Find personal king
         for y in range(8):
             for x in range(8):
-                if self.colour == 'white' and getattr(board[x, y].piece, 'str_rep') == 'K':
+                if self.color == COLORS.WHITE and board[x, y].piece.str_rep == 'K':
                     king_x = x
                     king_y = y
                     is_king = True
                     break
-                elif self.colour == 'black' and getattr(board[x, y].piece, 'str_rep') == 'k':
+                elif self.color == COLORS.BLACK and board[x, y].piece.str_rep == 'k':
                     king_x = x
                     king_y = y
                     is_king = True
@@ -114,36 +111,21 @@ class _Piece(object):
         # Return poss_moves
         return poss_moves
 
-    def __getattribute__(self, name: str) -> Any:
-        return super().__getattribute__(name)
-
-    def __setattr__(self, name: str, value: Any) -> None:
-        super().__setattr__(name, value)
-
     def __str__(self):
-        str = '\n    colour: %s\n' \
+        str = '\n    color: %s\n' \
               '    str_rep: %s\n' \
-              % (self.colour, self.str_rep)
+              % (self.color, self.str_rep)
         return str
 
 
 class Pawn(_Piece):
-    def __init__(self, colour, move_count=0, move_hist=None, piece_id=uuid.uuid4()):
-        if move_hist is None:
-            move_hist = []
-        if str(colour) == 'white':
-            image = 'Assets/Chess_tile_pl.png'
-            string = 'P'
-        elif str(colour) == 'black':
-            image = 'Assets/Chess_tile_pd.png'
-            string = 'p'
-        else:
-            print("colour typo")
-            image = 'not set'
-            string = 'error'
+    def __init__(self, color):
+        str_rep = PIECES.PAWN.value['str_rep']
+        if color == COLORS.WHITE:
+            str_rep = str_rep.upper()
 
         # Makes a piece with set values and images
-        super().__init__(1, colour, image, string, move_count, move_hist, piece_id)
+        super().__init__(PIECES.PAWN.value['value'], color, str_rep)
 
         # Make variable to store where enpassants are, set default as empty list
         self.enpassant_pos = []
@@ -153,14 +135,14 @@ class Pawn(_Piece):
         poss_moves = []
 
         # Black moves
-        if getattr(board[x, y].piece, 'colour') == 'black':
+        if board[x, y].color == COLORS.BLACK:
             i = 1
 
             # Do Move detection
             while i <= 2 and y + i <= 7:
                 piece_detect = self._piece_detect(x, y, x, y + i, board)
                 # piece in front blocks move
-                if getattr(board[x, y + i].piece, 'colour') == 'white':
+                if board[x, y + i].color == COLORS.WHITE:
                     break
 
                 # basic
@@ -181,20 +163,20 @@ class Pawn(_Piece):
 
             # NOTE: ONLY WHEN SCAN MODE AND KING CAN BE CAPTURED
             # Sideways Capture, ** if in scan mode, side captures count even if there is no piece currently there
-            if x < 7 and y < 7 and getattr(board[x + 1, y + 1].piece, 'colour') == 'white':
+            if x < 7 and y < 7 and board[x + 1, y + 1].color == COLORS.WHITE:
                 poss_moves.append([x + 1, y + 1])
-            if x > 0 and y < 7 and getattr(board[x - 1, y + 1].piece, 'colour') == 'white':
+            if x > 0 and y < 7 and board[x - 1, y + 1].color == COLORS.WHITE:
                 poss_moves.append([x - 1, y + 1])
 
         # white moves
-        elif getattr(board[x, y].piece, 'colour') == 'white':
+        elif board[x, y].color == COLORS.WHITE:
             i = 1
 
             while i <= 2 and y - i >= 0:
                 piece_detect = self._piece_detect(x, y, x, y - i, board)
 
                 # piece in front blocks move
-                if getattr(board[x, y - i].piece, 'colour') == 'black':
+                if board[x, y - i].color == COLORS.BLACK:
                     break
 
                 # basic
@@ -215,33 +197,33 @@ class Pawn(_Piece):
 
             # NOTE: ONLY WHEN SCAN MODE AND KING CAN BE CAPTURED
             # Sideways Capture
-            if x < 7 and y > 0 and getattr(board[x + 1, y - 1].piece, 'colour') == 'black':
+            if x < 7 and y > 0 and board[x + 1, y - 1].color == COLORS.BLACK:
                 poss_moves.append([x + 1, y - 1])
-            if x > 0 and y > 0 and getattr(board[x - 1, y - 1].piece, 'colour') == 'black':
+            if x > 0 and y > 0 and board[x - 1, y - 1].color == COLORS.BLACK:
                 poss_moves.append([x - 1, y - 1])
 
         # enPassante
-        if self.colour == 'white' and y == 3:
-            if (x + 1 in range(8)) and getattr(board[x + 1, y].piece, 'colour') == 'black' and \
+        if self.color == COLORS.WHITE and y == 3:
+            if (x + 1 in range(8)) and board[x + 1, y].color == COLORS.BLACK and \
                     board[x + 1, y].num_moves == 1:
                 if self._piece_detect(x, y, x + 1, y - 1, board) == 'opponent obstructed' or \
                         self._piece_detect(x, y, x + 1, y - 1, board) == 'unobstructed':
                     poss_moves.append([x + 1, y - 1])
                     self.enpassant_pos.append([x + 1, y - 1])
-            if (x - 1 in range(8)) and getattr(board[x - 1, y].piece, 'colour') == 'black' and \
+            if (x - 1 in range(8)) and board[x - 1, y].color == COLORS.BLACK and \
                     board[x - 1, y].num_moves == 1:
                 if self._piece_detect(x, y, x - 1, y - 1, board) == 'opponent obstructed' or \
                         self._piece_detect(x, y, x - 1, y - 1, board) == 'unobstructed':
                     poss_moves.append([x - 1, y - 1])
                     self.enpassant_pos.append([x - 1, y - 1])
-        elif self.colour == 'black' and y == 4:
-            if (x + 1 in range(8)) and getattr(board[x + 1, y].piece, 'colour') == 'white' and \
+        elif self.color == COLORS.BLACK and y == 4:
+            if (x + 1 in range(8)) and board[x + 1, y].color == COLORS.WHITE and \
                     board[x + 1, y].num_moves == 1:
                 if self._piece_detect(x, y, x + 1, y + 1, board) == 'opponent obstructed' or \
                         self._piece_detect(x, y, x + 1, y + 1, board) == 'unobstructed':
                     poss_moves.append([x + 1, y + 1])
                     self.enpassant_pos.append([x + 1, y + 1])
-            if (x - 1 in range(8)) and getattr(board[x - 1, y].piece, 'colour') == 'white' and \
+            if (x - 1 in range(8)) and board[x - 1, y].color == COLORS.WHITE and \
                     board[x - 1, y].num_moves == 1:
                 if self._piece_detect(x, y, x - 1, y + 1, board) == 'opponent obstructed' or \
                         self._piece_detect(x, y, x - 1, y + 1, board) == 'unobstructed':
@@ -269,22 +251,12 @@ class Pawn(_Piece):
 
 
 class Rook(_Piece):
-    def __init__(self, colour, move_count=0, move_hist=None, piece_id=uuid.uuid4()):
-        if move_hist is None:
-            move_hist = []
-        if str(colour) == 'white':
-            image = 'Assets/Chess_tile_rl.png'
-            string = 'R'
-        elif str(colour) == 'black':
-            image = 'Assets/Chess_tile_rd.png'
-            string = 'r'
-        else:
-            print("colour typo")
-            image = 'not set'
-            string = 'error'
-
+    def __init__(self, color):
+        str_rep = PIECES.ROOK.value['str_rep']
+        if color == COLORS.WHITE:
+            str_rep = str_rep.upper()
         # Makes a piece with set values and images
-        super().__init__(5, colour, image, string, move_count, move_hist, piece_id)
+        super().__init__(PIECES.ROOK.value['value'], color, str_rep)
 
     # Returns possible moves this piece can make
     def get_moves(self, x, y, board, scan_mode=False):
@@ -341,22 +313,12 @@ class Rook(_Piece):
 
 
 class Knight(_Piece):
-    def __init__(self, colour, move_count=0, move_hist=None, piece_id=uuid.uuid4()):
-        if move_hist is None:
-            move_hist = []
-        if str(colour) == 'white':
-            image = 'Assets/Chess_tile_nl.png'
-            string = 'N'
-        elif str(colour) == 'black':
-            image = 'Assets/Chess_tile_nd.png'
-            string = 'n'
-        else:
-            print("colour typo")
-            image = 'not set'
-            string = 'error'
-
+    def __init__(self, color):
+        str_rep = PIECES.KNIGHT.value['str_rep']
+        if color == COLORS.WHITE:
+            str_rep = str_rep.upper()
         # Makes a piece with set values and images
-        super().__init__(3, colour, image, string, move_count, move_hist, piece_id)
+        super().__init__(PIECES.KNIGHT.value['value'], color, str_rep)
 
     # Returns possible moves this piece can make
     def get_moves(self, x, y, board, scan_mode=False):
@@ -407,22 +369,12 @@ class Knight(_Piece):
 
 
 class Bishop(_Piece):
-    def __init__(self, colour, move_count=0, move_hist=None, piece_id=uuid.uuid4()):
-        if move_hist is None:
-            move_hist = []
-        if str(colour) == 'white':
-            image = 'Assets/Chess_tile_bl.png'
-            string = 'B'
-        elif str(colour) == 'black':
-            image = 'Assets/Chess_tile_bd.png'
-            string = 'b'
-        else:
-            print("colour typo")
-            image = 'not set'
-            string = 'error'
-
+    def __init__(self, color):
+        str_rep = PIECES.BISHOP.value['str_rep']
+        if color == COLORS.WHITE:
+            str_rep = str_rep.upper()
         # Makes a piece with set values and images
-        super().__init__(1, colour, image, string, move_count, move_hist, piece_id)
+        super().__init__(PIECES.BISHOP.value['value'], color, str_rep)
 
     def get_moves(self, x, y, board, scan_mode=False):
         poss_moves = []
@@ -479,22 +431,13 @@ class Bishop(_Piece):
 
 
 class Queen(_Piece):
-    def __init__(self, colour, move_count=0, move_hist=None, piece_id=uuid.uuid4()):
-        if move_hist is None:
-            move_hist = []
-        if str(colour) == 'white':
-            image = 'Assets/Chess_tile_ql.png'
-            string = 'Q'
-        elif str(colour) == 'black':
-            image = 'Assets/Chess_tile_qd.png'
-            string = 'q'
-        else:
-            print("colour typo")
-            image = 'not set'
-            string = 'error'
+    def __init__(self, color):
+        str_rep = PIECES.QUEEN.value['str_rep']
+        if color == COLORS.WHITE:
+            str_rep = str_rep.upper()
 
         # Makes a piece with set values and images
-        super().__init__(9, colour, image, string, move_count, move_hist, piece_id)
+        super().__init__(PIECES.QUEEN.value['value'], color, str_rep)
 
     def get_moves(self, x, y, board, scan_mode=False):
         poss_moves = []
@@ -595,23 +538,13 @@ class Queen(_Piece):
 
 
 class King(_Piece):
-    def __init__(self, colour, move_count=0, move_hist=None, piece_id=uuid.uuid4()):
-        if move_hist is None:
-            move_hist = []
-        if str(colour) == 'white':
-            image = 'Assets/Chess_tile_kl.png'
-            string = 'K'
-        elif str(colour) == 'black':
-            image = 'Assets/Chess_tile_kd.png'
-            string = 'k'
-        else:
-            print("colour typo")
-            image = 'not set'
-            string = 'error'
+    def __init__(self, color):
+        str_rep = PIECES.KING.value['str_rep']
+        if color == COLORS.WHITE:
+            str_rep = str_rep.upper()
 
         # Makes a piece with set values and images
-        super().__init__(100000000, colour, image, string, move_count, move_hist,
-                         piece_id)  # TODO: make value max int value
+        super().__init__(PIECES.KING.value['value'], color, str_rep)
 
         # Parameter for storing castle coordinates if castle move is possible
         self.left_castle = -1, -1
@@ -675,19 +608,19 @@ class King(_Piece):
         # If in check can't castle
         if not scan_mode:
             from game import Game
-            probe_game = Game(turn=self.colour, board=board, scan_mode=True)
+            probe_game = Game(turn=self.color, board=board, scan_mode=True)
 
         if scan_mode or not self.isin_check(x, y, probe_game):
             # White Piece
-            if getattr(board[x, y].piece, 'colour') == 'white':
+            if board[x, y].color == COLORS.WHITE:
                 # The king must be at starting position with 0 move count
                 if x == 4 and y == 7 and board[x, y].num_moves == 0:
                     # The rook on the left must be at starting position with 0 move count
-                    if getattr(board[0, 7].piece, 'str_rep') == 'R' and board[0, 7].num_moves == 0:
+                    if board[0, 7].piece.str_rep == 'R' and board[0, 7].num_moves == 0:
                         # there must not be anything blocking the path
-                        if getattr(board[1, 7].piece, 'str_rep') == '-' and \
-                                getattr(board[2, 7].piece, 'str_rep') == '-' and \
-                                getattr(board[3, 7].piece, 'str_rep') == '-':
+                        if board[1, 7].piece.str_rep == '-' and \
+                                board[2, 7].str_rep == '-' and \
+                                board[3, 7].str_rep == '-':
                             # append move to possible moves
                             poss_moves.append([2, 7])
                             # add left castle to self
@@ -698,10 +631,10 @@ class King(_Piece):
 
                 if x == 4 and y == 7 and board[x, y].num_moves == 0:
                     # The rook on the right must be at starting position with 0 move count
-                    if getattr(board[7, 7].piece, 'str_rep') == 'R' and board[7, 7].num_moves == 0:
+                    if board[7, 7].str_rep == 'R' and board[7, 7].num_moves == 0:
                         # there must not be anything blocking the path
-                        if getattr(board[5, 7].piece, 'str_rep') == '-' and \
-                                getattr(board[6, 7].piece, 'str_rep') == '-':
+                        if board[5, 7].str_rep == '-' and \
+                                board[6, 7].str_rep == '-':
                             # append move to possible moves
                             poss_moves.append([6, 7])
                             # add right castle to self
@@ -710,15 +643,15 @@ class King(_Piece):
                     # Reset once castle is not valid
                     self.right_castle = -1, -1
             # Black Piece
-            if getattr(board[x, y].piece, 'colour') == 'black':
+            if board[x, y].color == COLORS.BLACK:
                 # The king must be at starting position with 0 move count
                 if x == 4 and y == 0 and board[x, y].num_moves == 0:
                     # The rook on the left must be at starting position with 0 move count
-                    if getattr(board[0, 0].piece, 'str_rep') == 'r' and board[0, 0].num_moves == 0:
+                    if board[0, 0].str_rep == 'r' and board[0, 0].num_moves == 0:
                         # there must not be anything blocking the path
-                        if getattr(board[1, 0].piece, 'str_rep') == '-' and \
-                                getattr(board[2, 0].piece, 'str_rep') == '-' and \
-                                getattr(board[3, 0].piece, 'str_rep') == '-':
+                        if board[1, 0].str_rep == '-' and \
+                                board[2, 0].str_rep == '-' and \
+                                board[3, 0].str_rep == '-':
                             # append move to possible moves
                             poss_moves.append([2, 0])
                             # add left castle to self
@@ -729,10 +662,10 @@ class King(_Piece):
 
                 if x == 4 and y == 0 and board[x, y].num_moves == 0:
                     # The rook on the right must be at starting position with 0 move count
-                    if getattr(board[7, 0].piece, 'str_rep') == 'r' and board[7, 0].num_moves == 0:
+                    if board[7, 0].str_rep == 'r' and board[7, 0].num_moves == 0:
                         # there must not be anything blocking the path
-                        if getattr(board[5, 0].piece, 'str_rep') == '-' and \
-                                getattr(board[6, 0].piece, 'str_rep') == '-':
+                        if board[5, 0].str_rep == '-' and \
+                                board[6, 0].str_rep == '-':
                             # append move to possible moves
                             poss_moves.append([6, 0])
                             # add right castle to self
@@ -753,10 +686,10 @@ class King(_Piece):
         # Make a copy of the current game using the board and turn
         # ** NOT USING DEEP COPY TO SAVE MEM AND SPEED
         from game import Game
-        if self.colour == 'white':
-            probe_game = Game(turn='black', board=board, scan_mode=True)
+        if self.color == COLORS.WHITE:
+            probe_game = Game(turn=COLORS.BLACK, board=board, scan_mode=True)
         else:
-            probe_game = Game(turn='white', board=board, scan_mode=True)
+            probe_game = Game(turn=COLORS.WHITE, board=board, scan_mode=True)
 
         bad_moves = []
 
@@ -772,7 +705,7 @@ class King(_Piece):
 
                 # If the piece is a pawn, add the left and right capture into op_moves
                 # and remove the move in front of the pawn
-                if probe_game.turn == 'black' and getattr(board[x, y].piece, 'str_rep') == 'p':
+                if probe_game.turn == COLORS.BLACK and board[x, y].str_rep == 'p':
                     if x < 7 and y <= 7:
                         op_moves.append([x + 1, y + 1])
                     if x > 0 and y <= 7:
@@ -783,7 +716,7 @@ class King(_Piece):
                             op_moves.remove([x, y + 2])
                         except ValueError:
                             pass
-                elif probe_game.turn == 'white' and getattr(board[x, y].piece, 'str_rep') == 'P':
+                elif probe_game.turn == COLORS.WHITE and board[x, y].str_rep == 'P':
                     if x < 7 and y >= 0:
                         op_moves.append([x + 1, y - 1])
                     if x > 0 and y >= 0:
@@ -813,7 +746,7 @@ class King(_Piece):
                 x = myx + i
                 y = myy + j
                 # If there is a piece of the opposite colour
-                if (x in range(8)) and (y in range(8)) and getattr(board[x, y].piece, 'colour') != self.colour:
+                if (x in range(8)) and (y in range(8)) and board[x, y].color != self.color:
                     # Try the move
                     probe_game.full_move(myx, myy, x, y)
 
@@ -849,10 +782,10 @@ class King(_Piece):
     def isin_check(self, king_x, king_y, curr_game):
         # switches turn into the opponent's turn to check
         from game import Game
-        if curr_game.turn == 'black':
-            probe_game = Game(turn='white', board=curr_game.board, scan_mode=True, prev_game_state=curr_game.game_state)
+        if curr_game.turn == COLORS.BLACK:
+            probe_game = Game(turn=COLORS.WHITE, board=curr_game.board, scan_mode=True, prev_game_state=curr_game.game_state)
         else:
-            probe_game = Game(turn='black', board=curr_game.board, scan_mode=True, prev_game_state=curr_game.game_state)
+            probe_game = Game(turn=COLORS.BLACK, board=curr_game.board, scan_mode=True, prev_game_state=curr_game.game_state)
         # Loop through all pieces on the board
         for y in range(8):
             for x in range(8):
@@ -889,7 +822,7 @@ class King(_Piece):
 # TODO: Try take out blank piece
 class Blank(_Piece):
     def __init__(self, color=None):
-        super().__init__(0, 'none', 'Assets/Blank.png', '-', 0, [], None)
+        super().__init__(0, None, PIECES.BLANK.value['str_rep'])
 
 class PieceLibrary(object):
     """
@@ -910,22 +843,10 @@ class PieceLibrary(object):
             }
     COLOR_LIST = COLORS
 
-    def __init__(self):
-        """
-        Constructor
-        """
-        # Populate library
-        self.library = defaultdict(dict)
-        self._populate_library(self.library)
-
-    @classmethod
-    def _populate_library(cls, library):
-        """
-        Create a copy of each piece in each color
-        """
-        for piece, piece_obj in cls.PIECE_MAPPING.items():
-            for color in cls.COLOR_LIST:
-                library[piece][color] = piece_obj(color.value)
+    LIBRARY = defaultdict(dict)
+    for piece, piece_obj in PIECE_MAPPING.items():
+        for color in COLOR_LIST:
+            LIBRARY[piece][color] = piece_obj(color)
 
     @classmethod
     def get_piece_and_color_by_str_rep(cls, str_rep):
@@ -945,9 +866,10 @@ class PieceLibrary(object):
 
         return piece, color
         
-    def get_piece_ref(self, piece, color):
+    @classmethod
+    def get_piece_ref(cls, piece, color):
         if piece and color:
-            return self.library[piece][color]
+            return cls.LIBRARY[piece][color]
         else:
             return None
 

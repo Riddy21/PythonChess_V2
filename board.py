@@ -25,6 +25,8 @@ class Board(dict):
     
         def __str__(self):
             return str((self.piece.str_rep, self.num_moves))
+
+    BLANK_SQUARE = Square()
     
     def copy(self):
         """Override the copy method of a dict"""

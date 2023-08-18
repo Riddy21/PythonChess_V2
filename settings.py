@@ -7,7 +7,7 @@ BOARD_HEIGHT = 8
 BOARD_WIDTH = 8
 
 # Make pieces references instead of copies
-REFERENCE_PIECES = False
+REFERENCE_PIECES = True
 
 class COLORS(ChessEnum):
     WHITE = 'white'

@@ -38,7 +38,7 @@ class GameUserError(Exception):
 
 # Game class initiated when the game board is displayed
 class Game:
-    def __init__(self, turn='white', board=None, moves=None, captured_white=None, captured_black=None, scan_mode=False, prev_game_state='normal'):
+    def __init__(self, turn=COLORS.WHITE, board=None, moves=None, captured_white=None, captured_black=None, scan_mode=False, prev_game_state='normal'):
         if captured_black is None:
             captured_black = []
         if captured_white is None:
@@ -54,6 +54,8 @@ class Game:
         self.moves = moves
 
         # string representing the turn colour of the game
+        if type(turn) == str:
+            turn = COLORS.get_by_str_rep(turn)
         self.turn = turn
         self.switch_turn_event = Event()
 
@@ -99,7 +101,7 @@ class Game:
 
     def set_turn(self, turn):
         """Sets turn to the color specified"""
-        if self.turn in ('white', 'black'):
+        if self.turn in (COLORS.WHITE, COLORS.BLACK):
             self.turn = turn
         else:
             raise GameUserError("Not a valid turn setting")
@@ -108,10 +110,10 @@ class Game:
 
     # switch turns without notifying players
     def switch_turn_quiet(self):
-        if self.turn == 'white':
-            self.turn = 'black'
+        if self.turn == COLORS.WHITE:
+            self.turn = COLORS.BLACK
         else:
-            self.turn = 'white'
+            self.turn = COLORS.WHITE
 
         self.update_game_state()
 
@@ -158,7 +160,7 @@ class Game:
             self.move_from(x, y)
         else:
             # if the player selects a different piece to move
-            if getattr(self.board[x, y].piece, 'colour') == self.turn:
+            if self.board[x, y].color == self.turn:
                 # Removes move_id from piece and deletes move
                 self.moves[-1].deselect_move(self.board)
                 del self.moves[-1]
@@ -201,7 +203,7 @@ class Game:
     def get_playable_piece_coords(self):
         playable = set()
         for (x, y), square in self.board.items():
-            if square.piece.colour == self.turn:
+            if square.piece.color == self.turn:
                 if self.get_next_poss_moves(x, y):
                     playable.add((x, y))
         return playable
@@ -219,9 +221,9 @@ class Game:
         captured_piece = getattr(self.moves[-1], 'captured')
         if captured_piece == 'None':
             pass
-        elif getattr(captured_piece, 'colour') == 'black':
+        elif captured_piece.color == COLORS.BLACK:
             self.captured_black.append(captured_piece)
-        elif getattr(captured_piece, 'colour') == 'white':
+        elif captured_piece.color == COLORS.WHITE:
             self.captured_white.append(captured_piece)
 
         # if the move results in pawn promotion don't switch turn
@@ -275,9 +277,9 @@ class Game:
                 return 'black pawn promo'
 
             # If the piece iterated on is piece of the next turn
-            if piece.colour != 'none':
+            if piece.color != None:
                 num_pieces += 1
-            if piece.colour == self.turn:
+            if piece.color == self.turn:
                 # If the piece is the king
                 if piece.str_rep == 'k' or piece.str_rep == 'K':
                     # Test if it is in check
@@ -296,12 +298,12 @@ class Game:
 
         if not can_move:
             if in_check:
-                return '%s checkmate' % self.turn
+                return '%s checkmate' % self.turn.value
             else:
                 return 'stalemate'
 
         elif in_check:
-            return '%s check' % self.turn
+            return '%s check' % self.turn.value
 
         else:
             return 'normal'

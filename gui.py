@@ -71,6 +71,8 @@ class ChessboardGUI:
     def draw_check_highlight(self, game_state):
         if 'check' not in game_state:
             return
+
+        print(game_state)
         if 'black' in game_state:
             coords = self.api.get_piece_coords('k')
         elif 'white' in game_state:
@@ -173,16 +175,16 @@ class ChessboardGUI:
             return coords
 
         if self.get_current_player().type == Player.COMPUTER and\
-                self.api.turn == 'black':
+                self.api.turn == COLORS.BLACK:
             return coords
 
         if self.get_current_player().type == Player.COMPUTER and\
-                self.api.turn == 'white':
+                self.api.turn == COLORS.WHITE:
             return 7-coords[0], 7-coords[1]
         
-        if self.api.turn == 'white':
+        if self.api.turn == COLORS.WHITE:
             return coords
-        elif self.api.turn == 'black':
+        elif self.api.turn == COLORS.BLACK:
             return 7-coords[0], 7-coords[1]
 
     def run(self):

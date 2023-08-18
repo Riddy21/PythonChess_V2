@@ -13,7 +13,7 @@ class TestGame(unittest.TestCase):
 
     def compare_boards(self, board1, board2):
         for ((x1, y1), square1), ((x2, y2), square2) in zip(board1.items(), board2.items()):
-            self.assertEqual(square1.piece.colour, square2.piece.colour)
+            self.assertEqual(square1.piece.color, square2.piece.color)
             self.assertEqual(type(square2.piece), type(square1.piece))
 
     def test_set_board(self):
@@ -37,17 +37,17 @@ class TestGame(unittest.TestCase):
         # Set the board to check
         self.game.set_board('Presets/check.txt')
 
-        self.assertEqual(self.game.turn, 'white')
+        self.assertEqual(self.game.turn, COLORS.WHITE)
         self.game.switch_turn()
-        self.assertEqual(self.game.turn, 'black')
+        self.assertEqual(self.game.turn, COLORS.BLACK)
 
     def test_set_turn(self):
         # Set the board to check
         self.game.set_board('Presets/check.txt')
 
-        self.assertEqual(self.game.turn, 'white')
-        self.game.set_turn('black')
-        self.assertEqual(self.game.turn, 'black')
+        self.assertEqual(self.game.turn, COLORS.WHITE)
+        self.game.set_turn(COLORS.BLACK)
+        self.assertEqual(self.game.turn, COLORS.BLACK)
 
     #FIXME: Fix this one
     @unittest.expectedFailure
@@ -69,7 +69,7 @@ class TestGame(unittest.TestCase):
         self.game.set_board('Presets/check.txt')
         golden = Game.get_board_from_config_file('Presets/check.txt')
         # Black move
-        self.game.set_turn('black')
+        self.game.set_turn(COLORS.BLACK)
 
         # do an invalid move on the right color
         self.assertEqual(-1, self.game.full_move(0, 1, 0, 2))
@@ -84,7 +84,7 @@ class TestGame(unittest.TestCase):
 
         # Check piece
         self.assertEqual(type(self.game.board[6, 2].piece), Pawn)
-        self.assertEqual(self.game.board[6, 2].piece.colour, 'black')
+        self.assertEqual(self.game.board[6, 2].color, COLORS.BLACK)
 
     #FIXME: Fix this one
     @unittest.expectedFailure
@@ -96,12 +96,12 @@ class TestGame(unittest.TestCase):
         self.assertEqual(-1, self.game.full_move(6, 1, 6, 2))
         self.assertEqual(-1, self.game.full_move(0, 1, 0, 2))
 
-        self.assertEqual('white', self.game.turn)
+        self.assertEqual(COLORS.WHITE, self.game.turn)
 
         # Make promotion
         self.game.make_pawn_promo('Queen')
 
-        self.assertEqual('black', self.game.turn)
+        self.assertEqual(COLORS.BLACK, self.game.turn)
 
     def test_undo_move(self):
         # Set the board to check
@@ -139,7 +139,7 @@ class TestGame(unittest.TestCase):
         # Set the board to check
         self.game.set_board('Presets/check.txt')
         golden = Game.get_board_from_config_file('Presets/check.txt')
-        self.game.set_turn('black')
+        self.game.set_turn(COLORS.BLACK)
 
         # do an invalid move on the right color
         self.game.handle_move(0, 1)
@@ -157,12 +157,12 @@ class TestGame(unittest.TestCase):
 
         # Check piece
         self.assertEqual(type(self.game.board[6, 2].piece), Pawn)
-        self.assertEqual(self.game.board[6, 2].piece.colour, 'black')
+        self.assertEqual(self.game.board[6, 2].piece.color, COLORS.BLACK)
 
     def test_get_next_poss_moves(self):
         # Set the board to check
         self.game.set_board('Presets/check.txt')
-        self.game.set_turn('black')
+        self.game.set_turn(COLORS.BLACK)
 
         golden = [[6, 2]]
         self.assertEqual(golden, self.game.get_next_poss_moves(6, 1))
@@ -170,7 +170,7 @@ class TestGame(unittest.TestCase):
     def test_get_current_poss_moves(self):
         # Set the board to check
         self.game.set_board('Presets/check.txt')
-        self.game.set_turn('black')
+        self.game.set_turn(COLORS.BLACK)
 
         self.assertEqual((), self.game.get_current_poss_moves())
         self.game.handle_move(6, 1)
@@ -180,7 +180,7 @@ class TestGame(unittest.TestCase):
     def test_get_playable_piece_coords(self):
         # Set the board to check
         self.game.set_board('Presets/check.txt')
-        self.game.set_turn('black')
+        self.game.set_turn(COLORS.BLACK)
 
         golden = {(6, 1)}
         self.assertEqual(golden, self.game.get_playable_piece_coords())
@@ -232,7 +232,7 @@ class TestGame(unittest.TestCase):
 
     def test_enpassante(self):
         self.game.set_board('Presets/ready_to_enpass.txt')
-        self.game.set_turn('black')
+        self.game.set_turn(COLORS.BLACK)
 
         # Do pawn enpass
         self.game.full_move(4, 1, 4, 3)

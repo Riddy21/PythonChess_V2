@@ -1,6 +1,6 @@
 from typing import Any
 import copy
-from pieces import Blank, Queen, Bishop, Rook, Knight, Pawn
+from pieces import *
 from enum import Enum
 
 # Class to record moves and change game board
@@ -24,7 +24,7 @@ class Move(object):
         # Parameter for from location
         self.move_from = x, y
 
-        self.move_piece = board[x, y].piece.str_rep
+        self.move_piece = board[x, y].str_rep
 
         # Parameters for move type
         self.move_type = "not set"
@@ -32,7 +32,7 @@ class Move(object):
         self.pawn_promo = 'disabled'
 
         # Parameter for Move color
-        self.move_colour = board[x, y].piece.colour
+        self.move_colour = board[x, y].color
 
         # Parameter for possible next moves and set to the piece's move array
         self.poss_moves = poss_moves
@@ -47,7 +47,7 @@ class Move(object):
     @staticmethod
     def get_poss_moves(board, turn, x, y, move_number, scan_mode=False, look_ahead=False):
         # if the piece is not blank and is the right colour for the turn
-        if getattr(board[x, y].piece, 'str_rep') != "-" and getattr(board[x, y].piece, 'colour') == turn:
+        if board[x, y].str_rep != "-" and board[x, y].color == turn:
             # Add move_id to piece being moved (must be changed before get_moves)
             # only is added if its proper valid move and append move stays true
             # When only will append when the function is not looking ahead to the next move
@@ -85,26 +85,18 @@ class Move(object):
 
         # Make a new piece with same ID, moves history, move history count
         if piece_type == 'Queen':
-            new_piece = Queen(colour=self.move_colour,
-                              move_count=getattr(board[tox, toy].piece, 'move_count'),
-                              piece_id=getattr(board[tox, toy].piece, 'id'))
+            new_piece = PieceLibrary.get_piece_ref(PIECES.QUEEN, self.move_colour)
         elif piece_type == 'Rook':
-            new_piece = Rook(colour=self.move_colour,
-                             move_count=getattr(board[tox, toy].piece, 'move_count'),
-                             piece_id=getattr(board[tox, toy].piece, 'id'))
+            new_piece = PieceLibrary.get_piece_ref(PIECES.ROOK, self.move_colour)
         elif piece_type == 'Knight':
-            new_piece = Knight(colour=self.move_colour,
-                               move_count=getattr(board[tox, toy].piece, 'move_count'),
-                               piece_id=getattr(board[tox, toy].piece, 'id'))
+            new_piece = PieceLibrary.get_piece_ref(PIECES.KNIGHT, self.move_colour)
         elif piece_type == 'Bishop':
-            new_piece = Bishop(colour=self.move_colour,
-                               move_count=getattr(board[tox, toy].piece, 'move_count'),
-                               piece_id=getattr(board[tox, toy].piece, 'id'))
+            new_piece = PieceLibrary.get_piece_ref(PIECES.BISHOP, self.move_colour)
         else:
             print("Error, wrong piece choice")
             return -1
 
-        # Place in old piece's spot
+        # Place in old piece's spot, do not change num moves
         board[tox, toy].piece = new_piece
 
         self.pawn_promo = 'completed'
@@ -145,35 +137,35 @@ class Move(object):
         if self.move_type == 'enpassant':
             if not self.scan_mode:
                 print('enpassant from %d, %d to %d, %d' % (frox, froy, tox, toy))
-            if self.move_colour == 'black':
-                self.captured = board[tox, toy - 1].piece
-                board[tox, toy - 1].piece = Blank()
+            if self.move_colour == COLORS.BLACK:
+                self.captured = board[tox, toy - 1]
+                board[tox, toy - 1] = board.BLANK_SQUARE
             else:
-                self.captured = board[tox, toy + 1].piece
-                board[tox, toy + 1].piece = Blank()
-            board[tox, toy].piece, board[frox, froy].piece = board[frox, froy].piece, board[tox, toy].piece
+                self.captured = board[tox, toy + 1]
+                board[tox, toy + 1] = board.BLANK_SQUARE
+            board[tox, toy], board[frox, froy] = board[frox, froy], board[tox, toy]
 
         elif self.move_type == 'lcastle':
-            if getattr(board[0, froy].piece,'str_rep') != '-':
+            if board[0, froy].str_rep != '-':
                 if not self.scan_mode:
                     print('left castle at %d, %d' % (frox, froy))
                 # add move count to rook
                 board[0, froy].num_moves += 1
                 # add move id to rook
-                board[tox, toy].piece, board[frox, froy].piece = board[frox, froy].piece, board[tox, toy].piece
-                board[0, froy].piece, board[3, froy].piece = board[3, froy].piece, board[0, froy].piece
+                board[tox, toy], board[frox, froy] = board[frox, froy], board[tox, toy]
+                board[0, froy], board[3, froy] = board[3, froy], board[0, froy]
             else:
                 print(self.move_type, "WRONG")
 
         elif self.move_type == 'rcastle':
-            if getattr(board[7, froy].piece,'str_rep') != '-':
+            if board[7, froy].str_rep != '-':
                 if not self.scan_mode:
                     print('right castle at %d, %d' % (frox, froy))
                 # add move count to rook
                 board[7, froy].num_moves += 1
                 # add move id to rook
-                board[tox, toy].piece, board[frox, froy].piece = board[frox, froy].piece, board[tox, toy].piece
-                board[7, froy].piece, board[5, froy].piece = board[5, froy].piece, board[7, froy].piece
+                board[tox, toy], board[frox, froy] = board[frox, froy], board[tox, toy]
+                board[7, froy], board[5, froy] = board[5, froy], board[7, froy]
             else:
                 print(self.move_type, "WRONG")
 
@@ -181,14 +173,14 @@ class Move(object):
             if not self.scan_mode:
                 print('capture: from %d,%d to %d,%d' % (frox, froy, tox, toy))
             # Capture can be passed by reference because it will never be touched again after being captured
-            self.captured = board[tox, toy].piece
-            board[tox, toy].piece = board[frox, froy].piece
-            board[frox, froy].piece = Blank()
+            self.captured = board[tox, toy]
+            board[tox, toy] = board[frox, froy]
+            board[frox, froy] = board.BLANK_SQUARE
 
         elif self.move_type == 'move':
             if not self.scan_mode:
                 print('move: from %d,%d to %d,%d' % (frox, froy, tox, toy))
-            board[tox, toy].piece, board[frox, froy].piece = board[frox, froy].piece, board[tox, toy].piece
+            board[tox, toy], board[frox, froy] = board[frox, froy], board[tox, toy]
 
     # Undo a move
     def undo_move(self, board):
@@ -202,48 +194,42 @@ class Move(object):
         # if pawn Promotion is true
         if self.pawn_promo == 'completed':
             # convert piece back into pawn with all specifications
-            pawn_id = getattr(board[tox, toy].piece, 'id')
-            pawn_move_count = getattr(board[tox, toy].piece, 'move_count')
-            board[tox, toy].piece = Pawn(
-                colour=self.move_colour,
-                piece_id=pawn_id,
-                move_count=pawn_move_count,
-            )
+            board[tox, toy].piece = PieceLibrary.get_piece_ref(PIECES.PAWN, self.move_colour)
 
         # revert move piece's move count and move history
         board[tox, toy].num_moves -= 1
 
         # revert move piece back to from location by switching to and from
-        board[tox, toy].piece, board[frox, froy].piece = board[frox, froy].piece, board[tox, toy].piece
+        board[tox, toy], board[frox, froy] = board[frox, froy], board[tox, toy]
 
         # If the move was a left castle
         if self.move_type == 'lcastle':
             # delete rook move id and decrement move count
-            if getattr(board[3, toy].piece,'str_rep') != '-':
+            if board[3, toy].str_rep != '-':
                 board[3, toy].num_moves -= 1
                 # revert rook back to location
-                board[0, toy].piece, board[3, toy].piece = board[3, toy].piece, board[0, toy].piece
+                board[0, toy], board[3, toy] = board[3, toy], board[0, toy]
 
         # else If the move was a right castle
         elif self.move_type == 'rcastle':
             # delete rook move id and decrement move count
-            if getattr(board[5, toy].piece, 'str_rep') != '-':
+            if board[5, toy].str_rep != '-':
                 board[5, toy].num_moves -= 1
                 # revert rook back to location
-                board[7, toy].piece, board[5, toy].piece = board[5, toy].piece, board[7, toy].piece
+                board[7, toy], board[5, toy] = board[5, toy], board[7, toy]
 
         # else If the move was an enpassant
         elif self.move_type == 'enpassant':
             # replace captured piece back to old location
-            if self.move_colour == 'black':
-                board[tox, toy - 1].piece = self.captured
-            elif self.move_colour == 'white':
-                board[tox, toy + 1].piece = self.captured
+            if self.move_colour == COLORS.BLACK:
+                board[tox, toy - 1] = self.captured
+            elif self.move_colour == COLORS.WHITE:
+                board[tox, toy + 1] = self.captured
 
         # else if the move was a capture
         elif self.move_type == 'capture':
             # replace captured piece back to location
-            board[tox, toy].piece = self.captured
+            board[tox, toy] = self.captured
 
         # else if the move was a move do nothing
 
@@ -265,10 +251,10 @@ class Move(object):
         frox, froy = self.move_from
 
         # Confirms whether a castle happened when the piece was moved
-        is_castle = board[frox, froy].piece.is_castle(x, y)
+        is_castle = board[frox, froy].is_castle(x, y)
 
         # Confirms whether enpassant could happen when the piece is moved
-        is_enpassant = board[frox, froy].piece.is_enpassant(x, y)
+        is_enpassant = board[frox, froy].is_enpassant(x, y)
 
         # Sets instance variable pawn promo based on whether the piece is ready for a pawn promotion
         if board[frox, froy].piece.is_pawn_promo(x, y):
@@ -284,7 +270,7 @@ class Move(object):
         elif is_enpassant:
             return 'enpassant'
         # If is capture
-        elif getattr(board[x, y].piece, 'str_rep') != "-":
+        elif board[x, y].str_rep != "-":
             return 'capture'
         # If is normal move
         else:

@@ -4,6 +4,7 @@ from board import BoardManager
 import sys
 from game import Game
 from pieces import Rook, Blank
+from settings import *
 
 class TestBoard(unittest.TestCase):
     def setUp(self):
@@ -21,7 +22,6 @@ class TestBoard(unittest.TestCase):
 
         file.close()
 
-    @unittest.expectedFailure # FIXME: won't work until REFERENCE_PIECES set to True
     def test_copyable(self):
         board = BoardManager.get_board_from_file('Presets/check.txt')
         # Test if you can make a deep copy without problems
@@ -52,8 +52,8 @@ class TestBoard(unittest.TestCase):
     def test_get_attribute(self):
         board = BoardManager.get_board_from_file('Presets/default.txt')
 
-        self.assertEqual(board[0, 0].piece.colour, 'black')
-        self.assertEqual(board[0, 0].colour, 'black')
+        self.assertEqual(board[0, 0].piece.color, COLORS.BLACK)
+        self.assertEqual(board[0, 0].color, COLORS.BLACK)
         self.assertEqual(type(board[0, 0].piece), Rook )
         self.assertEqual(getattr(board[0, 0], 'str_rep'), 'r' )
 

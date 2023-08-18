@@ -11,6 +11,14 @@ class ChessEnum(Enum):
                 return member
         raise KeyError(f"No member with value {value}")
 
+    @classmethod
+    def get_by_value(cls, value):
+        # NOTE: For loop not ideal but fast enough for small enums
+        for member in cls:
+            if member.value == value:
+                return member
+        raise KeyError(f"No member with value {value}")
+
 LOCK = threading.Lock()
 
 def run_in_thread(func): # pragma: no cover

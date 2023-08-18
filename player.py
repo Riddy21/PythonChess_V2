@@ -2,17 +2,19 @@ from utils import *
 import threading
 import random
 from time import sleep
+from settings import *
 
 # FIXME: Make a variable to tell if the thread failed
 
 class Player:
     HUMAN = 'human'
     COMPUTER = 'computer'
-    def __init__(self, game, color, type):
-        super().__init__()
+    def __init__(self, game, color, player_type):
         self.game = game
+        if type(color) == str:
+            color = COLORS.get_by_value(color)
         self.color = color
-        self.type = type
+        self.type = player_type
 
     @run_synchronously
     def undo_move(self, num=1):
