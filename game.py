@@ -17,11 +17,12 @@ from settings import *
 # 1. Use dict of pieces, with coordinates as a property?
 # Change pieces to singletons that are referenced in the board
 #   1. Made piece library to implement this change
-# TODO: Edit Pices to be must more lite weight
+# Edit Pices to be must more lite weight
 # TODO: Only use boards instead of games as nodes in search tree
 # TODO: Make a lock decorator to lock the functions that need locking
 #       NOTE: Make sure that they don't call each other
 #             only lock forward facing functions that modify shared variables
+# TODO: Convert print statements to logging messages
 
 class GameInternalError(Exception):
     """
