@@ -3,6 +3,7 @@ import threading
 import random
 from time import sleep
 from settings import *
+import logging
 
 # FIXME: Make a variable to tell if the thread failed
 
@@ -43,7 +44,7 @@ class Computer(Player):
                 self.game.switch_turn_event.wait()
             else:
                 self.make_move()
-        print('Quitting player')
+        logging.info('Quitting player')
         exit()
 
     def quit(self):

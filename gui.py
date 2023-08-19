@@ -3,6 +3,7 @@ import popup
 from player import *
 from utils import run_in_thread
 from settings import *
+import logging
 
 # Set up the colors
 WHITE = (255, 255, 255)
@@ -72,13 +73,12 @@ class ChessboardGUI:
         if 'check' not in game_state:
             return
 
-        print(game_state)
         if 'black' in game_state:
             coords = self.api.get_piece_coords('k')
         elif 'white' in game_state:
             coords = self.api.get_piece_coords('K')
         if len(coords) != 1:
-            print('Error: more than one king')
+            logging.error('more than one king')
             return
         for col, row in coords:
             col, row = self.orient((col, row))
@@ -223,7 +223,7 @@ class ChessboardGUI:
                             import datetime
                             filename = str(datetime.datetime.now()).replace(' ', '-')+".txt"
                             self.api.export_board(filename)
-                            print('Game saved in "%s"!' % filename)
+                            logging.info('Game saved in "%s"!' % filename)
 
 
                 # Draw the chess board

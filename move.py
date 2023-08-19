@@ -2,6 +2,7 @@ from typing import Any
 import copy
 from pieces import *
 from enum import Enum
+import logging
 
 # Class to record moves and change game board
 # FIXME: Change each time board.piece() is changed to the actual Square switching spots
@@ -58,7 +59,7 @@ class Move(object):
             # If there is still moves left
             if not poss_moves:
                 if not scan_mode:
-                    print("No more moves")
+                    logging.debug("No more moves")
 
                 # Remove move num hist
                 return []
@@ -66,7 +67,7 @@ class Move(object):
             # Return the proper poss_moves
             return poss_moves
         if not scan_mode:
-            print("Invalid selection")
+            logging.debug("Invalid selection")
         return []
 
     # Removes move_id from piece being moved in case of reselection
@@ -77,7 +78,7 @@ class Move(object):
     def make_pawn_promo(self, piece_type, board):
         #only make promotion if in ready state
         if self.pawn_promo != 'ready':
-            print("Invalid pawn promotion")
+            logging.debug("Invalid pawn promotion")
             return -1
 
         # Set as for easier use
@@ -93,14 +94,14 @@ class Move(object):
         elif piece_type == 'Bishop':
             new_piece = PieceLibrary.get_piece_ref(PIECES.BISHOP, self.move_colour)
         else:
-            print("Error, wrong piece choice")
+            logging.error("wrong piece choice")
             return -1
 
         # Place in old piece's spot, do not change num moves
         board[tox, toy].piece = new_piece
 
         self.pawn_promo = 'completed'
-        print('Pawn promoted to %s' % piece_type)
+        logging.debug('Pawn promoted to %s', piece_type)
 
     # validate move and make the move based on the end coordinates
     def make_move(self, board, x, y):
@@ -110,7 +111,7 @@ class Move(object):
         # Check if it is a valid move
         # ** Don't set move to until validated
         if proposed_move == -1:
-            print("invalid move")
+            logging.debug("invalid move")
             return -1
 
         # if valid move then:
@@ -136,7 +137,7 @@ class Move(object):
         # Do corresponding move
         if self.move_type == 'enpassant':
             if not self.scan_mode:
-                print('enpassant from %d, %d to %d, %d' % (frox, froy, tox, toy))
+                logging.debug('enpassant from %d, %d to %d, %d' % (frox, froy, tox, toy))
             if self.move_colour == COLORS.BLACK:
                 self.captured = board[tox, toy - 1]
                 board[tox, toy - 1] = board.BLANK_SQUARE
@@ -148,30 +149,30 @@ class Move(object):
         elif self.move_type == 'lcastle':
             if board[0, froy].str_rep != '-':
                 if not self.scan_mode:
-                    print('left castle at %d, %d' % (frox, froy))
+                    logging.debug('left castle at %d, %d' % (frox, froy))
                 # add move count to rook
                 board[0, froy].num_moves += 1
                 # add move id to rook
                 board[tox, toy], board[frox, froy] = board[frox, froy], board[tox, toy]
                 board[0, froy], board[3, froy] = board[3, froy], board[0, froy]
             else:
-                print(self.move_type, "WRONG")
+                logging.error("Wrong piece type for castle")
 
         elif self.move_type == 'rcastle':
             if board[7, froy].str_rep != '-':
                 if not self.scan_mode:
-                    print('right castle at %d, %d' % (frox, froy))
+                    logging.debug('right castle at %d, %d' % (frox, froy))
                 # add move count to rook
                 board[7, froy].num_moves += 1
                 # add move id to rook
                 board[tox, toy], board[frox, froy] = board[frox, froy], board[tox, toy]
                 board[7, froy], board[5, froy] = board[5, froy], board[7, froy]
             else:
-                print(self.move_type, "WRONG")
+                logging.debug(self.move_type, "WRONG")
 
         elif self.move_type == 'capture':
             if not self.scan_mode:
-                print('capture: from %d,%d to %d,%d' % (frox, froy, tox, toy))
+                logging.debug('capture: from %d,%d to %d,%d' % (frox, froy, tox, toy))
             # Capture can be passed by reference because it will never be touched again after being captured
             self.captured = board[tox, toy]
             board[tox, toy] = board[frox, froy]
@@ -179,7 +180,7 @@ class Move(object):
 
         elif self.move_type == 'move':
             if not self.scan_mode:
-                print('move: from %d,%d to %d,%d' % (frox, froy, tox, toy))
+                logging.debug('move: from %d,%d to %d,%d' % (frox, froy, tox, toy))
             board[tox, toy], board[frox, froy] = board[frox, froy], board[tox, toy]
 
     # Undo a move
@@ -189,7 +190,7 @@ class Move(object):
         tox, toy = self.move_to
 
         if not self.scan_mode:
-            print('undo')
+            logging.debug('undo')
 
         # if pawn Promotion is true
         if self.pawn_promo == 'completed':

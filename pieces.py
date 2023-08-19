@@ -4,9 +4,6 @@ import uuid
 from enum import Enum
 from settings import *
 
-
-
-# TODO: Make a piece with move count and move history set to 0 and one with inserting a piece with a history
 # Abstract Piece Class
 class _Piece(object):
     def __init__(self, value, color, str_rep):

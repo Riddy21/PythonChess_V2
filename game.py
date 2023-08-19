@@ -6,6 +6,7 @@ from threading import Event, Lock
 from copy import deepcopy
 from board import BoardManager
 from settings import *
+import logging
 
 # NOTE: Next things to do
 
@@ -87,7 +88,7 @@ class Game:
         Saves the current board in a file
         """
         if os.path.isfile(filename):
-            print('Warning, overwriting %s' % filename)
+            logging.warning('Overwriting %s', filename)
         file = open(filename, 'w')
         file.write(self.__str__())
         file.close()
@@ -173,7 +174,7 @@ class Game:
     def move_from(self, x, y):
         # DOn't allow move if pawn promotion is valid
         if self.moves and self.moves[-1].pawn_promo == 'ready':
-            print("Invalid Selection, pawn promotion underway")
+            logging.debug("Invalid Selection, pawn promotion underway")
             return -1
         # Get possible moves
         poss_moves = Move.get_poss_moves(self.board, self.turn, x, y, len(self.moves), scan_mode=self.scan_mode)
@@ -229,7 +230,7 @@ class Game:
         # if the move results in pawn promotion don't switch turn
         if self.moves[-1].pawn_promo == 'ready':
             if not self.scan_mode:
-                print('Pawn Promotion is valid')
+                logging.debug('Pawn Promotion is valid')
                 # Update the state of the game so that the pawn promotion is registered
             # FIXME: make this a side process that happens every time the board changes
             self.update_game_state()
@@ -253,8 +254,6 @@ class Game:
         stalemate
         MUST BE IN THE TURN OF THE SIDE YOU'RE CHECKING
         """
-        # Disable print statements
-        sys.stdout = None
 
         can_move = False
         in_check = False
@@ -267,11 +266,9 @@ class Game:
             piece = item.piece
             # pawn promo check
             if y == 0 and piece.str_rep == 'P':
-                sys.stdout = sys.__stdout__
                 return 'white pawn promo'
 
             if y == BOARD_HEIGHT - 1 and piece.str_rep == 'p':
-                sys.stdout = sys.__stdout__
                 return 'black pawn promo'
 
             # If the piece iterated on is piece of the next turn
@@ -286,8 +283,6 @@ class Game:
                 if self.get_next_poss_moves(x, y):
                     # set can move to true and break out
                     can_move = True
-
-        sys.stdout = sys.__stdout__
 
         # If there's only 2 kings left
         if num_pieces <= 2:
