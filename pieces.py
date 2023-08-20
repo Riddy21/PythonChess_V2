@@ -727,11 +727,10 @@ class King(_Piece):
 
                 # loop through all possible moves
                 for op_move in op_moves:
-                    opx, opy = op_move
-                    # if the move is adjacent to the king
-                    if abs(opx - myx) <= 1 and abs(opy - myy) <= 1:
+                    # if the move is the same as the king's moves
+                    if op_move in poss_moves:
                         # Save the move in a list
-                        bad_moves.append([opx, opy])
+                        bad_moves.append(op_move)
 
         # If there is any move beside the king that cant be captured but not picked up by the check limit
         # Capture the piece and check for check

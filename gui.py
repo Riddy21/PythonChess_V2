@@ -133,7 +133,7 @@ class ChessboardGUI:
     def prompt_mate_quit(self, game_state):
         if 'checkmate' in game_state:
             ans = popup.askyesno(title="Checkmate!",
-                                 message="Checkmate! %s wins!\nWould you like to quit?" % self.get_prev_player().color)
+                                 message="Checkmate! %s wins!\nWould you like to quit?" % self.get_prev_player().color.value)
         elif 'stalemate' in game_state:
             ans = popup.askyesno(title="Stalemate!",
                                  message="Stalemate!\nWould you like to quit?")
