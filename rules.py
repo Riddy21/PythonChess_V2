@@ -1,3 +1,5 @@
+from enum import Enum
+
 class Rules(object):
     class ObstructionType(Enum):
         """
@@ -15,10 +17,10 @@ class Rules(object):
         # make sure its not checking its self
         if source != target:
             # Same colour pieces
-            if board[source].colour == board[target].colour:
+            if board[source].color == board[target].color:
                 return cls.ObstructionType.SELF_OBSTRUCTED
             # opponent pieces
-            elif board[source].colour != 'none':
+            elif board[target].color != None:
                 return cls.ObstructionType.OPPONENT_OBSTRUCTED
             else:
                 return cls.ObstructionType.UNOBSTRUCTED
