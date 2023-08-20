@@ -6,11 +6,11 @@ import logging
 if __name__ == "__main__":
     game = Game()
     ai = Computer(game, 'black')
-    #player = Human(game, 'white')
-    player = Computer(game, 'white')
+    player = Human(game, 'white')
+    #player = Computer(game, 'white')
     gui = ChessboardGUI(game, p1=ai, p2=player)
     ai.start()
-    player.start()
+    #player.start()
 
     #game.switch_turn_event.release()
 

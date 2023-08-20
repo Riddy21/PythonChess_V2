@@ -4,6 +4,7 @@ import uuid
 from enum import Enum
 from settings import *
 from rules import Rules
+from move import Move
 
 # Abstract Piece Class
 class _Piece(object):
@@ -14,7 +15,7 @@ class _Piece(object):
         self.str_rep = str_rep
 
     # Base functions that will be overriden when necessary
-    def is_castle(self, x, y):
+    def is_castle(self, x, y, board):
         return -1
 
     def is_enpassant(self, x, y):
@@ -289,40 +290,32 @@ class Knight(_Piece):
         poss_moves = []
         if x + 2 <= 7:
             if y + 1 <= 7:
-                if Rules.detect_obstruction((x, y), (x + 2, y + 1), board) == Rules.ObstructionType.OPPONENT_OBSTRUCTED or \
-                        Rules.detect_obstruction((x, y), (x + 2, y + 1), board) == Rules.ObstructionType. UNOBSTRUCTED:
+                if Rules.detect_obstruction((x, y), (x + 2, y + 1), board) != Rules.ObstructionType.SELF_OBSTRUCTED:
                     poss_moves.append([x + 2, y + 1])
             if y - 1 >= 0:
-                if Rules.detect_obstruction((x, y), (x + 2, y - 1), board) == Rules.ObstructionType.OPPONENT_OBSTRUCTED or \
-                        Rules.detect_obstruction((x, y), (x + 2, y - 1), board) ==  Rules.ObstructionType. UNOBSTRUCTED:
+                if Rules.detect_obstruction((x, y), (x + 2, y - 1), board) != Rules.ObstructionType.SELF_OBSTRUCTED:
                     poss_moves.append([x + 2, y - 1])
 
         if x + 1 <= 7:
             if y + 2 <= 7:
-                if Rules.detect_obstruction((x, y), (x + 1, y + 2), board) == Rules.ObstructionType.OPPONENT_OBSTRUCTED or \
-                        Rules.detect_obstruction((x, y), (x + 1, y + 2), board) == Rules.ObstructionType. UNOBSTRUCTED:
+                if Rules.detect_obstruction((x, y), (x + 1, y + 2), board) != Rules.ObstructionType.SELF_OBSTRUCTED:
                     poss_moves.append([x + 1, y + 2])
             if y - 2 >= 0:
-                if Rules.detect_obstruction((x, y), (x + 1, y - 2), board) == Rules.ObstructionType.OPPONENT_OBSTRUCTED or \
-                        Rules.detect_obstruction((x, y), (x + 1, y - 2), board) == Rules.ObstructionType. UNOBSTRUCTED:
+                if Rules.detect_obstruction((x, y), (x + 1, y - 2), board) != Rules.ObstructionType.SELF_OBSTRUCTED:
                     poss_moves.append([x + 1, y - 2])
         if x - 2 >= 0:
             if y + 1 <= 7:
-                if Rules.detect_obstruction((x, y), (x - 2, y + 1), board) == Rules.ObstructionType.OPPONENT_OBSTRUCTED or \
-                        Rules.detect_obstruction((x, y), (x - 2, y + 1), board) == Rules.ObstructionType. UNOBSTRUCTED:
+                if Rules.detect_obstruction((x, y), (x - 2, y + 1), board) != Rules.ObstructionType.SELF_OBSTRUCTED:
                     poss_moves.append([x - 2, y + 1])
             if y - 1 >= 0:
-                if Rules.detect_obstruction((x, y), (x - 2, y - 1), board) == Rules.ObstructionType.OPPONENT_OBSTRUCTED or \
-                        Rules.detect_obstruction((x, y), (x - 2, y - 1), board) == Rules.ObstructionType. UNOBSTRUCTED:
+                if Rules.detect_obstruction((x, y), (x - 2, y - 1), board) != Rules.ObstructionType.SELF_OBSTRUCTED:
                     poss_moves.append([x - 2, y - 1])
         if x - 1 >= 0:
             if y + 2 <= 7:
-                if Rules.detect_obstruction((x, y), (x - 1, y + 2), board) == Rules.ObstructionType.OPPONENT_OBSTRUCTED or \
-                        Rules.detect_obstruction((x, y), (x - 1, y + 2), board) == Rules.ObstructionType. UNOBSTRUCTED:
+                if Rules.detect_obstruction((x, y), (x - 1, y + 2), board) != Rules.ObstructionType.SELF_OBSTRUCTED:
                     poss_moves.append([x - 1, y + 2])
             if y - 2 >= 0:
-                if Rules.detect_obstruction((x, y), (x - 1, y - 2), board) == Rules.ObstructionType.OPPONENT_OBSTRUCTED or \
-                        Rules.detect_obstruction((x, y), (x - 1, y - 2), board) == Rules.ObstructionType.UNOBSTRUCTED:
+                if Rules.detect_obstruction((x, y), (x - 1, y - 2), board) != Rules.ObstructionType.SELF_OBSTRUCTED:
                     poss_moves.append([x - 1, y - 2])
 
         # only do this line if not scanning opponent for check to avoid getting stuck in recursive loop
@@ -510,9 +503,6 @@ class King(_Piece):
         # Makes a piece with set values and images
         super().__init__(PIECES.KING.value['value'], color, str_rep)
 
-        # Parameter for storing castle coordinates if castle move is possible
-        self.left_castle = -1, -1
-        self.right_castle = -1, -1
 
     def get_moves(self, x, y, board, scan_mode=False):
         # If castle move is possible, store castle coordinates into parameters
@@ -520,50 +510,42 @@ class King(_Piece):
 
         # All moves top left
         if x - 1 >= 0 and y - 1 >= 0:
-            if Rules.detect_obstruction((x, y), (x - 1, y - 1), board) == Rules.ObstructionType.OPPONENT_OBSTRUCTED or \
-                    Rules.detect_obstruction((x, y), (x - 1, y - 1), board) == Rules.ObstructionType.UNOBSTRUCTED:
+            if Rules.detect_obstruction((x, y), (x - 1, y - 1), board) != Rules.ObstructionType.SELF_OBSTRUCTED:
                 poss_moves.append([x - 1, y - 1])
 
         # All moves bottom right
         if x + 1 <= 7 and y + 1 <= 7:
-            if Rules.detect_obstruction((x, y), (x + 1, y + 1), board) == Rules.ObstructionType.OPPONENT_OBSTRUCTED or \
-                    Rules.detect_obstruction((x, y), (x + 1, y + 1), board) == Rules.ObstructionType.UNOBSTRUCTED:
+            if Rules.detect_obstruction((x, y), (x + 1, y + 1), board) != Rules.ObstructionType.SELF_OBSTRUCTED:
                 poss_moves.append([x + 1, y + 1])
 
         # All moves bottom left
         if x - 1 >= 0 and y + 1 <= 7:
-            if Rules.detect_obstruction((x, y), (x - 1, y + 1), board) == Rules.ObstructionType.OPPONENT_OBSTRUCTED or \
-                    Rules.detect_obstruction((x, y), (x - 1, y + 1), board) == Rules.ObstructionType.UNOBSTRUCTED:
+            if Rules.detect_obstruction((x, y), (x - 1, y + 1), board) != Rules.ObstructionType.SELF_OBSTRUCTED:
                 poss_moves.append([x - 1, y + 1])
 
         # All moves top right
         if x + 1 <= 7 and y - 1 >= 0:
-            if Rules.detect_obstruction((x, y), (x + 1, y - 1), board) == Rules.ObstructionType.OPPONENT_OBSTRUCTED or \
-                    Rules.detect_obstruction((x, y), (x + 1, y - 1), board) == Rules.ObstructionType.UNOBSTRUCTED:
+            if Rules.detect_obstruction((x, y), (x + 1, y - 1), board) != Rules.ObstructionType.SELF_OBSTRUCTED:
                 poss_moves.append([x + 1, y - 1])
 
         # All moves left
         if x - 1 >= 0:
-            if Rules.detect_obstruction((x, y), (x - 1, y), board) == Rules.ObstructionType.OPPONENT_OBSTRUCTED or \
-                    Rules.detect_obstruction((x, y), (x - 1, y), board) == Rules.ObstructionType.UNOBSTRUCTED:
+            if Rules.detect_obstruction((x, y), (x - 1, y), board) != Rules.ObstructionType.SELF_OBSTRUCTED:
                 poss_moves.append([x - 1, y])
 
         # All moves right
         if x + 1 <= 7:
-            if Rules.detect_obstruction((x, y), (x + 1, y), board) == Rules.ObstructionType.OPPONENT_OBSTRUCTED or \
-                    Rules.detect_obstruction((x, y), (x + 1, y), board) == Rules.ObstructionType.UNOBSTRUCTED:
+            if Rules.detect_obstruction((x, y), (x + 1, y), board) != Rules.ObstructionType.SELF_OBSTRUCTED:
                 poss_moves.append([x + 1, y])
 
         # All up
         if y - 1 >= 0:
-            if Rules.detect_obstruction((x, y), (x, y - 1), board) == Rules.ObstructionType.OPPONENT_OBSTRUCTED or \
-                    Rules.detect_obstruction((x, y), (x, y - 1), board) == Rules.ObstructionType.UNOBSTRUCTED:
+            if Rules.detect_obstruction((x, y), (x, y - 1), board) != Rules.ObstructionType.SELF_OBSTRUCTED:
                 poss_moves.append([x, y - 1])
 
         # All moves bottom
         if y + 1 <= 7:
-            if Rules.detect_obstruction((x, y), (x, y + 1), board) == Rules.ObstructionType.OPPONENT_OBSTRUCTED or \
-                    Rules.detect_obstruction((x, y), (x, y + 1), board) == Rules.ObstructionType.UNOBSTRUCTED:
+            if Rules.detect_obstruction((x, y), (x, y + 1), board) != Rules.ObstructionType.SELF_OBSTRUCTED:
                 poss_moves.append([x, y + 1])
 
 
@@ -766,21 +748,46 @@ class King(_Piece):
         return False
 
     # Check for whether castle move was made
-    def is_castle(self, x, y):
-        # Clear both castle variables
-        left = self.left_castle
-        right = self.right_castle
-        # check passed parameters with castle possible coordinates
-        if (x, y) == left:
-            self.right_castle = -1, -1
-            self.left_castle = -1, -1
-            return 'left'
-        elif (x, y) == right:
-            self.right_castle = -1, -1
-            self.left_castle = -1, -1
-            return 'right'
-        else:
-            return -1
+    @staticmethod
+    def is_castle(x, y, board):
+        # White Piece
+        if board[x, y].color == COLORS.WHITE:
+            # The king must be at starting position with 0 move count
+            if x == 4 and y == 7 and board[x, y].num_moves == 0:
+                # The rook on the left must be at starting position with 0 move count
+                if board[0, 7].piece.str_rep == 'R' and board[0, 7].num_moves == 0:
+                    # there must not be anything blocking the path
+                    if board[1, 7].piece.str_rep == '-' and \
+                            board[2, 7].str_rep == '-' and \
+                            board[3, 7].str_rep == '-':
+                        return Move.MoveType.LEFT_CASTLE
+
+            if x == 4 and y == 7 and board[x, y].num_moves == 0:
+                # The rook on the right must be at starting position with 0 move count
+                if board[7, 7].str_rep == 'R' and board[7, 7].num_moves == 0:
+                    # there must not be anything blocking the path
+                    if board[5, 7].str_rep == '-' and \
+                            board[6, 7].str_rep == '-':
+                        return Move.MoveType.RIGHT_CASTLE
+        # Black Piece
+        if board[x, y].color == COLORS.BLACK:
+            # The king must be at starting position with 0 move count
+            if x == 4 and y == 0 and board[x, y].num_moves == 0:
+                # The rook on the left must be at starting position with 0 move count
+                if board[0, 0].str_rep == 'r' and board[0, 0].num_moves == 0:
+                    # there must not be anything blocking the path
+                    if board[1, 0].str_rep == '-' and \
+                            board[2, 0].str_rep == '-' and \
+                            board[3, 0].str_rep == '-':
+                        return Move.MoveType.LEFT_CASTLE
+
+            if x == 4 and y == 0 and board[x, y].num_moves == 0:
+                # The rook on the right must be at starting position with 0 move count
+                if board[7, 0].str_rep == 'r' and board[7, 0].num_moves == 0:
+                    # there must not be anything blocking the path
+                    if board[5, 0].str_rep == '-' and \
+                            board[6, 0].str_rep == '-':
+                        return Move.MoveType.RIGHT_CASTLE
 
 # TODO: Try take out blank piece
 class Blank(_Piece):
