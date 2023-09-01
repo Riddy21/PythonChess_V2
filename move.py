@@ -1,6 +1,7 @@
 from typing import Any
 import copy
 from pieces import *
+from rules import Rules
 from enum import Enum
 import logging
 
@@ -8,13 +9,6 @@ import logging
 # FIXME: Change each time board.piece() is changed to the actual Square switching spots
 class Move(object):
     """Class for moving pieces on the board"""
-    class MoveType(Enum):
-        """
-        Enumerates the types of moves in the chess game
-        """
-        LEFT_CASTLE = 'left_castle'
-        RIGHT_CASTLE = 'right_castle'
-
     # init
     def __init__(self, board, x, y, id_number, poss_moves, scan_mode=False):
         # Board was not included to save a bit on memory
@@ -268,10 +262,10 @@ class Move(object):
             self.pawn_promo = 'ready'
 
         # If it is left castle
-        if is_castle == self.MoveType.LEFT_CASTLE:
+        if is_castle == Rules.MoveType.LEFT_CASTLE:
             return 'lcastle'
         # If it is right castle
-        elif is_castle == self.MoveType.RIGHT_CASTLE:
+        elif is_castle == Rules.MoveType.RIGHT_CASTLE:
             return 'rcastle'
         # If the move is enpassant
         elif is_enpassant:

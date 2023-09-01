@@ -1,10 +1,8 @@
 from typing import Any
 from collections import defaultdict
 import uuid
-from enum import Enum
 from settings import *
 from rules import Rules
-from move import Move
 
 # Abstract Piece Class
 class _Piece(object):
@@ -760,7 +758,7 @@ class King(_Piece):
                     if board[1, 7].piece.str_rep == '-' and \
                             board[2, 7].str_rep == '-' and \
                             board[3, 7].str_rep == '-':
-                        return Move.MoveType.LEFT_CASTLE
+                        return Rules.MoveType.LEFT_CASTLE
 
             if x == 4 and y == 7 and board[x, y].num_moves == 0:
                 # The rook on the right must be at starting position with 0 move count
@@ -768,7 +766,7 @@ class King(_Piece):
                     # there must not be anything blocking the path
                     if board[5, 7].str_rep == '-' and \
                             board[6, 7].str_rep == '-':
-                        return Move.MoveType.RIGHT_CASTLE
+                        return Rules.MoveType.RIGHT_CASTLE
         # Black Piece
         if board[x, y].color == COLORS.BLACK:
             # The king must be at starting position with 0 move count
@@ -779,7 +777,7 @@ class King(_Piece):
                     if board[1, 0].str_rep == '-' and \
                             board[2, 0].str_rep == '-' and \
                             board[3, 0].str_rep == '-':
-                        return Move.MoveType.LEFT_CASTLE
+                        return Rules.MoveType.LEFT_CASTLE
 
             if x == 4 and y == 0 and board[x, y].num_moves == 0:
                 # The rook on the right must be at starting position with 0 move count
@@ -787,7 +785,7 @@ class King(_Piece):
                     # there must not be anything blocking the path
                     if board[5, 0].str_rep == '-' and \
                             board[6, 0].str_rep == '-':
-                        return Move.MoveType.RIGHT_CASTLE
+                        return Rules.MoveType.RIGHT_CASTLE
 
 # TODO: Try take out blank piece
 class Blank(_Piece):

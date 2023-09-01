@@ -1,6 +1,13 @@
 from enum import Enum
 
 class Rules(object):
+    class MoveType(Enum):
+        """
+        Enumerates the types of moves in the chess game
+        """
+        LEFT_CASTLE = 'left_castle'
+        RIGHT_CASTLE = 'right_castle'
+
     class ObstructionType(Enum):
         """
         Enumerates the types of obstructions in the chess game
