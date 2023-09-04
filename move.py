@@ -100,8 +100,10 @@ class Move(object):
         self.pawn_promo = 'completed'
         logging.debug('Pawn promoted to %s', piece_type)
 
-    # validate move and make the move based on the end coordinates
     def make_move(self, board, x, y):
+        """
+        validate move and make the move based on the end coordinates
+        """
 
         # Tries to check if move is valid and returns the move type
         proposed_move = self._try_move(board, x, y)
@@ -179,6 +181,13 @@ class Move(object):
             if not self.scan_mode:
                 logging.debug('move: from %d,%d to %d,%d' % (frox, froy, tox, toy))
             board[tox, toy], board[frox, froy] = board[frox, froy], board[tox, toy]
+
+    def make_move_static(self, board, start, end):
+        """
+        A static function that returns a move after it's made
+        """
+        move = Move(board, start[0], start[1], poss_moves)
+
 
     # Undo a move
     def undo_move(self, board):

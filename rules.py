@@ -82,7 +82,7 @@ class Rules(object):
         probe_board = board.copy()
 
         # Do the move
-        move = Move()
+        move = Move(board)
 
         
 
