@@ -1,4 +1,5 @@
 from enum import Enum
+from settings import *
 
 class Rules(object):
     class MoveType(Enum):
@@ -33,8 +34,8 @@ class Rules(object):
                 return cls.ObstructionType.UNOBSTRUCTED
 
     # Check for whether castle move was made
-    @staticmethod
-    def is_castle(x, y, board):
+    @classmethod
+    def is_castle(cls, x, y, board):
         # White Piece
         if board[x, y].color == COLORS.WHITE:
             # The king must be at starting position with 0 move count
@@ -45,7 +46,7 @@ class Rules(object):
                     if board[1, 7].piece.str_rep == '-' and \
                             board[2, 7].str_rep == '-' and \
                             board[3, 7].str_rep == '-':
-                        return Move.MoveType.LEFT_CASTLE
+                        return cls.MoveType.LEFT_CASTLE
 
             if x == 4 and y == 7 and board[x, y].num_moves == 0:
                 # The rook on the right must be at starting position with 0 move count
@@ -53,7 +54,7 @@ class Rules(object):
                     # there must not be anything blocking the path
                     if board[5, 7].str_rep == '-' and \
                             board[6, 7].str_rep == '-':
-                        return Move.MoveType.RIGHT_CASTLE
+                        return cls.MoveType.RIGHT_CASTLE
         # Black Piece
         if board[x, y].color == COLORS.BLACK:
             # The king must be at starting position with 0 move count
@@ -64,7 +65,7 @@ class Rules(object):
                     if board[1, 0].str_rep == '-' and \
                             board[2, 0].str_rep == '-' and \
                             board[3, 0].str_rep == '-':
-                        return Move.MoveType.LEFT_CASTLE
+                        return cls.MoveType.LEFT_CASTLE
 
             if x == 4 and y == 0 and board[x, y].num_moves == 0:
                 # The rook on the right must be at starting position with 0 move count
@@ -72,8 +73,17 @@ class Rules(object):
                     # there must not be anything blocking the path
                     if board[5, 0].str_rep == '-' and \
                             board[6, 0].str_rep == '-':
-                        return Move.MoveType.RIGHT_CASTLE
+                        return cls.MoveType.RIGHT_CASTLE
 
     @staticmethod
     def chk_limit_moves(board, x, y):
-        pass
+        bad_moves = set()
+        # Copy the board given
+        probe_board = board.copy()
+
+        # Do the move
+        move = Move()
+
+        
+
+

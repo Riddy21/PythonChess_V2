@@ -10,11 +10,8 @@ import logging
 class Move(object):
     """Class for moving pieces on the board"""
     # init
-    def __init__(self, board, x, y, id_number, poss_moves, scan_mode=False):
+    def __init__(self, board, x, y, poss_moves, scan_mode=False):
         # Board was not included to save a bit on memory
-
-        # Unique ID to the move by number
-        self.move_number = id_number
 
         # Parameter for move stage
         self.move_stage = "selected"
@@ -46,7 +43,7 @@ class Move(object):
 
     # Function for checking if player picked a piece of the right colour and type
     @staticmethod
-    def get_poss_moves(board, turn, x, y, move_number, scan_mode=False, look_ahead=False):
+    def get_poss_moves(board, turn, x, y, scan_mode=False):
         # if the piece is not blank and is the right colour for the turn
         if board[x, y].str_rep != "-" and board[x, y].color == turn:
             # Add move_id to piece being moved (must be changed before get_moves)
@@ -252,7 +249,7 @@ class Move(object):
         frox, froy = self.move_from
 
         # Confirms whether a castle happened when the piece was moved
-        is_castle = board[frox, froy].is_castle(frox, froy, board)
+        is_castle = Rules.is_castle(frox, froy, board)
 
         # Confirms whether enpassant could happen when the piece is moved
         is_enpassant = board[frox, froy].is_enpassant(x, y)
@@ -285,15 +282,14 @@ class Move(object):
 
     def __str__(self):
         str = ''
-        str += 'id_number: %s\n' \
-               'move stage: %s\n' \
+        str += 'move stage: %s\n' \
                'move to: %s\n' \
                'move from: %s\n' \
                'move piece: %s\n' \
                'move type: %s\n' \
                'move colour: %s\n' \
                'captured pieces: %s\n' \
-               % (self.move_number, self.move_stage, self.move_to, self.move_from,
+               % (self.move_stage, self.move_to, self.move_from,
                   self.move_piece, self.move_type, self.move_colour, self.captured)
         return str
 

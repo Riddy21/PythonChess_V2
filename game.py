@@ -177,19 +177,18 @@ class Game:
             logging.debug("Invalid Selection, pawn promotion underway")
             return -1
         # Get possible moves
-        poss_moves = Move.get_poss_moves(self.board, self.turn, x, y, len(self.moves), scan_mode=self.scan_mode)
+        poss_moves = Move.get_poss_moves(self.board, self.turn, x, y, scan_mode=self.scan_mode)
 
         # Check if it is a valid selection, if not, exit the function
         if not poss_moves:
             return -1
 
         # Create a new move and add to list and pass the len of move list as move id
-        self.moves.append(Move(self.board, x, y, len(self.moves), poss_moves, scan_mode=self.scan_mode))
+        self.moves.append(Move(self.board, x, y, poss_moves, scan_mode=self.scan_mode))
 
     # Function to return possible moves for the piece entered without making the move
     def get_next_poss_moves(self, x, y):
-        poss_moves = Move.get_poss_moves(self.board, self.turn, x, y, len(self.moves), scan_mode=self.scan_mode,
-                                         look_ahead=True)
+        poss_moves = Move.get_poss_moves(self.board, self.turn, x, y, scan_mode=self.scan_mode)
 
         return poss_moves
 
