@@ -3,6 +3,7 @@ import popup
 from player import *
 from utils import run_in_thread
 from settings import *
+import logging
 
 # Set up the colors
 WHITE = (255, 255, 255)
@@ -72,13 +73,12 @@ class ChessboardGUI:
         if 'check' not in game_state:
             return
 
-        print(game_state)
         if 'black' in game_state:
             coords = self.api.get_piece_coords('k')
         elif 'white' in game_state:
             coords = self.api.get_piece_coords('K')
         if len(coords) != 1:
-            print('Error: more than one king')
+            logging.error('more than one king')
             return
         for col, row in coords:
             col, row = self.orient((col, row))
@@ -133,7 +133,7 @@ class ChessboardGUI:
     def prompt_mate_quit(self, game_state):
         if 'checkmate' in game_state:
             ans = popup.askyesno(title="Checkmate!",
-                                 message="Checkmate! %s wins!\nWould you like to quit?" % self.get_prev_player().color)
+                                 message="Checkmate! %s wins!\nWould you like to quit?" % self.get_prev_player().color.value)
         elif 'stalemate' in game_state:
             ans = popup.askyesno(title="Stalemate!",
                                  message="Stalemate!\nWould you like to quit?")
@@ -223,7 +223,7 @@ class ChessboardGUI:
                             import datetime
                             filename = str(datetime.datetime.now()).replace(' ', '-')+".txt"
                             self.api.export_board(filename)
-                            print('Game saved in "%s"!' % filename)
+                            logging.info('Game saved in "%s"!' % filename)
 
 
                 # Draw the chess board

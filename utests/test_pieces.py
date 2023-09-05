@@ -61,7 +61,7 @@ class TestPieceLibrary(unittest.TestCase):
 
 class TestPawn(unittest.TestCase):
     def setUp(self):
-        self.piece = Pawn(COLORS.WHITE.value)
+        self.piece = Pawn(COLORS.WHITE)
         self.board = BoardManager.get_board()
 
     def test_get_moves_start(self):

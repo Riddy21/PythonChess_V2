@@ -9,6 +9,8 @@ class Board(dict):
         """
         Object representing a tile on the board
         """
+        # TODO: Populate possible moves every time you run
+        # TODO: Possible moves should be a set
         def __init__(self, piece=Blank(), num_moves=0):
             """Constructor"""
             self.piece = piece
@@ -34,6 +36,10 @@ class Board(dict):
         for key, value in self.items():
             new_copy[key] = value.copy()
         return new_copy
+
+    def __iter__(self):
+        """Replace the iterator with just the squares"""
+        return iter(self.items())
 
     def __str__(self):
         """Print function Override"""

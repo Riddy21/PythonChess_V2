@@ -1,12 +1,11 @@
 from typing import Any
 from collections import defaultdict
 import uuid
-from enum import Enum
 from settings import *
+from rules import Rules
 
+# TODO: Use sets and tuples for poss moves
 
-
-# TODO: Make a piece with move count and move history set to 0 and one with inserting a piece with a history
 # Abstract Piece Class
 class _Piece(object):
     def __init__(self, value, color, str_rep):
@@ -15,22 +14,8 @@ class _Piece(object):
         self.color = color
         self.str_rep = str_rep
 
-    # detects if pieces are blocking the way of other pieces
-    @staticmethod
-    def _piece_detect(frox, froy, tox, toy, board):
-        # make sure its not checking its self
-        if tox != frox or toy != froy:
-            # Same colour pieces
-            if board[tox, toy].color == board[frox, froy].color:
-                return 'self obstructed'
-            # opponent pieces
-            elif board[tox, toy].color != None:
-                return 'opponent obstructed'
-            else:
-                return 'unobstructed'
-
     # Base functions that will be overriden when necessary
-    def is_castle(self, x, y):
+    def is_castle(self, x, y, board):
         return -1
 
     def is_enpassant(self, x, y):
@@ -140,16 +125,9 @@ class Pawn(_Piece):
 
             # Do Move detection
             while i <= 2 and y + i <= 7:
-                piece_detect = self._piece_detect(x, y, x, y + i, board)
-                # piece in front blocks move
-                if board[x, y + i].color == COLORS.WHITE:
-                    break
-
+                piece_detect = Rules.detect_obstruction((x, y), (x, y + i), board)
                 # basic
-                elif piece_detect == 'self obstructed':
-                    break
-
-                elif piece_detect == 'opponent obstructed':
+                if piece_detect != Rules.ObstructionType.UNOBSTRUCTED:
                     break
 
                 # no 2nd move on 2nd turn
@@ -173,17 +151,8 @@ class Pawn(_Piece):
             i = 1
 
             while i <= 2 and y - i >= 0:
-                piece_detect = self._piece_detect(x, y, x, y - i, board)
-
-                # piece in front blocks move
-                if board[x, y - i].color == COLORS.BLACK:
-                    break
-
-                # basic
-                elif piece_detect == 'self obstructed':
-                    break
-
-                elif piece_detect == 'opponent obstructed':
+                piece_detect = Rules.detect_obstruction((x, y), (x, y - i), board)
+                if piece_detect != Rules.ObstructionType.UNOBSTRUCTED:
                     break
 
                 # no 2nd move on 2nd turn
@@ -206,27 +175,23 @@ class Pawn(_Piece):
         if self.color == COLORS.WHITE and y == 3:
             if (x + 1 in range(8)) and board[x + 1, y].color == COLORS.BLACK and \
                     board[x + 1, y].num_moves == 1:
-                if self._piece_detect(x, y, x + 1, y - 1, board) == 'opponent obstructed' or \
-                        self._piece_detect(x, y, x + 1, y - 1, board) == 'unobstructed':
+                if Rules.detect_obstruction((x, y), (x + 1, y - 1), board) != Rules.ObstructionType.SELF_OBSTRUCTED:
                     poss_moves.append([x + 1, y - 1])
                     self.enpassant_pos.append([x + 1, y - 1])
             if (x - 1 in range(8)) and board[x - 1, y].color == COLORS.BLACK and \
                     board[x - 1, y].num_moves == 1:
-                if self._piece_detect(x, y, x - 1, y - 1, board) == 'opponent obstructed' or \
-                        self._piece_detect(x, y, x - 1, y - 1, board) == 'unobstructed':
+                if Rules.detect_obstruction((x, y), (x - 1, y - 1), board) != Rules.ObstructionType.SELF_OBSTRUCTED:
                     poss_moves.append([x - 1, y - 1])
                     self.enpassant_pos.append([x - 1, y - 1])
         elif self.color == COLORS.BLACK and y == 4:
             if (x + 1 in range(8)) and board[x + 1, y].color == COLORS.WHITE and \
                     board[x + 1, y].num_moves == 1:
-                if self._piece_detect(x, y, x + 1, y + 1, board) == 'opponent obstructed' or \
-                        self._piece_detect(x, y, x + 1, y + 1, board) == 'unobstructed':
+                if Rules.detect_obstruction((x, y), (x + 1, y + 1), board) != Rules.ObstructionType.SELF_OBSTRUCTED:
                     poss_moves.append([x + 1, y + 1])
                     self.enpassant_pos.append([x + 1, y + 1])
             if (x - 1 in range(8)) and board[x - 1, y].color == COLORS.WHITE and \
                     board[x - 1, y].num_moves == 1:
-                if self._piece_detect(x, y, x - 1, y + 1, board) == 'opponent obstructed' or \
-                        self._piece_detect(x, y, x - 1, y + 1, board) == 'unobstructed':
+                if Rules.detect_obstruction((x, y), (x - 1, y + 1), board) != Rules.ObstructionType.SELF_OBSTRUCTED:
                     poss_moves.append([x - 1, y + 1])
                     self.enpassant_pos.append([x - 1, y + 1])
 
@@ -265,9 +230,9 @@ class Rook(_Piece):
         i = 1
         # All x moves below x
         while x - i >= 0:
-            if self._piece_detect(x, y, x - i, y, board) == 'self obstructed':
+            if Rules.detect_obstruction((x, y), (x - i, y), board) == Rules.ObstructionType.SELF_OBSTRUCTED:
                 break
-            elif self._piece_detect(x, y, x - i, y, board) == 'opponent obstructed':
+            elif Rules.detect_obstruction((x, y), (x - i, y), board) == Rules.ObstructionType.OPPONENT_OBSTRUCTED:
                 poss_moves.append([x - i, y])
                 break
             poss_moves.append([x - i, y])
@@ -276,9 +241,9 @@ class Rook(_Piece):
         i = 1
         # All x moves above x
         while (x + i) <= 7:
-            if self._piece_detect(x, y, x + i, y, board) == 'self obstructed':
+            if Rules.detect_obstruction((x, y), (x + i, y), board) == Rules.ObstructionType.SELF_OBSTRUCTED:
                 break
-            elif self._piece_detect(x, y, x + i, y, board) == 'opponent obstructed':
+            elif Rules.detect_obstruction((x, y), (x + i, y), board) == Rules.ObstructionType.OPPONENT_OBSTRUCTED:
                 poss_moves.append([x + i, y])
                 break
             poss_moves.append([x + i, y])
@@ -287,9 +252,9 @@ class Rook(_Piece):
         i = 1
         # All y moves below y
         while y - i >= 0:
-            if self._piece_detect(x, y, x, y - i, board) == 'self obstructed':
+            if Rules.detect_obstruction((x, y), (x, y - i), board) == Rules.ObstructionType.SELF_OBSTRUCTED:
                 break
-            elif self._piece_detect(x, y, x, y - i, board) == 'opponent obstructed':
+            elif Rules.detect_obstruction((x, y), (x, y - i), board) == Rules.ObstructionType.OPPONENT_OBSTRUCTED:
                 poss_moves.append([x, y - i])
                 break
             poss_moves.append([x, y - i])
@@ -297,9 +262,9 @@ class Rook(_Piece):
         i = 1
         # All x moves above y
         while (y + i) <= 7:
-            if self._piece_detect(x, y, x, y + i, board) == 'self obstructed':
+            if Rules.detect_obstruction((x, y), (x, y + i), board) == Rules.ObstructionType.SELF_OBSTRUCTED:
                 break
-            elif self._piece_detect(x, y, x, y + i, board) == 'opponent obstructed':
+            elif Rules.detect_obstruction((x, y), (x, y + i), board) == Rules.ObstructionType.OPPONENT_OBSTRUCTED:
                 poss_moves.append([x, y + i])
                 break
             poss_moves.append([x, y + i])
@@ -325,40 +290,32 @@ class Knight(_Piece):
         poss_moves = []
         if x + 2 <= 7:
             if y + 1 <= 7:
-                if self._piece_detect(x, y, x + 2, y + 1, board) == 'opponent obstructed' or \
-                        self._piece_detect(x, y, x + 2, y + 1, board) == 'unobstructed':
+                if Rules.detect_obstruction((x, y), (x + 2, y + 1), board) != Rules.ObstructionType.SELF_OBSTRUCTED:
                     poss_moves.append([x + 2, y + 1])
             if y - 1 >= 0:
-                if self._piece_detect(x, y, x + 2, y - 1, board) == 'opponent obstructed' or \
-                        self._piece_detect(x, y, x + 2, y - 1, board) == 'unobstructed':
+                if Rules.detect_obstruction((x, y), (x + 2, y - 1), board) != Rules.ObstructionType.SELF_OBSTRUCTED:
                     poss_moves.append([x + 2, y - 1])
 
         if x + 1 <= 7:
             if y + 2 <= 7:
-                if self._piece_detect(x, y, x + 1, y + 2, board) == 'opponent obstructed' or \
-                        self._piece_detect(x, y, x + 1, y + 2, board) == 'unobstructed':
+                if Rules.detect_obstruction((x, y), (x + 1, y + 2), board) != Rules.ObstructionType.SELF_OBSTRUCTED:
                     poss_moves.append([x + 1, y + 2])
             if y - 2 >= 0:
-                if self._piece_detect(x, y, x + 1, y - 2, board) == 'opponent obstructed' or \
-                        self._piece_detect(x, y, x + 1, y - 2, board) == 'unobstructed':
+                if Rules.detect_obstruction((x, y), (x + 1, y - 2), board) != Rules.ObstructionType.SELF_OBSTRUCTED:
                     poss_moves.append([x + 1, y - 2])
         if x - 2 >= 0:
             if y + 1 <= 7:
-                if self._piece_detect(x, y, x - 2, y + 1, board) == 'opponent obstructed' or \
-                        self._piece_detect(x, y, x - 2, y + 1, board) == 'unobstructed':
+                if Rules.detect_obstruction((x, y), (x - 2, y + 1), board) != Rules.ObstructionType.SELF_OBSTRUCTED:
                     poss_moves.append([x - 2, y + 1])
             if y - 1 >= 0:
-                if self._piece_detect(x, y, x - 2, y - 1, board) == 'opponent obstructed' or \
-                        self._piece_detect(x, y, x - 2, y - 1, board) == 'unobstructed':
+                if Rules.detect_obstruction((x, y), (x - 2, y - 1), board) != Rules.ObstructionType.SELF_OBSTRUCTED:
                     poss_moves.append([x - 2, y - 1])
         if x - 1 >= 0:
             if y + 2 <= 7:
-                if self._piece_detect(x, y, x - 1, y + 2, board) == 'opponent obstructed' or \
-                        self._piece_detect(x, y, x - 1, y + 2, board) == 'unobstructed':
+                if Rules.detect_obstruction((x, y), (x - 1, y + 2), board) != Rules.ObstructionType.SELF_OBSTRUCTED:
                     poss_moves.append([x - 1, y + 2])
             if y - 2 >= 0:
-                if self._piece_detect(x, y, x - 1, y - 2, board) == 'opponent obstructed' or \
-                        self._piece_detect(x, y, x - 1, y - 2, board) == 'unobstructed':
+                if Rules.detect_obstruction((x, y), (x - 1, y - 2), board) != Rules.ObstructionType.SELF_OBSTRUCTED:
                     poss_moves.append([x - 1, y - 2])
 
         # only do this line if not scanning opponent for check to avoid getting stuck in recursive loop
@@ -382,9 +339,9 @@ class Bishop(_Piece):
         i = 1
         # All moves top left
         while x - i >= 0 and y - i >= 0:
-            if self._piece_detect(x, y, x - i, y - i, board) == 'self obstructed':
+            if Rules.detect_obstruction((x, y), (x - i, y - i), board) == Rules.ObstructionType.SELF_OBSTRUCTED:
                 break
-            elif self._piece_detect(x, y, x - i, y - i, board) == 'opponent obstructed':
+            elif Rules.detect_obstruction((x, y), (x - i, y - i), board) == Rules.ObstructionType.OPPONENT_OBSTRUCTED:
                 poss_moves.append([x - i, y - i])
                 break
             poss_moves.append([x - i, y - i])
@@ -393,9 +350,9 @@ class Bishop(_Piece):
         i = 1
         # All moves bottom right
         while x + i <= 7 and y + i <= 7:
-            if self._piece_detect(x, y, x + i, y + i, board) == 'self obstructed':
+            if Rules.detect_obstruction((x, y), (x + i, y + i), board) == Rules.ObstructionType.SELF_OBSTRUCTED:
                 break
-            elif self._piece_detect(x, y, x + i, y + i, board) == 'opponent obstructed':
+            elif Rules.detect_obstruction((x, y), (x + i, y + i), board) == Rules.ObstructionType.OPPONENT_OBSTRUCTED:
                 poss_moves.append([x + i, y + i])
                 break
             poss_moves.append([x + i, y + i])
@@ -404,9 +361,9 @@ class Bishop(_Piece):
         i = 1
         # All y moves below y
         while x - i >= 0 and y + i <= 7:
-            if self._piece_detect(x, y, x - i, y + i, board) == 'self obstructed':
+            if Rules.detect_obstruction((x, y), (x - i, y + i), board) == Rules.ObstructionType.SELF_OBSTRUCTED:
                 break
-            elif self._piece_detect(x, y, x - i, y + i, board) == 'opponent obstructed':
+            elif Rules.detect_obstruction((x, y), (x - i, y + i), board) == Rules.ObstructionType.OPPONENT_OBSTRUCTED:
                 poss_moves.append([x - i, y + i])
                 break
             poss_moves.append([x - i, y + i])
@@ -415,9 +372,9 @@ class Bishop(_Piece):
         i = 1
         # All x moves above y
         while x + i <= 7 and y - i >= 0:
-            if self._piece_detect(x, y, x + i, y - i, board) == 'self obstructed':
+            if Rules.detect_obstruction((x, y), (x + i, y - i), board) == Rules.ObstructionType.SELF_OBSTRUCTED:
                 break
-            elif self._piece_detect(x, y, x + i, y - i, board) == 'opponent obstructed':
+            elif Rules.detect_obstruction((x, y), (x + i, y - i), board) == Rules.ObstructionType.OPPONENT_OBSTRUCTED:
                 poss_moves.append([x + i, y - i])
                 break
             poss_moves.append([x + i, y - i])
@@ -446,9 +403,9 @@ class Queen(_Piece):
         i = 1
         # All moves top left
         while x - i >= 0 and y - i >= 0:
-            if self._piece_detect(x, y, x - i, y - i, board) == 'self obstructed':
+            if Rules.detect_obstruction((x, y), (x - i, y - i), board) == Rules.ObstructionType.SELF_OBSTRUCTED:
                 break
-            elif self._piece_detect(x, y, x - i, y - i, board) == 'opponent obstructed':
+            elif Rules.detect_obstruction((x, y), (x - i, y - i), board) == Rules.ObstructionType.OPPONENT_OBSTRUCTED:
                 poss_moves.append([x - i, y - i])
                 break
             poss_moves.append([x - i, y - i])
@@ -457,9 +414,9 @@ class Queen(_Piece):
         i = 1
         # All moves bottom right
         while x + i <= 7 and y + i <= 7:
-            if self._piece_detect(x, y, x + i, y + i, board) == 'self obstructed':
+            if Rules.detect_obstruction((x, y), (x + i, y + i), board) == Rules.ObstructionType.SELF_OBSTRUCTED:
                 break
-            elif self._piece_detect(x, y, x + i, y + i, board) == 'opponent obstructed':
+            elif Rules.detect_obstruction((x, y), (x + i, y + i), board) == Rules.ObstructionType.OPPONENT_OBSTRUCTED:
                 poss_moves.append([x + i, y + i])
                 break
             poss_moves.append([x + i, y + i])
@@ -468,9 +425,9 @@ class Queen(_Piece):
         i = 1
         # All y moves below y
         while x - i >= 0 and y + i <= 7:
-            if self._piece_detect(x, y, x - i, y + i, board) == 'self obstructed':
+            if Rules.detect_obstruction((x, y), (x - i, y + i), board) == Rules.ObstructionType.SELF_OBSTRUCTED:
                 break
-            elif self._piece_detect(x, y, x - i, y + i, board) == 'opponent obstructed':
+            elif Rules.detect_obstruction((x, y), (x - i, y + i), board) == Rules.ObstructionType.OPPONENT_OBSTRUCTED:
                 poss_moves.append([x - i, y + i])
                 break
             poss_moves.append([x - i, y + i])
@@ -479,9 +436,9 @@ class Queen(_Piece):
         i = 1
         # All x moves above y
         while x + i <= 7 and y - i >= 0:
-            if self._piece_detect(x, y, x + i, y - i, board) == 'self obstructed':
+            if Rules.detect_obstruction((x, y), (x + i, y - i), board) == Rules.ObstructionType.SELF_OBSTRUCTED:
                 break
-            elif self._piece_detect(x, y, x + i, y - i, board) == 'opponent obstructed':
+            elif Rules.detect_obstruction((x, y), (x + i, y - i), board) == Rules.ObstructionType.OPPONENT_OBSTRUCTED:
                 poss_moves.append([x + i, y - i])
                 break
             poss_moves.append([x + i, y - i])
@@ -490,9 +447,9 @@ class Queen(_Piece):
         i = 1
         # All x moves below x
         while x - i >= 0:
-            if self._piece_detect(x, y, x - i, y, board) == 'self obstructed':
+            if Rules.detect_obstruction((x, y), (x - i, y), board) == Rules.ObstructionType.SELF_OBSTRUCTED:
                 break
-            elif self._piece_detect(x, y, x - i, y, board) == 'opponent obstructed':
+            elif Rules.detect_obstruction((x, y), (x - i, y), board) == Rules.ObstructionType.OPPONENT_OBSTRUCTED:
                 poss_moves.append([x - i, y])
                 break
             poss_moves.append([x - i, y])
@@ -501,9 +458,9 @@ class Queen(_Piece):
         i = 1
         # All x moves above x
         while (x + i) <= 7:
-            if self._piece_detect(x, y, x + i, y, board) == 'self obstructed':
+            if Rules.detect_obstruction((x, y), (x + i, y), board) == Rules.ObstructionType.SELF_OBSTRUCTED:
                 break
-            elif self._piece_detect(x, y, x + i, y, board) == 'opponent obstructed':
+            elif Rules.detect_obstruction((x, y), (x + i, y), board) == Rules.ObstructionType.OPPONENT_OBSTRUCTED:
                 poss_moves.append([x + i, y])
                 break
             poss_moves.append([x + i, y])
@@ -512,9 +469,9 @@ class Queen(_Piece):
         i = 1
         # All y moves below y
         while y - i >= 0:
-            if self._piece_detect(x, y, x, y - i, board) == 'self obstructed':
+            if Rules.detect_obstruction((x, y), (x, y - i), board) == Rules.ObstructionType.SELF_OBSTRUCTED:
                 break
-            elif self._piece_detect(x, y, x, y - i, board) == 'opponent obstructed':
+            elif Rules.detect_obstruction((x, y), (x, y - i), board) == Rules.ObstructionType.OPPONENT_OBSTRUCTED:
                 poss_moves.append([x, y - i])
                 break
             poss_moves.append([x, y - i])
@@ -522,9 +479,9 @@ class Queen(_Piece):
         i = 1
         # All x moves above y
         while (y + i) <= 7:
-            if self._piece_detect(x, y, x, y + i, board) == 'self obstructed':
+            if Rules.detect_obstruction((x, y), (x, y + i), board) == Rules.ObstructionType.SELF_OBSTRUCTED:
                 break
-            elif self._piece_detect(x, y, x, y + i, board) == 'opponent obstructed':
+            elif Rules.detect_obstruction((x, y), (x, y + i), board) == Rules.ObstructionType.OPPONENT_OBSTRUCTED:
                 poss_moves.append([x, y + i])
                 break
             poss_moves.append([x, y + i])
@@ -546,9 +503,6 @@ class King(_Piece):
         # Makes a piece with set values and images
         super().__init__(PIECES.KING.value['value'], color, str_rep)
 
-        # Parameter for storing castle coordinates if castle move is possible
-        self.left_castle = -1, -1
-        self.right_castle = -1, -1
 
     def get_moves(self, x, y, board, scan_mode=False):
         # If castle move is possible, store castle coordinates into parameters
@@ -556,50 +510,42 @@ class King(_Piece):
 
         # All moves top left
         if x - 1 >= 0 and y - 1 >= 0:
-            if self._piece_detect(x, y, x - 1, y - 1, board) == 'opponent obstructed' or \
-                    self._piece_detect(x, y, x - 1, y - 1, board) == 'unobstructed':
+            if Rules.detect_obstruction((x, y), (x - 1, y - 1), board) != Rules.ObstructionType.SELF_OBSTRUCTED:
                 poss_moves.append([x - 1, y - 1])
 
         # All moves bottom right
         if x + 1 <= 7 and y + 1 <= 7:
-            if self._piece_detect(x, y, x + 1, y + 1, board) == 'opponent obstructed' or \
-                    self._piece_detect(x, y, x + 1, y + 1, board) == 'unobstructed':
+            if Rules.detect_obstruction((x, y), (x + 1, y + 1), board) != Rules.ObstructionType.SELF_OBSTRUCTED:
                 poss_moves.append([x + 1, y + 1])
 
         # All moves bottom left
         if x - 1 >= 0 and y + 1 <= 7:
-            if self._piece_detect(x, y, x - 1, y + 1, board) == 'opponent obstructed' or \
-                    self._piece_detect(x, y, x - 1, y + 1, board) == 'unobstructed':
+            if Rules.detect_obstruction((x, y), (x - 1, y + 1), board) != Rules.ObstructionType.SELF_OBSTRUCTED:
                 poss_moves.append([x - 1, y + 1])
 
         # All moves top right
         if x + 1 <= 7 and y - 1 >= 0:
-            if self._piece_detect(x, y, x + 1, y - 1, board) == 'opponent obstructed' or \
-                    self._piece_detect(x, y, x + 1, y - 1, board) == 'unobstructed':
+            if Rules.detect_obstruction((x, y), (x + 1, y - 1), board) != Rules.ObstructionType.SELF_OBSTRUCTED:
                 poss_moves.append([x + 1, y - 1])
 
         # All moves left
         if x - 1 >= 0:
-            if self._piece_detect(x, y, x - 1, y, board) == 'opponent obstructed' or \
-                    self._piece_detect(x, y, x - 1, y, board) == 'unobstructed':
+            if Rules.detect_obstruction((x, y), (x - 1, y), board) != Rules.ObstructionType.SELF_OBSTRUCTED:
                 poss_moves.append([x - 1, y])
 
         # All moves right
         if x + 1 <= 7:
-            if self._piece_detect(x, y, x + 1, y, board) == 'opponent obstructed' or \
-                    self._piece_detect(x, y, x + 1, y, board) == 'unobstructed':
+            if Rules.detect_obstruction((x, y), (x + 1, y), board) != Rules.ObstructionType.SELF_OBSTRUCTED:
                 poss_moves.append([x + 1, y])
 
         # All up
         if y - 1 >= 0:
-            if self._piece_detect(x, y, x, y - 1, board) == 'opponent obstructed' or \
-                    self._piece_detect(x, y, x, y - 1, board) == 'unobstructed':
+            if Rules.detect_obstruction((x, y), (x, y - 1), board) != Rules.ObstructionType.SELF_OBSTRUCTED:
                 poss_moves.append([x, y - 1])
 
         # All moves bottom
         if y + 1 <= 7:
-            if self._piece_detect(x, y, x, y + 1, board) == 'opponent obstructed' or \
-                    self._piece_detect(x, y, x, y + 1, board) == 'unobstructed':
+            if Rules.detect_obstruction((x, y), (x, y + 1), board) != Rules.ObstructionType.SELF_OBSTRUCTED:
                 poss_moves.append([x, y + 1])
 
 
@@ -730,11 +676,10 @@ class King(_Piece):
 
                 # loop through all possible moves
                 for op_move in op_moves:
-                    opx, opy = op_move
-                    # if the move is adjacent to the king
-                    if abs(opx - myx) <= 1 and abs(opy - myy) <= 1:
+                    # if the move is the same as the king's moves
+                    if op_move in poss_moves:
                         # Save the move in a list
-                        bad_moves.append([opx, opy])
+                        bad_moves.append(op_move)
 
         # If there is any move beside the king that cant be captured but not picked up by the check limit
         # Capture the piece and check for check
@@ -803,21 +748,46 @@ class King(_Piece):
         return False
 
     # Check for whether castle move was made
-    def is_castle(self, x, y):
-        # Clear both castle variables
-        left = self.left_castle
-        right = self.right_castle
-        # check passed parameters with castle possible coordinates
-        if (x, y) == left:
-            self.right_castle = -1, -1
-            self.left_castle = -1, -1
-            return 'left'
-        elif (x, y) == right:
-            self.right_castle = -1, -1
-            self.left_castle = -1, -1
-            return 'right'
-        else:
-            return -1
+    @staticmethod
+    def is_castle(x, y, board):
+        # White Piece
+        if board[x, y].color == COLORS.WHITE:
+            # The king must be at starting position with 0 move count
+            if x == 4 and y == 7 and board[x, y].num_moves == 0:
+                # The rook on the left must be at starting position with 0 move count
+                if board[0, 7].piece.str_rep == 'R' and board[0, 7].num_moves == 0:
+                    # there must not be anything blocking the path
+                    if board[1, 7].piece.str_rep == '-' and \
+                            board[2, 7].str_rep == '-' and \
+                            board[3, 7].str_rep == '-':
+                        return Rules.MoveType.LEFT_CASTLE
+
+            if x == 4 and y == 7 and board[x, y].num_moves == 0:
+                # The rook on the right must be at starting position with 0 move count
+                if board[7, 7].str_rep == 'R' and board[7, 7].num_moves == 0:
+                    # there must not be anything blocking the path
+                    if board[5, 7].str_rep == '-' and \
+                            board[6, 7].str_rep == '-':
+                        return Rules.MoveType.RIGHT_CASTLE
+        # Black Piece
+        if board[x, y].color == COLORS.BLACK:
+            # The king must be at starting position with 0 move count
+            if x == 4 and y == 0 and board[x, y].num_moves == 0:
+                # The rook on the left must be at starting position with 0 move count
+                if board[0, 0].str_rep == 'r' and board[0, 0].num_moves == 0:
+                    # there must not be anything blocking the path
+                    if board[1, 0].str_rep == '-' and \
+                            board[2, 0].str_rep == '-' and \
+                            board[3, 0].str_rep == '-':
+                        return Rules.MoveType.LEFT_CASTLE
+
+            if x == 4 and y == 0 and board[x, y].num_moves == 0:
+                # The rook on the right must be at starting position with 0 move count
+                if board[7, 0].str_rep == 'r' and board[7, 0].num_moves == 0:
+                    # there must not be anything blocking the path
+                    if board[5, 0].str_rep == '-' and \
+                            board[6, 0].str_rep == '-':
+                        return Rules.MoveType.RIGHT_CASTLE
 
 # TODO: Try take out blank piece
 class Blank(_Piece):
