@@ -71,6 +71,8 @@ class Game:
         else:
             self.board = board.copy()
 
+        # TODO: Add poss moves attribute here and check every switch turn
+
 
     @staticmethod
     def get_board_from_config_file(config_file):

@@ -40,9 +40,11 @@ class Move(object):
         # Scan mode
         self.scan_mode = scan_mode
 
-    # Function for checking if player picked a piece of the right colour and type
     @staticmethod
     def get_poss_moves(board, turn, x, y, scan_mode=False):
+        """
+        Function for checking if player picked a piece of the right colour and type
+        """
         # if the piece is not blank and is the right colour for the turn
         if board[x, y].str_rep != "-" and board[x, y].color == turn:
             # Add move_id to piece being moved (must be changed before get_moves)
@@ -65,6 +67,17 @@ class Move(object):
         if not scan_mode:
             logging.debug("Invalid selection")
         return []
+
+    @classmethod
+    def get_all_poss_moves(cls, board):
+        """
+        Function for checking if player picked a piece of the right colour and type
+        """
+        poss_moves = dict()
+        for loc, square in board:
+            if type(square.piece) != Blank:
+                poss_moves[loc] = cls.get_poss_moves(board, square.color, loc[0], loc[1], scan_mode=True)
+        return poss_moves
 
     # Removes move_id from piece being moved in case of reselection
     def deselect_move(self, board):

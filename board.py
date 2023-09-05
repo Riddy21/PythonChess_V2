@@ -11,11 +11,10 @@ class Board(dict):
         """
         # TODO: Populate possible moves every time you run
         # TODO: Possible moves should be a set
-        def __init__(self, piece=Blank(), num_moves=0, poss_moves=None):
+        def __init__(self, piece=Blank(), num_moves=0):
             """Constructor"""
             self.piece = piece
             self.num_moves = num_moves
-            self.poss_moves = poss_moves
     
         def copy(self):
             if REFERENCE_PIECES:
