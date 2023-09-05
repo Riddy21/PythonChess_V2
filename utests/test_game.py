@@ -233,9 +233,21 @@ class TestGame(unittest.TestCase):
         self.game.full_move(6, 7, 7, 7)
         self.game.full_move(7, 2, 7, 3)
 
-        # Try castling, ant
+        # Try castling, cant
         moves = self.game.get_next_poss_moves(4, 7)
         self.assertEqual(moves, [[5, 7], [4, 6]])
+
+    def test_do_not_castle(self):
+        self.game.set_board('Presets/ready_to_castle.txt')
+        golden = self.game.get_board_from_config_file("Presets/ready_to_castle.txt")
+
+        # Do regular king move
+        self.game.full_move(4, 7, 5, 7)
+
+        # undo it and see if it's messed up
+        self.game.undo_move()
+
+        self.compare_boards(self.game.board, golden)
 
     def test_enpassante(self):
         self.game.set_board('Presets/ready_to_enpass.txt')

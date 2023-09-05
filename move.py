@@ -260,16 +260,17 @@ class Move(object):
         if not self.is_valid_move(x, y):
             return -1
 
-        frox, froy = self.move_from
+        source = self.move_from
+        target = (x, y)
 
         # Confirms whether a castle happened when the piece was moved
-        is_castle = Rules.is_castle(frox, froy, board)
+        is_castle = Rules.is_castle(source, target, board)
 
         # Confirms whether enpassant could happen when the piece is moved
-        is_enpassant = board[frox, froy].is_enpassant(x, y)
+        is_enpassant = Rules.is_enpassant(source, target, board)
 
         # Sets instance variable pawn promo based on whether the piece is ready for a pawn promotion
-        if board[frox, froy].piece.is_pawn_promo(x, y):
+        if Rules.is_pawn_promo(source, target, board):
             self.pawn_promo = 'ready'
 
         # If it is left castle

@@ -11,6 +11,12 @@ class TestRules(unittest.TestCase):
     def test_isin_check(self):
         self.assertTrue(Rules.isin_check((4, 0), self.board))
 
+    #FIXME: Test is enpassant
+
+    #FIXME: Test is castle
+
+    #FIXME: Test is pawn promo
+
     def test_chk_limit_moves(self):
         ans = Rules.chk_limit_moves(self.board, 4, 0, [[5, 1]])
         self.assertEqual(ans, [])
