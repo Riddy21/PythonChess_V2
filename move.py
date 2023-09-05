@@ -6,7 +6,6 @@ from enum import Enum
 import logging
 
 # Class to record moves and change game board
-# FIXME: Change each time board.piece() is changed to the actual Square switching spots
 class Move(object):
     """Class for moving pieces on the board"""
     # init
@@ -51,7 +50,7 @@ class Move(object):
             # When only will append when the function is not looking ahead to the next move
 
             # Get the possible moves
-            poss_moves = board[x, y].piece.get_moves(x, y, board, scan_mode=scan_mode)
+            poss_moves = board[x, y].get_moves(x, y, board, scan_mode=scan_mode)
 
             # If there is still moves left
             if not poss_moves:
@@ -181,13 +180,6 @@ class Move(object):
             if not self.scan_mode:
                 logging.debug('move: from %d,%d to %d,%d' % (frox, froy, tox, toy))
             board[tox, toy], board[frox, froy] = board[frox, froy], board[tox, toy]
-
-    def make_move_static(self, board, start, end):
-        """
-        A static function that returns a move after it's made
-        """
-        move = Move(board, start[0], start[1], poss_moves)
-
 
     # Undo a move
     def undo_move(self, board):

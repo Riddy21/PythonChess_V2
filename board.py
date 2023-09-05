@@ -9,10 +9,13 @@ class Board(dict):
         """
         Object representing a tile on the board
         """
-        def __init__(self, piece=Blank(), num_moves=0):
+        # TODO: Populate possible moves every time you run
+        # TODO: Possible moves should be a set
+        def __init__(self, piece=Blank(), num_moves=0, poss_moves=None):
             """Constructor"""
             self.piece = piece
             self.num_moves = num_moves
+            self.poss_moves = poss_moves
     
         def copy(self):
             if REFERENCE_PIECES:
@@ -34,6 +37,10 @@ class Board(dict):
         for key, value in self.items():
             new_copy[key] = value.copy()
         return new_copy
+
+    def __iter__(self):
+        """Replace the iterator with just the squares"""
+        return iter(self.items())
 
     def __str__(self):
         """Print function Override"""

@@ -33,6 +33,23 @@ class Rules(object):
             else:
                 return cls.ObstructionType.UNOBSTRUCTED
 
+    @classmethod
+    def isin_check(cls, king_loc, board):
+        if board[king_loc].color == COLORS.WHITE:
+            turn = COLORS.BLACK
+        else:
+            turn = COLORS.WHITE
+
+        from move import Move
+        for (x, y), square in board:
+            if square.color == turn:
+                # Check possible moves
+                poss_moves = board[(x, y)].get_moves(x, y, board, scan_mode=True)
+                if list(king_loc) in poss_moves:
+                    return True
+
+        return False
+
     # Check for whether castle move was made
     @classmethod
     def is_castle(cls, x, y, board):
@@ -76,13 +93,17 @@ class Rules(object):
                         return cls.MoveType.RIGHT_CASTLE
 
     @staticmethod
-    def chk_limit_moves(board, x, y):
+    def chk_limit_moves(board, x, y, poss_moves):
         bad_moves = set()
         # Copy the board given
+        #FIXME: remove copy later
         probe_board = board.copy()
 
         # Do the move
-        move = Move(board)
+        from move import Move
+        move = Move(board, x, y, poss_moves)
+
+        
 
         
 

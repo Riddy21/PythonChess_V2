@@ -4,6 +4,8 @@ import uuid
 from settings import *
 from rules import Rules
 
+# TODO: Use sets and tuples for poss moves
+
 # Abstract Piece Class
 class _Piece(object):
     def __init__(self, value, color, str_rep):
