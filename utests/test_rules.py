@@ -3,27 +3,41 @@ from pieces import _Piece
 from settings import *
 from board import *
 from rules import *
-from game import Game
+from move import *
 
 class TestRules(unittest.TestCase):
     def test_isin_check(self):
         board = BoardManager.get_board_from_file('Presets/check.txt')
         self.assertTrue(Rules.isin_check((4, 0), board))
 
-    #FIXME: Test is enpassant
+    # Test is enpassant
     def test_is_enpassant(self):
-
         # Valid enpassant
-        game = Game()
-        game.set_turn(COLORS.BLACK)
+        board = BoardManager.get_board_from_file('Presets/ready_to_enpass.txt')
 
-        game.full_move(4, 1, 4, 3)
-        self.assertTrue(Rules.is_enpassant((5, 3), (4, 2), game.board))
-        self.assertFalse(Rules.is_enpassant((5, 3), (5, 2), game.board))
+        # Make move
+        Move.full_move((6,1), (6,3), board)
+        
+        self.assertTrue(Rules.is_enpassant((5, 3), (6, 2), board))
+        self.assertFalse(Rules.is_enpassant((5, 3), (5, 2), board))
 
-    #FIXME: Test is castle
+    # Test is castle
+    def test_is_castle(self):
+        # Valid Castle
+        board = BoardManager.get_board_from_file('Presets/ready_to_castle.txt')
 
-    #FIXME: Test is pawn promo
+        self.assertTrue(Rules.is_castle((4, 7), (6, 7), board))
+        self.assertFalse(Rules.is_castle((4, 7), (5, 7), board))
+
+
+    # Test is pawn promo
+    def test_is_pawn_promo(self):
+        board = BoardManager.get_board_from_file('Presets/ready_to_promo.txt')
+
+        self.assertTrue(Rules.is_pawn_promo((0, 1), (0, 0), board))
+        self.assertFalse(Rules.is_pawn_promo((1, 6), (1, 5), board))
+        self.assertFalse(Rules.is_pawn_promo((0, 7), (0, 5), board))
+        
 
     def test_chk_limit_moves(self):
         board = BoardManager.get_board_from_file('Presets/check.txt')

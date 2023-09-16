@@ -7,6 +7,12 @@ import logging
 
 # Class to record moves and change game board
 class Move(object):
+    class MoveError(Exception):
+        """
+        Exception thrown when error occurs in move class
+        """
+        pass
+
     """Class for moving pieces on the board"""
     # init
     def __init__(self, board, x, y, poss_moves, scan_mode=False):
@@ -193,6 +199,19 @@ class Move(object):
             if not self.scan_mode:
                 logging.debug('move: from %d,%d to %d,%d' % (frox, froy, tox, toy))
             board[tox, toy], board[frox, froy] = board[frox, froy], board[tox, toy]
+
+    @classmethod
+    def full_move(cls, source, target, board):
+        """
+        Static function to make a full move and returns a move object
+        """
+        turn = board[source].color
+        poss_moves = cls.get_poss_moves(board, turn, *source)
+        move = Move(board, *source, poss_moves)
+        if move.make_move(board, *target) == -1:
+            raise cls.MoveError('Failed to make move')
+        return move
+
 
     # Undo a move
     def undo_move(self, board):

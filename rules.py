@@ -98,29 +98,33 @@ class Rules(object):
     @classmethod
     def is_enpassant(cls, source, target, board):
         source = tuple(source)
+        x, y = source
         target = tuple(target)
-        if board[source] == COLORS.WHITE and y == 3:
+        if board[source].color == COLORS.WHITE and y == 3:
             if (x + 1 in range(8)) and board[x + 1, y].color == COLORS.BLACK and \
                     board[x + 1, y].num_moves == 1:
                 if cls.detect_obstruction((x, y), (x + 1, y - 1), board) != Rules.ObstructionType.SELF_OBSTRUCTED:
-                    poss_moves.add((x + 1, y - 1))
-                    self.enpassant_pos.append([x + 1, y - 1])
+                    if target == (x+1, y-1):
+                        return True
             if (x - 1 in range(8)) and board[x - 1, y].color == COLORS.BLACK and \
                     board[x - 1, y].num_moves == 1:
                 if Rules.detect_obstruction((x, y), (x - 1, y - 1), board) != Rules.ObstructionType.SELF_OBSTRUCTED:
-                    poss_moves.add((x - 1, y - 1))
-                    self.enpassant_pos.append([x - 1, y - 1])
-        elif board[source] == COLORS.BLACK and y == 4:
+                    if target == (x-1, y-1):
+                        return True
+        elif board[source].color == COLORS.BLACK and y == 4:
             if (x + 1 in range(8)) and board[x + 1, y].color == COLORS.WHITE and \
                     board[x + 1, y].num_moves == 1:
                 if Rules.detect_obstruction((x, y), (x + 1, y + 1), board) != Rules.ObstructionType.SELF_OBSTRUCTED:
-                    poss_moves.add((x + 1, y + 1))
-                    self.enpassant_pos.append([x + 1, y + 1])
+                    if target == (x+1, y+1):
+                        return True
             if (x - 1 in range(8)) and board[x - 1, y].color == COLORS.WHITE and \
                     board[x - 1, y].num_moves == 1:
                 if Rules.detect_obstruction((x, y), (x - 1, y + 1), board) != Rules.ObstructionType.SELF_OBSTRUCTED:
-                    poss_moves.add((x - 1, y + 1))
-                    self.enpassant_pos.append([x - 1, y + 1])
+                    if target == (x-1, y+1):
+                        return True
+
+        return False
+
     @staticmethod
     def is_pawn_promo(source, target, board):
         from pieces import Pawn

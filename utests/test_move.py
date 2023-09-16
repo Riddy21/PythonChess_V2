@@ -6,6 +6,21 @@ class TestMove(unittest.TestCase):
     def setUp(self):
         self.board = BoardManager.get_board_from_file('Presets/check.txt')
 
+    def compare_boards(self, board1, board2):
+        for ((x1, y1), square1), ((x2, y2), square2) in zip(board1.items(), board2.items()):
+            self.assertEqual(square1.piece.color, square2.piece.color)
+            self.assertEqual(type(square2.piece), type(square1.piece))
+
+    def test_full_move(self):
+        # bad move
+        with self.assertRaises(Move.MoveError):
+            move = Move.full_move((2,2), (0,2), self.board)
+
+        # good move
+        move = Move.full_move((6,1), (6,2), self.board)
+        golden = BoardManager.get_board_from_file('Presets/check_blocked.txt')
+        self.compare_boards(golden, self.board)
+
     def test_get_all_poss_moves(self):
         poss_moves = Move.get_all_poss_moves(self.board)
         golden = {(0, 0): [],
