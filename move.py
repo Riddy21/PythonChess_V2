@@ -75,14 +75,19 @@ class Move(object):
         return set()
 
     @classmethod
-    def get_all_poss_moves(cls, board):
+    def get_all_poss_moves(cls, board, color=None):
         """
         Function for checking if player picked a piece of the right colour and type
         """
         poss_moves = dict()
         for loc, square in board:
             if type(square.piece) != Blank:
-                poss_moves[loc] = cls.get_poss_moves(board, square.color, loc[0], loc[1], scan_mode=True)
+                # If color is used, skip if not the right color
+                if color and square.color != color:
+                    continue
+                moves = cls.get_poss_moves(board, square.color, loc[0], loc[1], scan_mode=True)
+                if moves:
+                    poss_moves[loc] = moves
         return poss_moves
 
     # Removes move_id from piece being moved in case of reselection
@@ -206,7 +211,7 @@ class Move(object):
         Static function to make a full move and returns a move object
         """
         turn = board[source].color
-        poss_moves = cls.get_poss_moves(board, turn, *source)
+        poss_moves = cls.get_poss_moves(board, turn, *source, scan_mode=True)
         move = Move(board, *source, poss_moves)
         if move.make_move(board, *target) == -1:
             raise cls.MoveError('Failed to make move')

@@ -1,7 +1,7 @@
-from game import Game
-from gui import ChessboardGUI
-from player import Computer, Human
 import logging
+from game import Game
+from player import *
+from gui import ChessboardGUI
 
 if __name__ == "__main__":
     game = Game()

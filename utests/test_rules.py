@@ -77,13 +77,16 @@ class TestRules(unittest.TestCase):
 
     def test_chk_limit_moves(self):
         board = BoardManager.get_board_from_file('Presets/check.txt')
-        ans = Rules.chk_limit_moves(board, 4, 0, [[5, 1]])
-        self.assertEqual(ans, [])
+        poss_moves = Move.get_poss_moves(board, COLORS.BLACK, 4, 0, scan_mode=True)
+        Rules.chk_limit_moves((4, 0), board, poss_moves)
+        self.assertEqual(poss_moves, set())
 
-        ans = Rules.chk_limit_moves(board, 6, 1, [[6, 2], [6, 3]])
-        self.assertEqual(ans, [[6, 2]])
+        poss_moves = Move.get_poss_moves(board, COLORS.BLACK, 6, 1, scan_mode=True)
+        Rules.chk_limit_moves((6, 1), board, poss_moves)
+        self.assertEqual(poss_moves, {(6, 2)})
 
         BoardManager.set_board(board, 'Presets/castle_into_check.txt')
 
-        ans = Rules.chk_limit_moves(board, 4, 7, [[3, 7], [4, 7]])
-        self.assertEqual(ans, [[3, 7]])
+        poss_moves = Move.get_poss_moves(board, COLORS.WHITE, 4, 7, scan_mode=True)
+        Rules.chk_limit_moves((4, 7), board, poss_moves)
+        self.assertEqual(poss_moves, {(3, 7), (3, 6)})

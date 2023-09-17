@@ -386,15 +386,29 @@ class Rules(object):
         return False
 
     @staticmethod
-    def chk_limit_moves(board, x, y, poss_moves):
-        bad_moves = set()
-        # Copy the board given
-        #FIXME: remove copy later
-        probe_board = board.copy()
-
-        # Do the move
+    def chk_limit_moves(source, board, poss_moves):
+        from pieces import King
+        from board import BoardManager
         from move import Move
-        move = Move(board, x, y, poss_moves)
+        probe_board = board.copy()
+        
+        # Iterate through possible moves and check if any puts you in check
+        remove_moves = set()
+        for move in poss_moves:
+            # Do the move
+            move_obj = Move.full_move(source, move, probe_board)
+            # check if in check
+            king_location = BoardManager.find(King, probe_board, probe_board[move].color, num=1).pop()
+            if Rules.isin_check(king_location, probe_board):
+                remove_moves.add(move)
+            # undo the move
+            move_obj.undo_move(probe_board)
+
+        poss_moves -= remove_moves
+        
+
+        
+
 
         
 

@@ -100,6 +100,18 @@ class BoardManager(object):
         """Gets a deep copy of the board"""
         return board.copy()
 
+    @classmethod
+    def find(cls, piece, board, color=None, num=math.inf):
+        locations = set()
+        for (x, y), square in board:
+            if type(square.piece) == piece:
+                if color and square.color != color:
+                    continue
+                locations.add((x, y))
+                if len(locations) == num:
+                    break
+        return locations
+
     @staticmethod
     def get_board_str(board):
         """Return string of board"""
