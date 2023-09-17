@@ -66,13 +66,13 @@ class Move(object):
                     logging.debug("No more moves")
 
                 # Remove move num hist
-                return []
+                return set()
 
             # Return the proper poss_moves
             return poss_moves
         if not scan_mode:
             logging.debug("Invalid selection")
-        return []
+        return set()
 
     @classmethod
     def get_all_poss_moves(cls, board):
@@ -136,7 +136,7 @@ class Move(object):
         self.move_stage = 'moved'
 
         # Clear poss moves to empty
-        self.poss_moves = []
+        self.poss_moves = set()
 
         # set move_to to x y now that it is verified as a valid move
         self.move_to = x, y
@@ -267,7 +267,7 @@ class Move(object):
     # Private: Validate move
     def is_valid_move(self, tox, toy):
         # If the board piece has the move in its list of possible moves
-        if [tox, toy] in self.poss_moves:
+        if (tox, toy) in self.poss_moves:
             return True
         else:
             return False
@@ -283,7 +283,8 @@ class Move(object):
         target = (x, y)
 
         # Confirms whether a castle happened when the piece was moved
-        is_castle = Rules.is_castle(source, target, board)
+        is_left_castle = Rules.is_left_castle(source, target, board)
+        is_right_castle = Rules.is_right_castle(source, target, board)
 
         # Confirms whether enpassant could happen when the piece is moved
         is_enpassant = Rules.is_enpassant(source, target, board)
@@ -293,10 +294,10 @@ class Move(object):
             self.pawn_promo = 'ready'
 
         # If it is left castle
-        if is_castle == Rules.MoveType.LEFT_CASTLE:
+        if is_left_castle:
             return 'lcastle'
         # If it is right castle
-        elif is_castle == Rules.MoveType.RIGHT_CASTLE:
+        elif is_right_castle:
             return 'rcastle'
         # If the move is enpassant
         elif is_enpassant:

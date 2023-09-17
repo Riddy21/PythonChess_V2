@@ -108,7 +108,7 @@ class TestGame(unittest.TestCase):
 
         moves = self.game.get_next_poss_moves(4, 7)
 
-        self.assertEqual([[3, 6], [3, 7]], moves)
+        self.assertEqual({(3, 6), (3, 7)}, moves)
 
     def test_undo_move(self):
         # Set the board to check
@@ -171,7 +171,7 @@ class TestGame(unittest.TestCase):
         self.game.set_board('Presets/check.txt')
         self.game.set_turn(COLORS.BLACK)
 
-        golden = [[6, 2]]
+        golden = {(6, 2)}
         self.assertEqual(golden, self.game.get_next_poss_moves(6, 1))
 
     def test_get_current_poss_moves(self):
@@ -181,7 +181,7 @@ class TestGame(unittest.TestCase):
 
         self.assertEqual((), self.game.get_current_poss_moves())
         self.game.handle_move(6, 1)
-        golden = [[6, 2]]
+        golden = {(6, 2)}
         self.assertEqual(golden, self.game.get_current_poss_moves())
 
     def test_get_playable_piece_coords(self):
@@ -225,7 +225,7 @@ class TestGame(unittest.TestCase):
         self.game.undo_move()
 
         moves = self.game.get_next_poss_moves(4, 7)
-        self.assertEqual(moves, [[5, 7], [4, 6], [6, 7]])
+        self.assertEqual(moves, {(5, 7), (4, 6), (6, 7)})
 
         #Move it out and back and try castling again
         self.game.full_move(7, 7, 6, 7)
@@ -235,7 +235,7 @@ class TestGame(unittest.TestCase):
 
         # Try castling, cant
         moves = self.game.get_next_poss_moves(4, 7)
-        self.assertEqual(moves, [[5, 7], [4, 6]])
+        self.assertEqual(moves, {(5, 7), (4, 6)})
 
     def test_do_not_castle(self):
         self.game.set_board('Presets/ready_to_castle.txt')
@@ -266,7 +266,7 @@ class TestGame(unittest.TestCase):
         self.game.undo_move()
 
         moves = self.game.get_next_poss_moves(5, 3)
-        self.assertEqual(moves, [[4, 2]])
+        self.assertEqual(moves, {(4, 2)})
 
         self.game.undo_move()
 
@@ -277,7 +277,7 @@ class TestGame(unittest.TestCase):
 
         ## Try enpass
         moves = self.game.get_next_poss_moves(5, 3)
-        self.assertEqual(moves, [])
+        self.assertEqual(moves, set())
 
 
 if __name__ == '__main__':

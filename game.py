@@ -280,7 +280,7 @@ class Game:
                 # If the piece is the king
                 if piece.str_rep == 'k' or piece.str_rep == 'K':
                     # Test if it is in check
-                    in_check = piece.isin_check(x, y, self)
+                    in_check = Rules.isin_check((x, y), self.board)
                 # Try to move it and if there are no more moves
                 if self.get_next_poss_moves(x, y):
                     # set can move to true and break out

@@ -1,6 +1,6 @@
 r - - - k b n r
-- p - b p p p p
-- q n p - - - -
+- p - b p - p p
+- q n p - p - -
 p P p P - P - -
 - - P - - - - -
 - - - - - - - -

@@ -68,7 +68,7 @@ class TestPawn(unittest.TestCase):
         BoardManager.set_board(self.board, 'Presets/default.txt')
         moves = self.piece.get_moves(0, 6, self.board, scan_mode=True)
 
-        self.assertEqual([[0, 5], [0, 4]], moves)
+        self.assertEqual({(0, 5), (0, 4)}, moves)
 
 if __name__ == '__main__':
     unittest.main()
