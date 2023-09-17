@@ -10,20 +10,16 @@ import logging
 
 # NOTE: Next things to do
 
-# TODO: Move get poss moves down to a solver engine that is only passed a game board and turn
 # TODO: Move get game state down to a solver engine that is only passed a game board
-# TODO: Move chk_limit_moves from pieces to the solver engine level to ensure no recursion happens
 # Change game board to an object
 # Add a dict of pieces to the game board so that it's easier to access and faster
 # 1. Use dict of pieces, with coordinates as a property?
 # Change pieces to singletons that are referenced in the board
 #   1. Made piece library to implement this change
 # Edit Pices to be must more lite weight
-# TODO: Only use boards instead of games as nodes in search tree
 # TODO: Make a lock decorator to lock the functions that need locking
 #       NOTE: Make sure that they don't call each other
 #             only lock forward facing functions that modify shared variables
-# TODO: Convert print statements to logging messages
 
 class GameInternalError(Exception):
     """
@@ -40,7 +36,7 @@ class GameUserError(Exception):
 
 # Game class initiated when the game board is displayed
 class Game:
-    def __init__(self, turn=COLORS.WHITE, board=None, moves=None, captured_white=None, captured_black=None, scan_mode=False, prev_game_state='normal'):
+    def __init__(self, turn=COLORS.WHITE, board=None, moves=None, captured_white=None, captured_black=None, prev_game_state='normal'):
         if captured_black is None:
             captured_black = []
         if captured_white is None:
@@ -60,9 +56,6 @@ class Game:
             turn = COLORS.get_by_str_rep(turn)
         self.turn = turn
         self.switch_turn_event = Event()
-
-        # scan mode to stop recursive loop of checking check and checkmate
-        self.scan_mode = scan_mode
 
         self.game_state = prev_game_state
 
@@ -180,18 +173,18 @@ class Game:
             logging.debug("Invalid Selection, pawn promotion underway")
             return -1
         # Get possible moves
-        poss_moves = Move.get_poss_moves(self.board, self.turn, x, y, scan_mode=self.scan_mode)
+        poss_moves = Move.get_poss_moves(self.board, self.turn, x, y)
 
         # Check if it is a valid selection, if not, exit the function
         if not poss_moves:
             return -1
 
         # Create a new move and add to list and pass the len of move list as move id
-        self.moves.append(Move(self.board, x, y, poss_moves, scan_mode=self.scan_mode))
+        self.moves.append(Move(self.board, x, y, poss_moves))
 
     # Function to return possible moves for the piece entered without making the move
     def get_next_poss_moves(self, x, y):
-        poss_moves = Move.get_poss_moves(self.board, self.turn, x, y, scan_mode=self.scan_mode)
+        poss_moves = Move.get_poss_moves(self.board, self.turn, x, y)
 
         return poss_moves
 
@@ -231,17 +224,13 @@ class Game:
 
         # if the move results in pawn promotion don't switch turn
         if self.moves[-1].pawn_promo == 'ready':
-            if not self.scan_mode:
-                logging.debug('Pawn Promotion is valid')
-                # Update the state of the game so that the pawn promotion is registered
             # FIXME: make this a side process that happens every time the board changes
             self.update_game_state()
         else:
             self.switch_turn()
 
     def update_game_state(self):
-        if not self.scan_mode:
-            self.game_state = self.get_game_state()
+        self.game_state = self.get_game_state()
 
     # FIXME: remove dependency on turn you are checking and enable it to be stateless
     def get_game_state(self):

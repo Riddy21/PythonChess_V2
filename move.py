@@ -75,7 +75,7 @@ class Move(object):
         return set()
 
     @classmethod
-    def get_all_poss_moves(cls, board, color=None):
+    def get_all_poss_moves(cls, board, color=None, scan_mode=False):
         """
         Function for checking if player picked a piece of the right colour and type
         """
@@ -85,7 +85,7 @@ class Move(object):
                 # If color is used, skip if not the right color
                 if color and square.color != color:
                     continue
-                moves = cls.get_poss_moves(board, square.color, loc[0], loc[1], scan_mode=True)
+                moves = cls.get_poss_moves(board, square.color, loc[0], loc[1], scan_mode=scan_mode)
                 if moves:
                     poss_moves[loc] = moves
         return poss_moves

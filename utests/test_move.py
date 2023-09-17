@@ -22,7 +22,7 @@ class TestMove(unittest.TestCase):
         self.compare_boards(golden, self.board)
 
     def test_get_all_poss_moves(self):
-        poss_moves = Move.get_all_poss_moves(self.board)
+        poss_moves = Move.get_all_poss_moves(self.board, scan_mode=True)
         golden = {(1, 0): {(0, 2), (2, 2)},
                   (4, 0): {(5, 1)},
                   (6, 0): {(7, 2)},
