@@ -65,7 +65,6 @@ class Computer(Player):
 
         # Get all possible moves
         playable_moves = set()
-        # FIXME: Check will cause "no more moves"
         for piece in playable_pieces:
             moves = self.game.get_next_poss_moves(*piece)
             for move in moves:

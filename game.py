@@ -8,19 +8,6 @@ from board import BoardManager
 from settings import *
 import logging
 
-# NOTE: Next things to do
-
-# TODO: Move get game state down to a solver engine that is only passed a game board
-# Change game board to an object
-# Add a dict of pieces to the game board so that it's easier to access and faster
-# 1. Use dict of pieces, with coordinates as a property?
-# Change pieces to singletons that are referenced in the board
-#   1. Made piece library to implement this change
-# Edit Pices to be must more lite weight
-# TODO: Make a lock decorator to lock the functions that need locking
-#       NOTE: Make sure that they don't call each other
-#             only lock forward facing functions that modify shared variables
-
 class GameInternalError(Exception):
     """
     This exception is thrown when an internal error occurs
@@ -64,8 +51,6 @@ class Game:
             self.set_board()
         else:
             self.board = board.copy()
-
-        # TODO: Add poss moves attribute here and check every switch turn
 
 
     @staticmethod
@@ -131,7 +116,6 @@ class Game:
                 raise GameUserError("Pawn promo failed")
         except IndexError:
             raise GameInternalError("There are no moves in the stack") from None
-        # TODO: turn return -1 to a try catch
 
     # Function to undo a move and remove it from the move list
     def undo_move(self, num=1):
@@ -211,8 +195,6 @@ class Game:
         if self.moves[-1].make_move(self.board, x, y) == -1:
             return -1
 
-        # FIXME One the get_game_state is stateless, you can update game state here
-
         # Append captured pieces to the correct captured list
         captured_piece = getattr(self.moves[-1], 'captured')
         if captured_piece == None:
@@ -224,7 +206,6 @@ class Game:
 
         # if the move results in pawn promotion don't switch turn
         if self.moves[-1].pawn_promo == 'ready':
-            # FIXME: make this a side process that happens every time the board changes
             self.update_game_state()
         else:
             self.switch_turn()

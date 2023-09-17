@@ -91,15 +91,13 @@ class TestGame(unittest.TestCase):
         self.assertEqual(type(self.game.board[6, 2].piece), Pawn)
         self.assertEqual(self.game.board[6, 2].color, COLORS.BLACK)
 
-    #FIXME: Fix this one
-    @unittest.expectedFailure
     def test_make_pawn_promo(self):
         # Set the board to check
-        self.game.set_board('Presets/promo.txt')
+        self.game.set_board('Presets/ready_to_promo.txt')
 
         # Try making a move on both sides
         self.assertEqual(-1, self.game.full_move(6, 1, 6, 2))
-        self.assertEqual(-1, self.game.full_move(0, 1, 0, 2))
+        self.assertEqual(None, self.game.full_move(0, 1, 0, 0))
 
         self.assertEqual(COLORS.WHITE, self.game.turn)
 
