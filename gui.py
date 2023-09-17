@@ -131,10 +131,19 @@ class ChessboardGUI:
         #self.api.make_move(position)
 
     def prompt_mate_quit(self, game_state):
-        if 'checkmate' in game_state:
+        if game_state == 'black checkmate' and self.api.turn == COLORS.BLACK:
             ans = popup.askyesno(title="Checkmate!",
                                  message="Checkmate! %s wins!\nWould you like to quit?" % self.get_prev_player().color.value)
-        elif 'stalemate' in game_state:
+        elif game_state == 'white checkmate' and self.api.turn == COLORS.WHITE:
+            ans = popup.askyesno(title="Checkmate!",
+                                 message="Checkmate! %s wins!\nWould you like to quit?" % self.get_prev_player().color.value)
+        elif game_state == 'black stalemate' and self.api.turn == COLORS.BLACK:
+            ans = popup.askyesno(title="Stalemate!",
+                                 message="Stalemate!\nWould you like to quit?")
+        elif game_state == 'white stalemate' and self.api.turn == COLORS.WHITE:
+            ans = popup.askyesno(title="Stalemate!",
+                                 message="Stalemate!\nWould you like to quit?")
+        elif game_state == 'stalemate':
             ans = popup.askyesno(title="Stalemate!",
                                  message="Stalemate!\nWould you like to quit?")
         else:

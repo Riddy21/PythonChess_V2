@@ -49,8 +49,6 @@ class TestGame(unittest.TestCase):
         self.game.set_turn(COLORS.BLACK)
         self.assertEqual(self.game.turn, COLORS.BLACK)
 
-    #FIXME: Fix this one
-    @unittest.expectedFailure
     def test_get_game_state(self):
         # Set the board to check
         self.game.set_board('Presets/check.txt')
@@ -62,6 +60,13 @@ class TestGame(unittest.TestCase):
         # Set the board to check
         self.game.set_board('Presets/promo.txt')
         self.assertEqual(self.game.game_state, 'white pawn promo')
+
+        self.game.set_board('Presets/checkmate.txt')
+        self.assertEqual(self.game.game_state, 'white checkmate')
+        self.game.set_board('Presets/stalemate.txt')
+        self.assertEqual(self.game.game_state, 'white stalemate')
+        self.game.set_board('Presets/two_kings.txt')
+        self.assertEqual(self.game.game_state, 'stalemate')
 
 
     def test_full_move(self):

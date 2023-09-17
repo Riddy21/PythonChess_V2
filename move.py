@@ -41,7 +41,7 @@ class Move(object):
         self.poss_moves = poss_moves
 
         # Parameter for captured Piece
-        self.captured = 'None'
+        self.captured = None
 
         # Scan mode
         self.scan_mode = scan_mode

@@ -215,7 +215,7 @@ class Game:
 
         # Append captured pieces to the correct captured list
         captured_piece = getattr(self.moves[-1], 'captured')
-        if captured_piece == 'None':
+        if captured_piece == None:
             pass
         elif captured_piece.color == COLORS.BLACK:
             self.captured_black.append(captured_piece)
@@ -230,66 +230,7 @@ class Game:
             self.switch_turn()
 
     def update_game_state(self):
-        self.game_state = self.get_game_state()
-
-    # FIXME: remove dependency on turn you are checking and enable it to be stateless
-    def get_game_state(self):
-        """
-        Gets the the state of the game
-        white pawn promo
-        white check
-        white checkmate
-        white pawn promo
-        black check
-        black checkmate
-        stalemate
-        MUST BE IN THE TURN OF THE SIDE YOU'RE CHECKING
-        """
-
-        can_move = False
-        in_check = False
-
-        # in opponent's turn currently
-        num_pieces = 0
-
-        # loops through all pieces on the board
-        for (x, y), item in self.board.items():
-            piece = item.piece
-            # pawn promo check
-            if y == 0 and piece.str_rep == 'P':
-                return 'white pawn promo'
-
-            if y == BOARD_HEIGHT - 1 and piece.str_rep == 'p':
-                return 'black pawn promo'
-
-            # If the piece iterated on is piece of the next turn
-            if piece.color != None:
-                num_pieces += 1
-            if piece.color == self.turn:
-                # If the piece is the king
-                if piece.str_rep == 'k' or piece.str_rep == 'K':
-                    # Test if it is in check
-                    in_check = Rules.isin_check((x, y), self.board)
-                # Try to move it and if there are no more moves
-                if self.get_next_poss_moves(x, y):
-                    # set can move to true and break out
-                    can_move = True
-
-        # If there's only 2 kings left
-        if num_pieces <= 2:
-            return 'stalemate'
-
-        if not can_move:
-            if in_check:
-                return '%s checkmate' % self.turn.value
-            else:
-                return 'stalemate'
-
-        elif in_check:
-            return '%s check' % self.turn.value
-
-        else:
-            return 'normal'
+        self.game_state = Rules.get_game_state(self.board)
 
     # Get the coordinates of that type of piece
     def get_piece_coords(self, piece_str):

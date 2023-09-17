@@ -3,13 +3,6 @@ import math
 from settings import *
 
 class Rules(object):
-    class MoveType(Enum):
-        """
-        Enumerates the types of moves in the chess game
-        """
-        LEFT_CASTLE = 'left_castle'
-        RIGHT_CASTLE = 'right_castle'
-
     class ObstructionType(Enum):
         """
         Enumerates the types of obstructions in the chess game
@@ -406,7 +399,70 @@ class Rules(object):
 
         poss_moves -= remove_moves
         
+    @staticmethod
+    def get_game_state(board):
+        """
+        Gets the the state of the game
+        white pawn promo
+        white check
+        white checkmate
+        white pawn promo
+        black check
+        black checkmate
+        stalemate
+        MUST BE IN THE TURN OF THE SIDE YOU'RE CHECKING
+        """
+        from move import Move
 
+        black_can_move = False
+        white_can_move = False
+        black_in_check = False
+        white_in_check = False
+
+        num_pieces = 0
+
+        # loops through all pieces on the board
+        for (x, y), item in board.items():
+            piece = item.piece
+            if piece.color != None:
+                num_pieces += 1
+            # pawn promo check
+            if y == 0 and piece.str_rep == 'P':
+                return 'white pawn promo'
+
+            if y == BOARD_HEIGHT - 1 and piece.str_rep == 'p':
+                return 'black pawn promo'
+            # If the piece is the king
+            if piece.str_rep == 'k':
+                # Test if it is in check
+                black_in_check = Rules.isin_check((x, y), board)
+            if piece.str_rep == 'K':
+                white_in_check = Rules.isin_check((x, y), board)
+            # Try to move it and if there are no more moves
+            if Move.get_poss_moves(board, piece.color, x, y):
+                if piece.color == COLORS.WHITE:
+                    # set can move to true and break out
+                    white_can_move = True
+
+                else:
+                    black_can_move = True
+
+        if black_in_check and not black_can_move:
+            return 'black checkmate'
+        elif white_in_check and not white_can_move:
+            return 'white checkmate'
+        elif black_in_check:
+            return 'black check'
+        elif white_in_check:
+            return 'white check'
+        elif not white_can_move:
+            return 'white stalemate'
+        elif not black_can_move:
+            return 'black stalemate'
+        elif num_pieces == 2:
+            return 'stalemate'
+        else:
+            return 'normal'
         
 
 
