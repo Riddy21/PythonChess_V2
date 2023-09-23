@@ -136,7 +136,6 @@ class King(_Piece):
         # Makes a piece with set values and images
         super().__init__(PIECES.KING.value['value'], color, str_rep)
 
-
     def get_moves(self, x, y, board, scan_mode=False):
         poss_moves = set()
 
@@ -188,7 +187,7 @@ class PieceLibrary(object):
         """
         # Get piece by the PIECES str rep, kind of hacky
         try:
-            piece = PIECES.get_by_str_rep(str_rep.lower())
+            piece = PIECES.get_by_key('str_rep', str_rep.lower())
         except KeyError:
             raise cls.PieceLibraryException('Could not find piece with value %s' % str_rep)
 

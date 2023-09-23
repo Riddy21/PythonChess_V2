@@ -102,7 +102,7 @@ class TestGame(unittest.TestCase):
         self.assertEqual(COLORS.WHITE, self.game.turn)
 
         # Make promotion
-        self.game.make_pawn_promo('Queen')
+        self.game.make_pawn_promo(PIECES.QUEEN)
 
         self.assertEqual(COLORS.BLACK, self.game.turn)
 

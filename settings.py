@@ -15,6 +15,7 @@ class COLORS(ChessEnum):
 
 class PIECES(ChessEnum):
     ROOK = {
+           'display_name' : 'Rook',
            'str_rep' : 'r',
            'asset'   : {
                        COLORS.WHITE : pygame.image.load("./Assets/Chess_tile_rd.png"),
@@ -23,6 +24,7 @@ class PIECES(ChessEnum):
            'value'   : 5,
            }
     KNIGHT = {
+           'display_name' : 'Knight',
            'str_rep' : 'n',
            'asset'   : {
                        COLORS.WHITE : pygame.image.load("./Assets/Chess_tile_nd.png"),
@@ -31,6 +33,7 @@ class PIECES(ChessEnum):
            'value'   : 3,
            }
     BISHOP = {
+           'display_name' : 'Bishop',
            'str_rep' : 'b',
            'asset'   : {
                        COLORS.WHITE : pygame.image.load("./Assets/Chess_tile_bd.png"),
@@ -39,6 +42,7 @@ class PIECES(ChessEnum):
            'value'   : 3,
            }
     QUEEN = {
+           'display_name' : 'Queen',
            'str_rep' : 'q',
            'asset'   : {
                        COLORS.WHITE : pygame.image.load("./Assets/Chess_tile_qd.png"),
@@ -47,6 +51,7 @@ class PIECES(ChessEnum):
            'value'   : 9,
            }
     KING = {
+           'display_name' : 'King',
            'str_rep' : 'k',
            'asset'   : {
                        COLORS.WHITE : pygame.image.load("./Assets/Chess_tile_kd.png"),
@@ -55,6 +60,7 @@ class PIECES(ChessEnum):
            'value'   : math.inf,
            }
     PAWN = {
+           'display_name' : 'Pawn',
            'str_rep' : 'p',
            'asset'   : {
                        COLORS.WHITE : pygame.image.load("./Assets/Chess_tile_pd.png"),

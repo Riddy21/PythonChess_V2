@@ -4,10 +4,10 @@ import multiprocessing
 
 class ChessEnum(Enum):
     @classmethod
-    def get_by_str_rep(cls, value):
+    def get_by_key(cls, key, value):
         # NOTE: For loop not ideal but fast enough for small enums
         for member in cls:
-            if member.value['str_rep'] == value:
+            if member.value[key] == value:
                 return member
         raise KeyError(f"No member with value {value}")
 

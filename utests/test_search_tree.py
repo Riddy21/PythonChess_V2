@@ -25,7 +25,6 @@ class TestSearchTree(unittest.TestCase):
 
         self.assertEqual(moves, starting_moves)
 
-    #@unittest.expectedFailure
     def test_populate(self):
         start = timer()
         self.tree.populate(depth=2)
@@ -34,7 +33,48 @@ class TestSearchTree(unittest.TestCase):
         length = end - start
         self.assertEqual(self.tree.num_nodes, 420)
         self.assertEqual(self.tree.num_leaves, 400)
-        self.assertLess(length, 5)
+        self.assertLess(length, 0.5)
+
+    def test_promotion(self):
+        # Testing when the search tree needs to make pawn promo
+        self.game.set_board('Presets/ready_to_promo.txt')
+
+        start = timer()
+        self.tree.populate(depth=2)
+        end = timer()
+
+        length = end - start
+        self.assertEqual(self.tree.num_nodes, 558)
+        self.assertEqual(self.tree.num_leaves, 531)
+        self.assertLess(length, 0.5)
+
+    def test_populate_continue(self):
+        start = timer()
+        self.tree.populate(depth=2)
+        end = timer()
+        first = end - start
+
+        # Second time should take 5% or the orig time
+        start = timer()
+        self.tree.populate_continue(depth=2)
+        end = timer()
+        second = end - start
+
+        self.assertLess(second, first*0.05)
+
+        self.assertEqual(self.tree.num_nodes, 420)
+        self.assertEqual(self.tree.num_leaves, 400)
+
+    def test_get_best_move(self):
+        self.game.set_board('Presets/almost_checkmate.txt')
+        self.game.set_turn(COLORS.BLACK)
+
+        self.tree.populate(depth=2)
+
+        best_move = self.tree.get_best_move()
+
+        self.assertEqual(best_move, ((2, 6), (2, 7)))
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -40,7 +40,9 @@ class Game:
 
         # string representing the turn colour of the game
         if type(turn) == str:
-            turn = COLORS.get_by_str_rep(turn)
+            turn = COLORS.get_by_value(turn)
+
+        # TODO: Move turn to board object
         self.turn = turn
         self.switch_turn_event = Event()
 

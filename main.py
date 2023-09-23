@@ -7,7 +7,7 @@ if __name__ == "__main__":
     game = Game()
     ai = Computer(game, 'white')
     player = Human(game, 'black')
-    #player = Computer(game, 'white')
+    #player = Computer(game, 'black')
     gui = ChessboardGUI(game, p1=ai, p2=player)
     ai.start()
     #player.start()

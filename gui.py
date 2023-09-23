@@ -175,7 +175,7 @@ class ChessboardGUI:
                                   message="Choose Piece",
                                   options=['Queen', 'Rook', 'Knight', 'Bishop'],
                                   default='Queen')
-            self.api.make_pawn_promo(ans)
+            self.api.make_pawn_promo(PIECES.get_by_key('display_name', ans))
 
 
     def orient(self, coords):

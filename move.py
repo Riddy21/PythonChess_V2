@@ -96,22 +96,18 @@ class Move(object):
 
     # Makes a pawn promotion by creating and replacing an old piece
     def make_pawn_promo(self, piece_type, board):
-        #only make promotion if in ready state
-        if self.pawn_promo != 'ready':
-            logging.debug("Invalid pawn promotion")
-            return -1
 
         # Set as for easier use
         tox, toy = self.move_to
 
         # Make a new piece with same ID, moves history, move history count
-        if piece_type == 'Queen':
+        if piece_type == PIECES.QUEEN:
             new_piece = PieceLibrary.get_piece_ref(PIECES.QUEEN, self.move_colour)
-        elif piece_type == 'Rook':
+        elif piece_type == PIECES.ROOK:
             new_piece = PieceLibrary.get_piece_ref(PIECES.ROOK, self.move_colour)
-        elif piece_type == 'Knight':
+        elif piece_type == PIECES.KNIGHT:
             new_piece = PieceLibrary.get_piece_ref(PIECES.KNIGHT, self.move_colour)
-        elif piece_type == 'Bishop':
+        elif piece_type == PIECES.BISHOP:
             new_piece = PieceLibrary.get_piece_ref(PIECES.BISHOP, self.move_colour)
         else:
             logging.error("wrong piece choice")
