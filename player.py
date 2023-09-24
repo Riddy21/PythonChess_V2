@@ -3,6 +3,7 @@ import threading
 import random
 from time import sleep
 from settings import *
+from search_tree import SearchTree
 import logging
 
 # FIXME: Make a variable to tell if the thread failed
@@ -36,6 +37,7 @@ class Computer(Player):
     def __init__(self, game, color):
         super().__init__(game, color, Player.COMPUTER)
         self.running = True
+        self.search_tree = SearchTree(game)
 
     @run_in_thread
     def start(self):
@@ -60,24 +62,14 @@ class Computer(Player):
             return
 
         LOCK.acquire()
-        # get all playable pieces
-        playable_pieces = self.game.get_playable_piece_coords()
+        #TODO Save calculated tree to speed up algorithm and don't reset 
+        self.search_tree.reset()
+        self.search_tree.populate(2)
+        move, promo = self.search_tree.get_best_move()
+        self.game.full_move(*move[0], *move[1])
 
-        # Get all possible moves
-        playable_moves = set()
-        for piece in playable_pieces:
-            moves = self.game.get_next_poss_moves(*piece)
-            for move in moves:
-                playable_moves.add((*piece, *move))
-
-
-        # TODO: This is a placeholder
-        # chose the move to make
-        # NOTE: Lock to make sure game only accessed by one at a time
-        if playable_moves:
-            move = random.sample(playable_moves, 1)[0]
-            self.game.full_move(*move)
-        if self.game.game_state == '%s pawn promo' % self.color.value:
-            self.game.make_pawn_promo('Queen')
+        # Pawn promo
+        if promo != None:
+            self.game.make_pawn_promo(promo)
         LOCK.release()
 

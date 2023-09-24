@@ -73,7 +73,9 @@ class TestSearchTree(unittest.TestCase):
 
         best_move = self.tree.get_best_move()
 
-        self.assertEqual(best_move, ((2, 6), (2, 7)))
+        self.assertEqual(best_move, (((2, 6), (2, 7)), None))
+
+        # TODO: Make a test with a pawn promo
 
 
 if __name__ == '__main__':

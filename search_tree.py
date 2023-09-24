@@ -3,22 +3,26 @@ from move import Move
 from settings import *
 from rules import Rules
 from predict import Predict
+import math
 import logging
 
 class SearchTreeNode(object):
     """Node of the search tree"""
-    def __init__(self, move_obj, board, turn):
+    def __init__(self, move_obj, board=None, promo=None):
         self.children = []
         self.move = None
+        self.move_obj = None
         self.points = 0
         self.board = board
-        self.turn = turn
+        self.promo = promo
 
         if move_obj:
             self.move = (move_obj.move_from, move_obj.move_to)
+            self.move_obj = move_obj
 
-        if move_obj and board:
-            self.points = Predict.get_points(move_obj, board, turn)
+    def evaluate_points(self, orig_turn, next_poss_moves):
+        """Evaluate points gained in the previous move"""
+        self.points = Predict.get_points(self.move_obj, self.board, orig_turn, next_poss_moves)
 
     def add_child(self, node):
         """
@@ -34,8 +38,12 @@ class SearchTreeNode(object):
 
 class SearchTreeRoot(SearchTreeNode):
     """Root of the search tree"""
-    def __init__(self, board, turn):
-        super().__init__(None, board, turn)
+    def __init__(self):
+        super().__init__(None)
+
+    def evaluate_points(self, turn, next_poss_moves):
+        # Root doesn't have points
+        self.points = 0
 
     def __str__(self):
         # FIXME: Still fixing the print
@@ -52,6 +60,7 @@ class SearchTree(object):
         self.game = game
         self.num_nodes = 0
         self.num_leaves = 0
+        self.depth = 0
 
     # TODO: Add function to add one more row to the tree
 
@@ -59,7 +68,7 @@ class SearchTree(object):
         """Populates the game tree with moves to a certain depth"""
         self.num_nodes = 0
         self.num_leaves = 0
-        self.root = SearchTreeRoot(self.game.board.copy(), self.game.turn)
+        self.root = SearchTreeRoot()
         self._populate_node_recursive(self.root, self.game.board, depth, self.game.turn)
 
     def populate_continue(self, depth=5):
@@ -83,9 +92,12 @@ class SearchTree(object):
         # loop through next moves
         for node in self.root.children:
             # Tally up the points under the tree
-            poss_moves[node.move] = self._add_avg_points_recursive(node)
+            poss_moves[node] = self._add_avg_points_recursive(node)
             
-        print(poss_moves)
+        best_move_node = max(poss_moves, key=poss_moves.get)
+
+        #return the move and the promo if there is any
+        return best_move_node.move, best_move_node.promo
 
     @classmethod
     def _add_avg_points_recursive(cls, node):
@@ -102,7 +114,7 @@ class SearchTree(object):
         # Average teh points of the children
         total = 0
         for child in node.children:
-            total = cls._add_avg_points_recursive(child)
+            total += cls._add_avg_points_recursive(child)
         points += total/len(node.children)
 
         return points
@@ -126,6 +138,8 @@ class SearchTree(object):
         # Get the moves from the current game
         moves = self._get_all_moves(board, turn)
 
+        node.evaluate_points(self.game.turn, moves)
+
         for move in moves:
             if Rules.is_pawn_promo(*move, board):
                 valid_pieces = [PIECES.QUEEN, PIECES.ROOK, PIECES.KNIGHT, PIECES.BISHOP]
@@ -138,7 +152,7 @@ class SearchTree(object):
                     move_obj.make_pawn_promo(piece, new_board)
 
                     # Add the child node
-                    child = self._add_child_node(node, move_obj, board)
+                    child = self._add_child_node(node, move_obj, new_board, piece)
                     # populate the child node
                     self._populate_node_recursive(child, new_board, layers_to_go-1, next_turn)
 
@@ -150,13 +164,13 @@ class SearchTree(object):
                 move_obj = Move.full_move(*move, new_board)
 
                 # Add the child node
-                child = self._add_child_node(node, move_obj, board)
+                child = self._add_child_node(node, move_obj, new_board)
                 # populate the child node
                 self._populate_node_recursive(child, new_board, layers_to_go-1, next_turn)
 
-    def _add_child_node(self, parent, move, board):
+    def _add_child_node(self, parent, move, board, promo=None):
         # Add the child node
-        child = SearchTreeNode(move, board, self.game.turn)
+        child = SearchTreeNode(move, board, promo)
         parent.add_child(child)
         self.num_nodes += 1
         return child
