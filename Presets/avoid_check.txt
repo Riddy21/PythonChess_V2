@@ -2,7 +2,7 @@ r - - - k - n r
 p p - q - p p p
 - - - p - - - -
 - - - P - - - -
-- n - - P b - -
-- - - - Q - - P
-P P P K - - - -
-R N B - - - N R
+- - - - P b - -
+- - P P - - - P
+P P P K Q - - -
+R N B - N - - R

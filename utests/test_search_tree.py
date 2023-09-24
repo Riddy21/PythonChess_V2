@@ -106,6 +106,17 @@ class TestSearchTree(unittest.TestCase):
         self.assertEqual(best_move.move, ((5, 6), (5, 7)))
         self.assertEqual(best_move.promo, None)
 
+    def test_get_best_move_avoid_check(self):
+        self.game.set_board('Presets/avoid_check.txt')
+        self.game.set_turn(COLORS.WHITE)
+
+        self.tree.populate(depth=2)
+
+        best_move = self.tree.get_best_move()
+
+        self.assertEqual(best_move.move, ((3, 6), (3, 7)))
+        self.assertEqual(best_move.promo, None)
+
 if __name__ == '__main__':
     unittest.main()
 
