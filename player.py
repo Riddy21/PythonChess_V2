@@ -18,6 +18,7 @@ class Player:
         self.color = color
         self.type = player_type
 
+    # FIXME: Figure out how to handle undo moves for AI without losing track
     @run_synchronously
     def undo_move(self, num=1):
         self.game.undo_move(num)
@@ -38,6 +39,7 @@ class Computer(Player):
         super().__init__(game, color, Player.COMPUTER)
         self.running = True
         self.search_tree = SearchTree(game)
+        self.search_tree.populate(3)
 
     @run_in_thread
     def start(self):
@@ -61,11 +63,16 @@ class Computer(Player):
             self.game.switch_turn_event.wait()
             return
 
+        # Calculate 2 layers deeper if game has already started
+        if self.game.moves:
+            self.search_tree.populate_continue(depth=2, moves_made=self.game.moves[-2:])
+
+        best_move_node = self.search_tree.get_best_move()
+
+        move = best_move_node.move
+        promo = best_move_node.promo
+
         LOCK.acquire()
-        #TODO Save calculated tree to speed up algorithm and don't reset 
-        self.search_tree.reset()
-        self.search_tree.populate(2)
-        move, promo = self.search_tree.get_best_move()
         self.game.full_move(*move[0], *move[1])
 
         # Pawn promo

@@ -10,6 +10,7 @@ class SearchTreeNode(object):
     """Node of the search tree"""
     def __init__(self, move_obj, board=None, promo=None):
         self.children = []
+        self.children_dict = {}
         self.move = None
         self.move_obj = None
         self.points = 0
@@ -29,6 +30,7 @@ class SearchTreeNode(object):
         Add child node, will add the points of the child to the node
         """
         self.children.append(node)
+        self.children_dict[node.move] = node
 
     def __str__(self):
         out = str(self.move) + " %d" % self.points + '\n'
@@ -70,11 +72,19 @@ class SearchTree(object):
         self.num_leaves = 0
         self.root = SearchTreeRoot()
         self._populate_node_recursive(self.root, self.game.board, depth, self.game.turn)
+        self.depth = depth
 
-    def populate_continue(self, depth=5):
+    def populate_continue(self, depth=5, moves_made=None):
         """Populates a prepopulated tree further"""
+        if moves_made:
+            for move in moves_made:
+                move_tuple = (move.move_from, move.move_to)
+                self.root = self.root.children_dict[move_tuple]
+                self.depth -= 1
+
         self.num_leaves = 0
-        self._populate_node_recursive(self.root, self.game.board, depth, self.game.turn)
+        self._populate_node_recursive(self.root, self.game.board, depth+self.depth, self.game.turn)
+        self.depth = depth + self.depth
 
     def reset(self):
         self.root = None
@@ -93,11 +103,11 @@ class SearchTree(object):
         for node in self.root.children:
             # Tally up the points under the tree
             poss_moves[node] = self._add_avg_points_recursive(node)
-            
+        
         best_move_node = max(poss_moves, key=poss_moves.get)
 
         #return the move and the promo if there is any
-        return best_move_node.move, best_move_node.promo
+        return best_move_node
 
     @classmethod
     def _add_avg_points_recursive(cls, node):

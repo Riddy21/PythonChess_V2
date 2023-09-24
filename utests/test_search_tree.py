@@ -50,20 +50,25 @@ class TestSearchTree(unittest.TestCase):
 
     def test_populate_continue(self):
         start = timer()
-        self.tree.populate(depth=2)
+        self.tree.populate(depth=1)
+        self.tree.populate_continue(depth=1)
         end = timer()
-        first = end - start
 
-        # Second time should take 5% or the orig time
-        start = timer()
-        self.tree.populate_continue(depth=2)
-        end = timer()
-        second = end - start
-
-        self.assertLess(second, first*0.05)
-
+        length = end - start
         self.assertEqual(self.tree.num_nodes, 420)
         self.assertEqual(self.tree.num_leaves, 400)
+        self.assertLess(length, 0.5)
+
+    def test_populate_continue_with_moves_made(self):
+        self.tree.populate(depth=2)
+
+        best_move = self.tree.get_best_move().move
+
+        self.game.full_move(*best_move[0], *best_move[1])
+
+        self.game.full_move(0, 1, 0, 2)
+
+        self.tree.populate_continue(2, self.game.moves[-2:])
 
     def test_get_best_move(self):
         self.game.set_board('Presets/almost_checkmate.txt')
@@ -73,9 +78,19 @@ class TestSearchTree(unittest.TestCase):
 
         best_move = self.tree.get_best_move()
 
-        self.assertEqual(best_move, (((2, 6), (2, 7)), None))
+        self.assertEqual(best_move.move, ((2, 6), (2, 7)))
+        self.assertEqual(best_move.promo, None)
 
         # TODO: Make a test with a pawn promo
+        self.game.set_board('Presets/promo_check.txt')
+        self.game.set_turn(COLORS.WHITE)
+
+        self.tree.populate(depth=2)
+
+        best_move = self.tree.get_best_move()
+
+        self.assertEqual(best_move.move, ((2, 1), (2, 0)))
+        self.assertEqual(best_move.promo, PIECES.KNIGHT)
 
 
 if __name__ == '__main__':
