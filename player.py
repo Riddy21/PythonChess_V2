@@ -39,7 +39,7 @@ class Computer(Player):
         super().__init__(game, color, Player.COMPUTER)
         self.running = True
         self.search_tree = SearchTree(game)
-        self.search_tree.populate(4)
+        #self.search_tree.populate(3)
 
     @run_in_thread
     def start(self):
@@ -65,8 +65,9 @@ class Computer(Player):
 
         LOCK.acquire()
         # Calculate 2 layers deeper if game has already started
-        if self.game.moves:
-            self.search_tree.populate_continue(depth=2, moves_made=self.game.moves[-2:])
+        #if self.game.moves:
+        #    self.search_tree.populate_continue(depth=2, moves_made=self.game.moves[-2:])
+        self.search_tree.populate(3)
 
         best_move_node = self.search_tree.get_best_move()
 

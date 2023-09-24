@@ -5,6 +5,7 @@ from rules import Rules
 from predict import Predict
 import math
 import logging
+import random
 
 class SearchTreeNode(object):
     """Node of the search tree"""
@@ -13,6 +14,7 @@ class SearchTreeNode(object):
         self.children_dict = {}
         self.move = None
         self.move_obj = None
+        self.turn = None
         self.points = 0
         self.board = board
         self.promo = promo
@@ -20,8 +22,9 @@ class SearchTreeNode(object):
         if move_obj:
             self.move = (move_obj.move_from, move_obj.move_to)
             self.move_obj = move_obj
+            self.turn = move_obj.move_colour
 
-    def evaluate_points(self, orig_turn, next_poss_moves):
+    def evaluate_points(self, orig_turn, next_poss_moves=None):
         """Evaluate points gained in the previous move"""
         self.points = Predict.get_points(self.move_obj, self.board, orig_turn, next_poss_moves)
 
@@ -33,9 +36,9 @@ class SearchTreeNode(object):
         self.children_dict[node.move] = node
 
     def __str__(self):
-        out = str(self.move) + " %d" % self.points + '\n'
-        for child in self.children:
-            out += str(child).replace('\n', '\n    ')[:-4]
+        out = str(self.move) + " %s" % self.points + '\n'
+        #for child in self.children:
+        #    out += str(child).replace('\n', '\n    ')[:-4]
         return out
 
 class SearchTreeRoot(SearchTreeNode):
@@ -48,7 +51,6 @@ class SearchTreeRoot(SearchTreeNode):
         self.points = 0
 
     def __str__(self):
-        # FIXME: Still fixing the print
         out = 'ROOT\n'
         for child in self.children:
             out += str(child).replace('\n', '\n    ')[:-4]
@@ -98,20 +100,22 @@ class SearchTree(object):
         if self.root == None:
             logging.error("Please populate the root")
 
-        poss_moves = dict()
+        poss_moves = []
         # loop through next moves
         for node in self.root.children:
             # Tally up the points under the tree
-            poss_moves[node] = self._add_avg_points_recursive(node)
-        
-        # FIXME: Still not always making the best move
-        best_move_node = max(poss_moves, key=poss_moves.get)
+            poss_moves.append((node, self._add_best_points_recursive(node)))
+
+        # Randomize
+        random.shuffle(poss_moves)
+
+        # Find best one from tuple
+        best_move_node = max(poss_moves, key=lambda x:x[1])[0]
 
         #return the move and the promo if there is any
         return best_move_node
 
-    @classmethod
-    def _add_avg_points_recursive(cls, node):
+    def _add_best_points_recursive(self, node):
         """
         Add the current node's points with the average of the child points
         """
@@ -123,16 +127,26 @@ class SearchTree(object):
             return points
 
         # Average teh points of the children
-        total = 0
+        best = None
         for child in node.children:
-            total += cls._add_avg_points_recursive(child)
-        points += total/len(node.children)
+            child_points = self._add_best_points_recursive(child)
+           
+            # If it's the opponents turn, choose the min points(Opponent will make worst move against you)
+            if child.turn != self.game.turn and (best == None or best > child_points):
+                best = child_points
+
+            # If it's your turn, choose the max points(You will try to make the best move)
+            elif child.turn == self.game.turn and (best == None or best < child_points):
+                best = child_points
+
+        points += best
 
         return points
     
     def _populate_node_recursive(self, node, board, layers_to_go, turn):
         if layers_to_go == 0:
             self.num_leaves += 1
+            node.evaluate_points(self.game.turn)
             return
 
         if turn == COLORS.WHITE:

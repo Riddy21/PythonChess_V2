@@ -70,7 +70,7 @@ class TestSearchTree(unittest.TestCase):
 
         self.tree.populate_continue(2, self.game.moves[-2:])
 
-    def test_get_best_move(self):
+    def test_get_best_move_checkmate(self):
         self.game.set_board('Presets/almost_checkmate.txt')
         self.game.set_turn(COLORS.BLACK)
 
@@ -78,10 +78,11 @@ class TestSearchTree(unittest.TestCase):
 
         best_move = self.tree.get_best_move()
 
-        self.assertEqual(best_move.move, ((2, 6), (2, 7)))
-        self.assertEqual(best_move.promo, None)
+        self.assertEqual(best_move.move, ((3, 6), (3, 7)))
+        self.assertNotEqual(best_move.promo, None)
 
-        # TODO: Make a test with a pawn promo
+    def test_get_best_move_promo_check(self):
+        # Test with a pawn promo
         self.game.set_board('Presets/promo_check.txt')
         self.game.set_turn(COLORS.WHITE)
 
@@ -92,6 +93,18 @@ class TestSearchTree(unittest.TestCase):
         self.assertEqual(best_move.move, ((2, 1), (2, 0)))
         self.assertEqual(best_move.promo, PIECES.KNIGHT)
 
+    @unittest.expectedFailure
+    def test_get_best_move_minimize_capture(self):
+        self.game.set_board('Presets/minimize_capture.txt')
+        self.game.set_turn(COLORS.WHITE)
+
+        # Only works in 4 layers +
+        self.tree.populate(depth=2)
+
+        best_move = self.tree.get_best_move()
+
+        self.assertEqual(best_move.move, ((5, 6), (5, 7)))
+        self.assertEqual(best_move.promo, None)
 
 if __name__ == '__main__':
     unittest.main()
