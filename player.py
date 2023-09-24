@@ -39,7 +39,7 @@ class Computer(Player):
         super().__init__(game, color, Player.COMPUTER)
         self.running = True
         self.search_tree = SearchTree(game)
-        self.search_tree.populate(3)
+        self.search_tree.populate(4)
 
     @run_in_thread
     def start(self):
@@ -63,6 +63,7 @@ class Computer(Player):
             self.game.switch_turn_event.wait()
             return
 
+        LOCK.acquire()
         # Calculate 2 layers deeper if game has already started
         if self.game.moves:
             self.search_tree.populate_continue(depth=2, moves_made=self.game.moves[-2:])
@@ -72,7 +73,6 @@ class Computer(Player):
         move = best_move_node.move
         promo = best_move_node.promo
 
-        LOCK.acquire()
         self.game.full_move(*move[0], *move[1])
 
         # Pawn promo

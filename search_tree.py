@@ -104,6 +104,7 @@ class SearchTree(object):
             # Tally up the points under the tree
             poss_moves[node] = self._add_avg_points_recursive(node)
         
+        # FIXME: Still not always making the best move
         best_move_node = max(poss_moves, key=poss_moves.get)
 
         #return the move and the promo if there is any

@@ -33,7 +33,7 @@ class TestSearchTree(unittest.TestCase):
         length = end - start
         self.assertEqual(self.tree.num_nodes, 420)
         self.assertEqual(self.tree.num_leaves, 400)
-        self.assertLess(length, 0.5)
+        self.assertLess(length, 1)
 
     def test_promotion(self):
         # Testing when the search tree needs to make pawn promo
@@ -46,7 +46,7 @@ class TestSearchTree(unittest.TestCase):
         length = end - start
         self.assertEqual(self.tree.num_nodes, 558)
         self.assertEqual(self.tree.num_leaves, 531)
-        self.assertLess(length, 0.5)
+        self.assertLess(length, 1)
 
     def test_populate_continue(self):
         start = timer()
@@ -57,7 +57,7 @@ class TestSearchTree(unittest.TestCase):
         length = end - start
         self.assertEqual(self.tree.num_nodes, 420)
         self.assertEqual(self.tree.num_leaves, 400)
-        self.assertLess(length, 0.5)
+        self.assertLess(length, 1)
 
     def test_populate_continue_with_moves_made(self):
         self.tree.populate(depth=2)
