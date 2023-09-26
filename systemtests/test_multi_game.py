@@ -2,31 +2,33 @@ from game import Game
 from player import Computer, Human
 import unittest
 from time import sleep
-import threading
+from utils import run_in_thread
 
-class TestGame(unittest.TestCase):
-    @staticmethod
-    def quit_on_mate(game, ai1, ai2):
+class TestMultiGame(unittest.TestCase):
+    def setUp(self):
+        self.failed = False
+
+    def quit_on_mate(self, game, ai1, ai2):
+        @run_in_thread
         def is_mate():
-            for i in range(500):
+            for i in range(1000):
                 if 'mate' not in game.game_state:
                     sleep(0.5)
                 else:
                     return
+            self.failed = True
             raise RuntimeError('Timeout: Game did not end')
 
-        thread = threading.Thread(target=is_mate)
-        thread.start()
+        thread = is_mate()
         thread.join()
         ai1.quit()
         ai2.quit()
         game.quit()
-        sleep(0.5)
+        sleep(1)
 
-
-    def test_random(self):
+    def test_multi(self):
         try:
-            for i in range(2):
+            for i in range(3):
                 print("------ game %d ------" % (i+1))
                 game = Game()
                 ai1 = Computer(game=game, color='black')
@@ -37,13 +39,12 @@ class TestGame(unittest.TestCase):
                 self.quit_on_mate(game, ai1, ai2)
                 self.assertFalse(thread1.is_alive())
                 self.assertFalse(thread2.is_alive())
+                self.assertFalse(self.failed)
         except Exception as e:
             ai1.quit()
             ai2.quit()
             game.quit()
             raise e
 
-    # FIXME: Write test for stalemate and checkmate undo
-
-
-        
+if __name__ == '__main__':
+    unittest.main()

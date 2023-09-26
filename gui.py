@@ -1,6 +1,9 @@
 import pygame
 import popup
 from player import *
+from utils import run_in_thread
+from settings import *
+import logging
 
 # Set up the colors
 WHITE = (255, 255, 255)
@@ -11,12 +14,15 @@ GREY = (200, 200, 200)
 RED = (255, 200, 200)
 
 class ChessboardGUI:
-    def __init__(self, api, p1, p2):
+    def __init__(self, api, p1, p2, interactive=True):
         if p1.color == p2.color:
             raise RuntimeError("Player colors cannot be the same")
         self.api = api
         self.p1 = p1
         self.p2 = p2
+
+        # If popups and user prompts are to be created
+        self.interactive=interactive
 
         # Initialize Pygame
         pygame.init()
@@ -28,29 +34,27 @@ class ChessboardGUI:
         pygame.display.set_caption("Pygame Chessboard")
 
         # Define the size of each square
-        self.SQUARE_SIZE = self.WIDTH // 8
+        self.SQUARE_SIZE = self.WIDTH // BOARD_WIDTH
 
-        # Load the chess piece images
         self.piece_images = {
-            "-": pygame.image.load("./Assets/Blank.png"),
-            "r": pygame.image.load("./Assets/Chess_tile_rd.png"),
-            "n": pygame.image.load("./Assets/Chess_tile_nd.png"),
-            "b": pygame.image.load("./Assets/Chess_tile_bd.png"),
-            "q": pygame.image.load("./Assets/Chess_tile_qd.png"),
-            "k": pygame.image.load("./Assets/Chess_tile_kd.png"),
-            "p": pygame.image.load("./Assets/Chess_tile_pd.png"),
-            "R": pygame.image.load("./Assets/Chess_tile_rl.png"),
-            "N": pygame.image.load("./Assets/Chess_tile_nl.png"),
-            "Q": pygame.image.load("./Assets/Chess_tile_ql.png"),
-            "B": pygame.image.load("./Assets/Chess_tile_bl.png"),
-            "K": pygame.image.load("./Assets/Chess_tile_kl.png"),
-            "P": pygame.image.load("./Assets/Chess_tile_pl.png"),
-        }
+                "r": pygame.image.load("./Assets/Chess_tile_rd.png"),
+                "n": pygame.image.load("./Assets/Chess_tile_nd.png"),
+                "b": pygame.image.load("./Assets/Chess_tile_bd.png"),
+                "q": pygame.image.load("./Assets/Chess_tile_qd.png"),
+                "k": pygame.image.load("./Assets/Chess_tile_kd.png"),
+                "p": pygame.image.load("./Assets/Chess_tile_pd.png"),
+                "R": pygame.image.load("./Assets/Chess_tile_rl.png"),
+                "N": pygame.image.load("./Assets/Chess_tile_nl.png"),
+                "Q": pygame.image.load("./Assets/Chess_tile_ql.png"),
+                "B": pygame.image.load("./Assets/Chess_tile_bl.png"),
+                "K": pygame.image.load("./Assets/Chess_tile_kl.png"),
+                "P": pygame.image.load("./Assets/Chess_tile_pl.png"),
+                }
 
     def draw_board(self):
         # Clear the window
-        for row in range(8):
-            for col in range(8):
+        for row in range(BOARD_HEIGHT):
+            for col in range(BOARD_WIDTH):
                 color = GREEN if (row%2 == 1 and col%2 == 0) or (row%2 == 0 and col%2 == 1)else TAN
                 col, row = self.orient((col, row))
                 x = col * self.SQUARE_SIZE
@@ -68,12 +72,13 @@ class ChessboardGUI:
     def draw_check_highlight(self, game_state):
         if 'check' not in game_state:
             return
+
         if 'black' in game_state:
             coords = self.api.get_piece_coords('k')
         elif 'white' in game_state:
             coords = self.api.get_piece_coords('K')
         if len(coords) != 1:
-            print('Error: more than one king')
+            logging.error('more than one king')
             return
         for col, row in coords:
             col, row = self.orient((col, row))
@@ -85,8 +90,8 @@ class ChessboardGUI:
         chessboard_state = self.api.get_chess_board_string_array()
 
         # Draw the chess pieces
-        for row in range(8):
-            for col in range(8):
+        for row in range(BOARD_HEIGHT):
+            for col in range(BOARD_WIDTH):
                 piece = chessboard_state[row][col]
                 self.draw_piece(piece, col, row)
 
@@ -126,10 +131,19 @@ class ChessboardGUI:
         #self.api.make_move(position)
 
     def prompt_mate_quit(self, game_state):
-        if 'checkmate' in game_state:
+        if game_state == 'black checkmate' and self.api.turn == COLORS.BLACK:
             ans = popup.askyesno(title="Checkmate!",
-                                 message="Checkmate! %s wins!\nWould you like to quit?" % self.get_prev_player().color)
-        elif 'stalemate' in game_state:
+                                 message="Checkmate! %s wins!\nWould you like to quit?" % self.get_prev_player().color.value)
+        elif game_state == 'white checkmate' and self.api.turn == COLORS.WHITE:
+            ans = popup.askyesno(title="Checkmate!",
+                                 message="Checkmate! %s wins!\nWould you like to quit?" % self.get_prev_player().color.value)
+        elif game_state == 'black stalemate' and self.api.turn == COLORS.BLACK:
+            ans = popup.askyesno(title="Stalemate!",
+                                 message="Stalemate!\nWould you like to quit?")
+        elif game_state == 'white stalemate' and self.api.turn == COLORS.WHITE:
+            ans = popup.askyesno(title="Stalemate!",
+                                 message="Stalemate!\nWould you like to quit?")
+        elif game_state == 'stalemate':
             ans = popup.askyesno(title="Stalemate!",
                                  message="Stalemate!\nWould you like to quit?")
         else:
@@ -161,7 +175,7 @@ class ChessboardGUI:
                                   message="Choose Piece",
                                   options=['Queen', 'Rook', 'Knight', 'Bishop'],
                                   default='Queen')
-            self.api.make_pawn_promo(ans)
+            self.api.make_pawn_promo(PIECES.get_by_key('display_name', ans))
 
 
     def orient(self, coords):
@@ -170,16 +184,16 @@ class ChessboardGUI:
             return coords
 
         if self.get_current_player().type == Player.COMPUTER and\
-                self.api.turn == 'black':
+                self.api.turn == COLORS.BLACK:
             return coords
 
         if self.get_current_player().type == Player.COMPUTER and\
-                self.api.turn == 'white':
+                self.api.turn == COLORS.WHITE:
             return 7-coords[0], 7-coords[1]
         
-        if self.api.turn == 'white':
+        if self.api.turn == COLORS.WHITE:
             return coords
-        elif self.api.turn == 'black':
+        elif self.api.turn == COLORS.BLACK:
             return 7-coords[0], 7-coords[1]
 
     def run(self):
@@ -193,22 +207,32 @@ class ChessboardGUI:
                     if event.type == pygame.QUIT:
                         running = False
                     elif event.type == pygame.MOUSEBUTTONDOWN:
-                        # Get the position of the mouse click
-                        pos = pygame.mouse.get_pos()
-
-                        if current_player.type == Player.HUMAN:
-                            self.handle_click(pos, current_player)
+                        if self.interactive:
+                            # Get the position of the mouse click
+                            pos = pygame.mouse.get_pos()
+                            if current_player.type == Player.HUMAN:
+                                self.handle_click(pos, current_player)
 
                     elif event.type == pygame.KEYDOWN:
                         # Ctrl-Z was pressed
                         if event.key == pygame.K_z and \
                                 (pygame.key.get_mods() & pygame.KMOD_CTRL or \
                                  pygame.key.get_mods() & pygame.KMOD_META):
-                            if current_player.type == Player.HUMAN:
-                                if Player.COMPUTER in (self.p1.type, self.p2.type):
-                                    self.get_current_player().undo_move(2)
-                                else:
-                                    self.get_current_player().undo_move(1)
+                            if self.interactive:
+                                if current_player.type == Player.HUMAN:
+                                    if Player.COMPUTER in (self.p1.type, self.p2.type):
+                                        self.get_current_player().undo_move(2)
+                                    else:
+                                        self.get_current_player().undo_move(1)
+                        # Save if Ctrl-S is pressed
+                        if event.key == pygame.K_s and \
+                                (pygame.key.get_mods() & pygame.KMOD_CTRL or \
+                                 pygame.key.get_mods() & pygame.KMOD_META):
+
+                            import datetime
+                            filename = str(datetime.datetime.now()).replace(' ', '-')+".txt"
+                            self.api.export_board(filename)
+                            logging.info('Game saved in "%s"!' % filename)
 
 
                 # Draw the chess board
@@ -226,10 +250,11 @@ class ChessboardGUI:
                 # Update the display
                 pygame.display.flip()
 
-                if self.prompt_mate_quit(self.api.game_state):
-                    running = False
+                if self.interactive:
+                    if self.prompt_mate_quit(self.api.game_state):
+                        running = False
 
-                self.prompt_promo(self.api.game_state)
+                    self.prompt_promo(self.api.game_state)
 
                 # Have AI do move if ai is enabled
                 #if self.get_current_player().type == Player.COMPUTER:
@@ -242,8 +267,10 @@ class ChessboardGUI:
     def quit(self):
         # Quit the game
         pygame.quit()
-        if self.p1.type == Player.COMPUTER:
-            self.p1.quit()
-        if self.p2.type == Player.COMPUTER:
-            self.p2.quit()
-        self.api.quit()
+        # only when non-interactive mode
+        if self.interactive:
+            if self.p1.type == Player.COMPUTER:
+                self.p1.quit()
+            if self.p2.type == Player.COMPUTER:
+                self.p2.quit()
+            self.api.quit()

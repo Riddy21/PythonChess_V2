@@ -1,33 +1,36 @@
+from utils import *
 import threading
 import random
 from time import sleep
+from settings import *
+from search_tree import SearchTree
+import logging
 
-LOCK = threading.Lock()
+# FIXME: Make a variable to tell if the thread failed
 
 class Player:
     HUMAN = 'human'
     COMPUTER = 'computer'
-    def __init__(self, game, color, type):
-        super().__init__()
+    def __init__(self, game, color, player_type):
         self.game = game
+        if type(color) == str:
+            color = COLORS.get_by_value(color)
         self.color = color
-        self.type = type
+        self.type = player_type
 
+    # FIXME: Figure out how to handle undo moves for AI without losing track
+    @run_synchronously
     def undo_move(self, num=1):
-        LOCK.acquire()
-        for i in range(num):
-            self.game.undo_move()
-        LOCK.release()
+        self.game.undo_move(num)
 
 
 class Human(Player):
     def __init__(self, game, color):
         super().__init__(game, color, Player.HUMAN)
 
+    @run_synchronously
     def handle_move(self, col, row):
-        LOCK.acquire()
         self.game.handle_move(col, row)
-        LOCK.release()
 
 
 # Ai class that can analyse a game and take control of a specific color
@@ -35,55 +38,46 @@ class Computer(Player):
     def __init__(self, game, color):
         super().__init__(game, color, Player.COMPUTER)
         self.running = True
+        self.search_tree = SearchTree(game)
+        #self.search_tree.populate(3)
 
+    @run_in_thread
     def start(self):
-        def threaded_start():
-            while self.running:
-                if self.game.turn != self.color:
-                    self.game.switch_turn_event.wait()
-                else:
-                    self.make_move()
-            print('Quitting player')
-            exit()
-
-        start_thread = threading.Thread(target=threaded_start)
-        start_thread.start()
-
-        return start_thread
+        while self.running:
+            if self.game.turn != self.color:
+                self.game.switch_turn_event.wait()
+            else:
+                self.make_move()
+        logging.info('Quitting player')
+        exit()
 
     def quit(self):
         self.running = False
         # Make sure to alert all players
         self.game.alert_players()
 
-
     def make_move(self):
-        # get all playable pieces
-        playable_pieces = self.game.get_playable_piece_coords()
-
-        # Get all possible moves
-        playable_moves = set()
-        # FIXME: Check will cause "no more moves"
-        for piece in playable_pieces:
-            moves = self.game.get_next_poss_moves(*piece)
-            for move in moves:
-                playable_moves.add((*piece, *move))
-
         # Don't do anything on checkmate or stalemate
         if 'mate' in self.game.game_state:
             # Pause
             self.game.switch_turn_event.wait()
             return
 
-        # TODO: This is a placeholder
-        # chose the move to make
-        # NOTE: Lock to make sure game only accessed by one at a time
         LOCK.acquire()
-        if playable_moves:
-            move = random.sample(playable_moves, 1)[0]
-            self.game.full_move(*move)
-        if self.game.game_state == '%s pawn promo' % self.color:
-            self.game.make_pawn_promo('Queen')
+        # Calculate 2 layers deeper if game has already started
+        #if self.game.moves:
+        #    self.search_tree.populate_continue(depth=2, moves_made=self.game.moves[-2:])
+        self.search_tree.populate(3)
 
+        best_move_node = self.search_tree.get_best_move()
+
+        move = best_move_node.move
+        promo = best_move_node.promo
+
+        self.game.full_move(*move[0], *move[1])
+
+        # Pawn promo
+        if promo != None:
+            self.game.make_pawn_promo(promo)
         LOCK.release()
 
